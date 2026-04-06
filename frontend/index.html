@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  // ── Site Mode Guard — injected on all public pages ────────────────────────
+  (async function checkSiteMode() {
+    // Admins always bypass the construction gate
+    try {
+      const u = localStorage.getItem('taiq_user');
+      if (u && JSON.parse(u).role === 'admin') return;
+    } catch {}
+    // Skip the check if we're already on the construction page
+    if (window.location.pathname.includes('under-construction')) return;
+    // Skip admin panel
+    if (window.location.pathname.includes('admin.html')) return;
+    try {
+      const r = await fetch('/api/v1/admin/site-settings');
+      if (r.ok) {
+        const s = await r.json();
+        if (s.mode === 'construction') {
+          window.location.replace('under-construction.html');
+        }
+      }
+    } catch {}
+  })();
+</script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaIQ — Find Your Next Opportunity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────────────────────── */
+    :root {
+      --ink:       #0a0f1e;
+      --ink-2:     #1c2338;
+      --ink-3:     #384060;
+      --steel:     #6b7899;
+      --mist:      #c8d0e4;
+      --paper:     #f4f6fb;
+      --white:     #ffffff;
+      --brand:     #0052cc;
+      --brand-2:   #0040a0;
+      --accent:    #ff5c35;
+      --accent-2:  #e04520;
+      --teal:      #00b4d8;
+      --gold:      #f5a623;
+      --success:   #22c55e;
+      --r1: 0.5rem; --r2: 1rem; --r3: 1.5rem; --r4: 2rem; --r-full: 9999px;
+      --shadow-sm: 0 1px 4px rgba(10,15,30,.08);
+      --shadow-md: 0 4px 20px rgba(10,15,30,.12);
+      --shadow-lg: 0 12px 48px rgba(10,15,30,.16);
+      --shadow-xl: 0 24px 80px rgba(10,15,30,.22);
+      --trans: .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+    button { cursor: pointer; border: none; background: none; font: inherit; }
+
+    /* ─── Typography ─────────────────────────────────────────────────────────── */
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; line-height: 1.15; font-weight: 700; }
+    .label {
+      font-size: .75rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--brand);
+    }
+
+    /* ─── Layout helpers ─────────────────────────────────────────────────────── */
+    .container { width: min(1240px, 100% - 3rem); margin-inline: auto; }
+    .section { padding: 5rem 0; }
+    .section-sm { padding: 3rem 0; }
+    .flex { display: flex; }
+    .grid { display: grid; }
+
+    /* ─── Nav ────────────────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(18px) saturate(160%);
+      border-bottom: 1px solid rgba(200,208,228,.4);
+      transition: box-shadow var(--trans);
+    }
+    .nav.scrolled { box-shadow: var(--shadow-md); }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 70px; gap: 2rem;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: .6rem;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem;
+      color: var(--ink);
+    }
+    .nav-logo-mark {
+      width: 36px; height: 36px; background: var(--brand);
+      border-radius: 10px; display: grid; place-items: center;
+    }
+    .nav-logo-mark svg { width: 20px; height: 20px; fill: white; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      font-size: .9rem; font-weight: 500; color: var(--ink-3);
+      transition: color var(--trans); position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 100%;
+      height: 2px; background: var(--brand); transition: right var(--trans);
+    }
+    .nav-links a:hover { color: var(--brand); }
+    .nav-links a:hover::after { right: 0; }
+    .nav-actions { display: flex; align-items: center; gap: .75rem; }
+    .nav-burger { display: none; flex-direction: column; gap: 5px; padding: 4px; }
+    .nav-burger span { display: block; width: 24px; height: 2px; background: var(--ink); border-radius: 2px; transition: all var(--trans); }
+
+    /* ─── Buttons ─────────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .65rem 1.4rem; border-radius: var(--r-full);
+      font-size: .88rem; font-weight: 600; transition: all var(--trans);
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--brand); color: var(--white);
+      box-shadow: 0 4px 14px rgba(0,82,204,.3);
+    }
+    .btn-primary:hover {
+      background: var(--brand-2); transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0,82,204,.4);
+    }
+    .btn-outline {
+      border: 1.5px solid var(--mist); color: var(--ink-3);
+    }
+    .btn-outline:hover { border-color: var(--brand); color: var(--brand); background: rgba(0,82,204,.04); }
+    .btn-accent {
+      background: var(--accent); color: var(--white);
+      box-shadow: 0 4px 14px rgba(255,92,53,.3);
+    }
+    .btn-accent:hover { background: var(--accent-2); transform: translateY(-1px); }
+    .btn-lg { padding: .9rem 2.2rem; font-size: 1rem; }
+    .btn-sm { padding: .45rem 1rem; font-size: .8rem; }
+
+    /* ─── Hero ────────────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #050c1f 0%, #0d1f4a 45%, #1a3a7a 100%);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+      padding-top: 70px;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    .hero-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .5;
+    }
+    .hero-orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,82,204,.6) 0%, transparent 70%);
+      top: -150px; right: -100px;
+      animation: float1 8s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0,180,216,.5) 0%, transparent 70%);
+      bottom: 100px; left: -50px;
+      animation: float2 10s ease-in-out infinite;
+    }
+    .hero-orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,92,53,.3) 0%, transparent 70%);
+      top: 40%; right: 20%;
+      animation: float1 12s ease-in-out infinite reverse;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    @keyframes float1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(30px,-30px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(-20px, 20px); }
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center; padding: 5rem 0;
+    }
+    .hero-content { color: white; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--r-full); padding: .4rem 1rem;
+      font-size: .8rem; font-weight: 500; color: #90c4ff;
+      margin-bottom: 1.5rem;
+      animation: slideDown .6s ease both;
+    }
+    .hero-badge-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+    .hero-headline {
+      font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 800;
+      line-height: 1.1; margin-bottom: 1.5rem;
+      animation: slideDown .7s .1s ease both;
+    }
+    .hero-headline span { color: #60a5fa; }
+    .hero-sub {
+      font-size: 1.1rem; color: rgba(255,255,255,.7);
+      max-width: 480px; margin-bottom: 2.5rem;
+      animation: slideDown .7s .2s ease both;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      animation: slideDown .7s .3s ease both;
+    }
+    .hero-stats {
+      display: flex; gap: 2.5rem; margin-top: 3rem;
+      animation: slideDown .7s .4s ease both;
+    }
+    .hero-stat-num {
+      font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+      color: white; line-height: 1;
+    }
+    .hero-stat-label { font-size: .8rem; color: rgba(255,255,255,.55); margin-top: .2rem; }
+
+    @keyframes slideDown {
+      from { opacity:0; transform: translateY(-16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* Search panel in hero */
+    .hero-search-wrap {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r3); padding: 2rem;
+      backdrop-filter: blur(12px);
+      animation: slideUp .8s .3s ease both;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .search-tab-row {
+      display: flex; gap: .5rem; margin-bottom: 1.5rem;
+    }
+    .search-tab {
+      padding: .5rem 1.2rem; border-radius: var(--r-full);
+      font-size: .85rem; font-weight: 500; color: rgba(255,255,255,.6);
+      transition: all var(--trans); cursor: pointer;
+    }
+    .search-tab.active {
+      background: rgba(255,255,255,.15); color: white;
+    }
+    .search-form { display: grid; gap: .75rem; }
+    .search-field {
+      display: flex; align-items: center; gap: .75rem;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--r2); padding: .8rem 1rem;
+      transition: border-color var(--trans);
+    }
+    .search-field:focus-within { border-color: rgba(96,165,250,.6); }
+    .search-field svg { width: 18px; height: 18px; fill: none; stroke: rgba(255,255,255,.5); stroke-width: 2; flex-shrink: 0; }
+    .search-field input, .search-field select {
+      background: none; border: none; outline: none;
+      color: white; font: inherit; font-size: .9rem; width: 100%;
+    }
+    .search-field input::placeholder { color: rgba(255,255,255,.4); }
+    .search-field select option { background: #1c2338; color: white; }
+    .search-btn-full {
+      width: 100%; padding: .9rem;
+      background: var(--brand); color: white;
+      border-radius: var(--r2); font-weight: 600; font-size: .95rem;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: all var(--trans);
+    }
+    .search-btn-full:hover { background: var(--brand-2); transform: translateY(-1px); }
+    .popular-searches { margin-top: 1rem; }
+    .popular-searches p { font-size: .78rem; color: rgba(255,255,255,.45); margin-bottom: .5rem; }
+    .popular-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .popular-tag {
+      padding: .25rem .75rem; border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--r-full); font-size: .75rem; color: rgba(255,255,255,.65);
+      cursor: pointer; transition: all var(--trans);
+    }
+    .popular-tag:hover { border-color: rgba(96,165,250,.5); color: #90c4ff; }
+
+    /* ─── Trust Bar ───────────────────────────────────────────────────────────── */
+    .trust-bar {
+      background: var(--paper);
+      border-top: 1px solid var(--mist); border-bottom: 1px solid var(--mist);
+      padding: 1.5rem 0;
+    }
+    .trust-bar-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .trust-label { font-size: .8rem; font-weight: 600; color: var(--steel); white-space: nowrap; }
+    .trust-logos { display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap; }
+    .trust-logo {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem;
+      color: var(--mist); transition: color var(--trans);
+    }
+    .trust-logo:hover { color: var(--steel); }
+
+    /* ─── Stats band ──────────────────────────────────────────────────────────── */
+    .stats-band { background: var(--brand); color: white; padding: 3.5rem 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; text-align: center; }
+    .stat-item-num {
+      font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800;
+      line-height: 1; color: white;
+    }
+    .stat-item-label { font-size: .85rem; opacity: .8; margin-top: .4rem; }
+    .stat-divider { width: 1px; background: rgba(255,255,255,.2); }
+
+    /* ─── Section headers ─────────────────────────────────────────────────────── */
+    .section-header { text-align: center; max-width: 640px; margin: 0 auto 3.5rem; }
+    .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); margin: .5rem 0 1rem; }
+    .section-header p { color: var(--steel); font-size: 1.05rem; }
+
+    /* ─── Industries ─────────────────────────────────────────────────────────── */
+    .industries-grid {
+      display: grid; grid-template-columns: repeat(5,1fr); gap: 1rem;
+    }
+    .industry-card {
+      background: var(--white); border: 1.5px solid var(--mist);
+      border-radius: var(--r3); padding: 1.75rem 1.25rem;
+      text-align: center; cursor: pointer;
+      transition: all var(--trans); position: relative; overflow: hidden;
+    }
+    .industry-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,82,204,.04) 0%, transparent 100%);
+      opacity: 0; transition: opacity var(--trans);
+    }
+    .industry-card:hover {
+      border-color: var(--brand); transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .industry-card:hover::before { opacity: 1; }
+    .industry-icon { font-size: 2.2rem; margin-bottom: .75rem; }
+    .industry-name { font-weight: 600; font-size: .92rem; color: var(--ink); }
+    .industry-count { font-size: .78rem; color: var(--steel); margin-top: .25rem; }
+
+    /* ─── Featured Jobs ───────────────────────────────────────────────────────── */
+    .jobs-section { background: var(--paper); }
+    .jobs-filters {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: .5rem 1.2rem; border-radius: var(--r-full);
+      border: 1.5px solid var(--mist); font-size: .85rem; font-weight: 500;
+      color: var(--steel); transition: all var(--trans); cursor: pointer;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--brand); color: var(--brand);
+      background: rgba(0,82,204,.05);
+    }
+    .jobs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+    .job-card {
+      background: var(--white); border-radius: var(--r3);
+      padding: 1.5rem; border: 1.5px solid var(--mist);
+      transition: all var(--trans); cursor: pointer;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .job-card:hover { border-color: var(--brand); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .job-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .job-card-logo {
+      width: 48px; height: 48px; border-radius: var(--r2);
+      background: var(--paper); border: 1px solid var(--mist);
+      display: grid; place-items: center; font-size: 1.4rem; flex-shrink: 0;
+    }
+    .job-card-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .badge {
+      padding: .25rem .7rem; border-radius: var(--r-full);
+      font-size: .72rem; font-weight: 600;
+    }
+    .badge-remote { background: rgba(34,197,94,.1); color: #16a34a; }
+    .badge-featured { background: rgba(245,166,35,.12); color: #b45309; }
+    .badge-new { background: rgba(0,82,204,.1); color: var(--brand); }
+    .badge-ft { background: var(--paper); color: var(--steel); border: 1px solid var(--mist); }
+    .job-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+    .job-company { font-size: .85rem; color: var(--steel); display: flex; align-items: center; gap: .3rem; margin-top: .25rem; }
+    .job-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .job-meta-item { display: flex; align-items: center; gap: .35rem; font-size: .8rem; color: var(--steel); }
+    .job-meta-item svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .job-salary { font-weight: 600; color: var(--ink); font-size: .88rem; }
+    .job-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: .75rem; border-top: 1px solid var(--paper); }
+    .job-posted { font-size: .75rem; color: var(--steel); }
+    .btn-apply { padding: .45rem 1.1rem; background: var(--brand); color: white; border-radius: var(--r-full); font-size: .8rem; font-weight: 600; transition: all var(--trans); }
+    .btn-apply:hover { background: var(--brand-2); transform: translateY(-1px); }
+    .jobs-cta { text-align: center; margin-top: 2.5rem; }
+    .job-count { font-size: .78rem; color: var(--steel); }
+
+    /* ─── How It Works ────────────────────────────────────────────────────────── */
+    .how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    .how-steps { display: flex; flex-direction: column; gap: 1.75rem; }
+    .how-step { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .how-step-num {
+      width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+      background: var(--brand); color: white;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem;
+      display: grid; place-items: center;
+    }
+    .how-step-body h3 { font-size: 1.1rem; margin-bottom: .35rem; }
+    .how-step-body p { color: var(--steel); font-size: .92rem; }
+    .how-visual {
+      background: linear-gradient(135deg, #0a1628 0%, #0d2654 100%);
+      border-radius: var(--r4); padding: 2rem; position: relative; overflow: hidden;
+      min-height: 400px;
+    }
+    .how-visual-card {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r3); padding: 1.25rem; margin-bottom: 1rem;
+      backdrop-filter: blur(8px); color: white;
+    }
+    .how-visual-card h4 { font-size: .95rem; margin-bottom: .5rem; }
+    .how-visual-card p { font-size: .8rem; opacity: .7; }
+    .how-visual-match {
+      display: flex; align-items: center; gap: .75rem; margin-top: .75rem;
+    }
+    .match-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 1.1rem;
+      background: rgba(255,255,255,.1);
+    }
+    .match-pct {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 1.3rem; color: #22c55e;
+    }
+    .match-label { font-size: .78rem; opacity: .6; }
+
+    /* ─── Testimonials ────────────────────────────────────────────────────────── */
+    .testimonials-section { background: var(--paper); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+    .testimonial-card {
+      background: var(--white); border-radius: var(--r3); padding: 2rem;
+      border: 1.5px solid var(--mist); transition: all var(--trans);
+    }
+    .testimonial-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--mist); }
+    .tcard-stars { color: var(--gold); font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px; }
+    .tcard-quote { font-size: .93rem; color: var(--ink-3); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic; }
+    .tcard-author { display: flex; align-items: center; gap: .75rem; }
+    .tcard-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--teal) 100%);
+      display: grid; place-items: center; color: white;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .tcard-name { font-weight: 600; font-size: .9rem; }
+    .tcard-role { font-size: .78rem; color: var(--steel); }
+
+    /* ─── Why Us ──────────────────────────────────────────────────────────────── */
+    .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    .why-features { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .why-feature {
+      background: var(--white); border: 1.5px solid var(--mist);
+      border-radius: var(--r3); padding: 1.5rem;
+      transition: all var(--trans);
+    }
+    .why-feature:hover { border-color: var(--brand); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+    .why-icon {
+      width: 48px; height: 48px; border-radius: var(--r2);
+      background: rgba(0,82,204,.08); display: grid; place-items: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .why-feature h3 { font-size: 1rem; margin-bottom: .4rem; }
+    .why-feature p { font-size: .83rem; color: var(--steel); line-height: 1.6; }
+    .why-content h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin: .5rem 0 1.25rem; }
+    .why-content p { color: var(--steel); font-size: 1rem; line-height: 1.8; margin-bottom: 1.5rem; }
+    .why-checklist { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 2rem; }
+    .why-check { display: flex; align-items: center; gap: .6rem; font-size: .9rem; font-weight: 500; }
+    .check-icon { width: 22px; height: 22px; background: rgba(34,197,94,.1); border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+    .check-icon::after { content: '✓'; font-size: .7rem; color: var(--success); font-weight: 700; }
+
+    /* ─── CTA Band ────────────────────────────────────────────────────────────── */
+    .cta-band {
+      background: linear-gradient(135deg, #0a1628 0%, #1a3a7a 100%);
+      color: white; padding: 5rem 0; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-band::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(0,82,204,.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(0,180,216,.2) 0%, transparent 50%);
+    }
+    .cta-band-inner { position: relative; }
+    .cta-band h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+    .cta-band p { font-size: 1.1rem; opacity: .75; margin-bottom: 2.5rem; max-width: 520px; margin-inline: auto; }
+    .cta-band-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── Blog ────────────────────────────────────────────────────────────────── */
+    .blog-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .blog-card {
+      background: var(--white); border-radius: var(--r3); overflow: hidden;
+      border: 1.5px solid var(--mist); transition: all var(--trans);
+    }
+    .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--mist); }
+    .blog-img {
+      height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+    .blog-img-1 { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
+    .blog-img-2 { background: linear-gradient(135deg, #f0fdf4, #bbf7d0); }
+    .blog-img-3 { background: linear-gradient(135deg, #fef9c3, #fde68a); }
+    .blog-body { padding: 1.5rem; }
+    .blog-cat {
+      display: inline-block; padding: .2rem .7rem;
+      background: rgba(0,82,204,.08); color: var(--brand);
+      border-radius: var(--r-full); font-size: .72rem; font-weight: 600;
+      margin-bottom: .75rem;
+    }
+    .blog-title { font-size: 1.05rem; font-weight: 700; line-height: 1.3; margin-bottom: .5rem; }
+    .blog-excerpt { font-size: .83rem; color: var(--steel); line-height: 1.6; margin-bottom: 1rem; }
+    .blog-footer { display: flex; align-items: center; justify-content: space-between; }
+    .blog-date { font-size: .75rem; color: var(--steel); }
+    .blog-read { font-size: .8rem; font-weight: 600; color: var(--brand); }
+
+    /* ─── Footer ──────────────────────────────────────────────────────────────── */
+    .footer {
+      background: var(--ink); color: rgba(255,255,255,.7);
+      padding: 4rem 0 2rem;
+    }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand h3 { color: white; font-family: 'Syne', sans-serif; font-size: 1.4rem; margin-bottom: .75rem; }
+    .footer-brand p { font-size: .88rem; line-height: 1.7; max-width: 280px; }
+    .footer-social { display: flex; gap: .75rem; margin-top: 1.25rem; }
+    .social-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(255,255,255,.08); display: grid; place-items: center;
+      color: rgba(255,255,255,.6); font-size: .9rem;
+      transition: all var(--trans); cursor: pointer;
+    }
+    .social-icon:hover { background: var(--brand); color: white; }
+    .footer-col h4 { color: white; font-size: .9rem; font-weight: 600; margin-bottom: 1.25rem; }
+    .footer-col ul li { margin-bottom: .6rem; }
+    .footer-col ul li a { font-size: .85rem; transition: color var(--trans); }
+    .footer-col ul li a:hover { color: white; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .8rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-bottom-links { display: flex; gap: 1.5rem; }
+    .footer-bottom-links a:hover { color: white; }
+
+    /* ─── Modal / Overlay ─────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(10,15,30,.6); backdrop-filter: blur(4px);
+      display: grid; place-items: center; padding: 1rem;
+      opacity: 0; pointer-events: none; transition: opacity var(--trans);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white; border-radius: var(--r3);
+      padding: 2.5rem; width: min(500px, 100%);
+      transform: translateY(20px); transition: transform var(--trans);
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; }
+    .modal-close { width: 34px; height: 34px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; cursor: pointer; transition: all var(--trans); font-size: 1.2rem; }
+    .modal-close:hover { background: var(--mist); }
+    .modal-tabs { display: flex; gap: .25rem; background: var(--paper); border-radius: var(--r2); padding: .3rem; margin-bottom: 1.5rem; }
+    .modal-tab { flex: 1; text-align: center; padding: .6rem; border-radius: var(--r1); font-weight: 500; font-size: .9rem; cursor: pointer; transition: all var(--trans); }
+    .modal-tab.active { background: white; box-shadow: var(--shadow-sm); color: var(--brand); }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label { display: block; font-size: .83rem; font-weight: 500; margin-bottom: .4rem; color: var(--ink-3); }
+    .form-input {
+      width: 100%; padding: .75rem 1rem;
+      border: 1.5px solid var(--mist); border-radius: var(--r2);
+      font: inherit; font-size: .9rem; color: var(--ink);
+      transition: border-color var(--trans); outline: none;
+    }
+    .form-input:focus { border-color: var(--brand); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .form-submit {
+      width: 100%; padding: .9rem; background: var(--brand); color: white;
+      border-radius: var(--r2); font-weight: 600; font-size: .95rem;
+      transition: all var(--trans); margin-top: .5rem;
+    }
+    .form-submit:hover { background: var(--brand-2); }
+    .form-divider { text-align: center; color: var(--steel); font-size: .82rem; margin: 1rem 0; }
+    .form-footer { text-align: center; font-size: .83rem; color: var(--steel); margin-top: 1rem; }
+    .form-footer a { color: var(--brand); font-weight: 500; }
+
+    /* Password field wrapper */
+    .password-wrap { position: relative; }
+    .password-wrap .form-input { padding-right: 2.5rem; }
+    .pwd-toggle {
+      position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 1rem; padding: 0;
+      line-height: 1; color: var(--steel);
+    }
+    /* Password strength bar */
+    .pwd-strength {
+      height: 4px; background: var(--mist); border-radius: var(--r-full);
+      margin: .4rem 0 .25rem; overflow: hidden;
+    }
+    .pwd-bar { height: 100%; width: 0%; border-radius: var(--r-full); transition: width .3s, background .3s; }
+    .pwd-hint { font-size: .73rem; font-weight: 500; min-height: 1em; }
+    .confirm-hint { font-size: .73rem; font-weight: 500; min-height: 1em; margin-top: .25rem; }
+    /* Terms checkbox */
+    .form-check { display: flex; align-items: flex-start; gap: .5rem; margin: .75rem 0; font-size: .82rem; color: var(--ink-3); }
+    .form-check input { margin-top: 2px; width: 15px; height: 15px; accent-color: var(--brand); flex-shrink: 0; cursor: pointer; }
+    .form-check a { color: var(--brand); font-weight: 500; }
+    /* Verification notice */
+    .email-notice {
+      text-align: center; font-size: .78rem; color: var(--steel);
+      background: rgba(0,82,204,.05); border: 1px solid rgba(0,82,204,.12);
+      border-radius: var(--r1); padding: .5rem .75rem; margin: .5rem 0;
+    }
+    /* Disabled submit button */
+    .form-submit:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+
+    /* ─── Job Detail Modal ──────────────────────────────────────────────────── */
+    .job-detail-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(10,15,30,.6); backdrop-filter: blur(4px);
+      display: grid; place-items: center; padding: 1rem;
+      opacity: 0; pointer-events: none; transition: opacity var(--trans);
+      overflow-y: auto;
+    }
+    .job-detail-overlay.open { opacity: 1; pointer-events: all; }
+    .job-detail-modal {
+      background: white; border-radius: var(--r3);
+      width: min(780px, 100%); max-height: 92vh; overflow-y: auto;
+      transform: translateY(20px); transition: transform var(--trans);
+    }
+    .job-detail-overlay.open .job-detail-modal { transform: translateY(0); }
+    .jd-header {
+      padding: 2rem 2.5rem 1.5rem;
+      border-bottom: 1px solid var(--paper);
+      position: sticky; top: 0; background: white; z-index: 1;
+      border-radius: var(--r3) var(--r3) 0 0;
+    }
+    .jd-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .jd-logo { width: 56px; height: 56px; border-radius: var(--r2); background: var(--paper); display: grid; place-items: center; font-size: 1.6rem; flex-shrink: 0; }
+    .jd-title-wrap { flex: 1; }
+    .jd-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); }
+    .jd-company { font-size: .9rem; color: var(--steel); display: flex; align-items: center; gap: .3rem; margin-top: .2rem; }
+    .jd-badges { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .6rem; }
+    .jd-meta-grid { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 1rem; }
+    .jd-meta-item { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--steel); }
+    .jd-meta-item svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .jd-meta-item strong { color: var(--ink); font-weight: 600; }
+    .jd-body { padding: 1.5rem 2.5rem 2rem; }
+    .jd-section { margin-bottom: 1.75rem; }
+    .jd-section-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: .6rem; display: flex; align-items: center; gap: .5rem; }
+    .jd-section p { color: var(--ink-3); font-size: .92rem; line-height: 1.7; }
+    .jd-list { list-style: none; padding: 0; }
+    .jd-list li { position: relative; padding-left: 1.4rem; font-size: .9rem; color: var(--ink-3); line-height: 1.7; margin-bottom: .3rem; }
+    .jd-list li::before { content: ''; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+    .jd-benefits-list li::before { background: var(--success); }
+    .jd-skills { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+    .jd-skill-tag { padding: .3rem .75rem; background: rgba(0,82,204,.08); color: var(--brand); border-radius: var(--r-full); font-size: .8rem; font-weight: 500; }
+    .jd-footer {
+      padding: 1.25rem 2.5rem;
+      border-top: 1px solid var(--paper);
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      position: sticky; bottom: 0; background: white; z-index: 1;
+      border-radius: 0 0 var(--r3) var(--r3);
+    }
+    .jd-footer-info { font-size: .82rem; color: var(--steel); }
+    .jd-apply-btn {
+      padding: .8rem 2rem; background: var(--brand); color: white;
+      border-radius: var(--r2); font-weight: 600; font-size: .95rem;
+      transition: all var(--trans); border: none; cursor: pointer;
+    }
+    .jd-apply-btn:hover { background: var(--brand-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+    /* ─── Application Modal ──────────────────────────────────────────────────── */
+    .apply-overlay {
+      position: fixed; inset: 0; z-index: 2500;
+      background: rgba(10,15,30,.65); backdrop-filter: blur(5px);
+      display: grid; place-items: center; padding: 1rem;
+      opacity: 0; pointer-events: none; transition: opacity var(--trans);
+    }
+    .apply-overlay.open { opacity: 1; pointer-events: all; }
+    .apply-modal {
+      background: white; border-radius: var(--r3);
+      padding: 2.5rem; width: min(560px, 100%);
+      max-height: 92vh; overflow-y: auto;
+      transform: translateY(20px); transition: transform var(--trans);
+    }
+    .apply-overlay.open .apply-modal { transform: translateY(0); }
+    .apply-job-banner {
+      background: var(--paper); border-radius: var(--r2);
+      padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .apply-job-banner-logo { width: 42px; height: 42px; border-radius: var(--r1); background: white; display: grid; place-items: center; font-size: 1.2rem; }
+    .apply-job-banner-title { font-weight: 700; font-size: .95rem; color: var(--ink); }
+    .apply-job-banner-company { font-size: .8rem; color: var(--steel); }
+    .apply-textarea {
+      width: 100%; padding: .75rem 1rem; min-height: 120px; resize: vertical;
+      border: 1.5px solid var(--mist); border-radius: var(--r2);
+      font: inherit; font-size: .9rem; color: var(--ink);
+      transition: border-color var(--trans); outline: none;
+    }
+    .apply-textarea:focus { border-color: var(--brand); }
+    .file-upload-zone {
+      border: 2px dashed var(--mist); border-radius: var(--r2);
+      padding: 1.5rem; text-align: center; cursor: pointer;
+      transition: all var(--trans); background: var(--paper);
+    }
+    .file-upload-zone:hover { border-color: var(--brand); background: rgba(0,82,204,.03); }
+    .file-upload-zone.has-file { border-color: var(--success); background: rgba(34,197,94,.05); }
+    .file-upload-icon { font-size: 1.5rem; margin-bottom: .4rem; }
+    .file-upload-text { font-size: .85rem; color: var(--steel); }
+    .file-upload-text strong { color: var(--brand); }
+    .file-upload-name { font-size: .85rem; font-weight: 600; color: var(--success); margin-top: .3rem; }
+    .apply-success {
+      text-align: center; padding: 2rem 0;
+    }
+    .apply-success-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .apply-success h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; margin-bottom: .5rem; }
+    .apply-success p { color: var(--steel); font-size: .9rem; line-height: 1.6; }
+    .apply-steps { display: flex; gap: 1rem; margin: 1.5rem 0; justify-content: center; }
+    .apply-step { display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--steel); }
+    .apply-step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mist); }
+    .apply-step-dot.active { background: var(--success); }
+
+    @media (max-width: 640px) {
+      .jd-header, .jd-body, .jd-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .jd-title { font-size: 1.15rem; }
+      .jd-footer { flex-direction: column; }
+      .jd-apply-btn { width: 100%; text-align: center; }
+      .apply-modal { padding: 1.5rem; }
+    }
+
+    /* ─── Toast ───────────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 3000;
+      background: var(--ink); color: white;
+      padding: 1rem 1.5rem; border-radius: var(--r2);
+      box-shadow: var(--shadow-xl); font-size: .9rem;
+      display: flex; align-items: center; gap: .75rem;
+      transform: translateY(100px); opacity: 0;
+      transition: all var(--trans); max-width: 360px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+    /* ─── Utilities / Animations ─────────────────────────────────────────────── */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .text-brand { color: var(--brand); }
+    .text-accent { color: var(--accent); }
+
+    /* ─── Responsive ─────────────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .industries-grid { grid-template-columns: repeat(4,1fr); }
+      .jobs-grid { grid-template-columns: repeat(2,1fr); }
+      .testimonials-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero-search-wrap { display: none; }
+      .hero-actions { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .how-grid, .why-grid { grid-template-columns: 1fr; }
+      .why-features { grid-template-columns: 1fr; }
+      .jobs-grid, .testimonials-grid, .blog-grid { grid-template-columns: 1fr; }
+      .industries-grid { grid-template-columns: repeat(3,1fr); }
+      .nav-links, .nav-actions { display: none; }
+      .nav-burger { display: flex; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .industries-grid { grid-template-columns: repeat(2,1fr); }
+      .section { padding: 3.5rem 0; }
+    }
+
+    /* Mobile nav open */
+    .mobile-nav {
+      display: none; flex-direction: column;
+      position: fixed; inset: 0; top: 70px; z-index: 999;
+      background: white; padding: 2rem;
+      gap: 1.5rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a { font-size: 1.1rem; font-weight: 500; color: var(--ink-3); border-bottom: 1px solid var(--paper); padding-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+<!-- ─── Navigation ─────────────────────────────────────────────────────────── -->
+<nav class="nav" id="navbar">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      TaIQ
+    </a>
+    <div class="nav-links">
+      <a href="#jobs">Find Jobs</a>
+      <a href="#industries">Industries</a>
+      <a href="#employers">For Employers</a>
+      <a href="#blog">Insights</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-outline btn-sm" onclick="openModal('login')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('register')">Get Started</button>
+    </div>
+    <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#jobs" onclick="toggleMobileNav()">Find Jobs</a>
+  <a href="#industries" onclick="toggleMobileNav()">Industries</a>
+  <a href="#employers" onclick="toggleMobileNav()">For Employers</a>
+  <a href="#blog" onclick="toggleMobileNav()">Insights</a>
+  <a href="#about" onclick="toggleMobileNav()">About</a>
+  <button class="btn btn-primary" onclick="openModal('register'); toggleMobileNav()">Get Started</button>
+</div>
+
+<!-- ─── Hero ───────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+  </div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Now featuring AI-powered matching
+        </div>
+        <h1 class="hero-headline">
+          Bridge the Gap Between<br>
+          <span>Talent & Opportunity</span>
+        </h1>
+        <p class="hero-sub">
+          TaIQ connects skilled professionals with leading employers across every industry. Your next great career move is one click away.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-accent btn-lg" onclick="document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Browse Jobs
+          </button>
+          <button class="btn btn-lg" style="background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2)" onclick="openModal('register')">
+            Post a Job
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-num" id="heroJobs">24K+</div>
+            <div class="hero-stat-label">Active Jobs</div>
+          </div>
+          <div>
+            <div class="hero-stat-num" id="heroCompanies">3.8K+</div>
+            <div class="hero-stat-label">Companies</div>
+          </div>
+          <div>
+            <div class="hero-stat-num" id="heroPlaced">180K+</div>
+            <div class="hero-stat-label">Placed This Year</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Panel -->
+      <div class="hero-search-wrap">
+        <div class="search-tab-row">
+          <div class="search-tab active" onclick="setTab(this,'candidate')">Find a Job</div>
+          <div class="search-tab" onclick="setTab(this,'employer')">Hire Talent</div>
+        </div>
+        <div class="search-form">
+          <div class="search-field">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Job title, skill, or keyword" id="searchQ" />
+          </div>
+          <div class="search-field">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <input type="text" placeholder="City, state, or remote" id="searchLoc" />
+          </div>
+          <div class="search-field">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <select id="searchType">
+              <option value="">All Job Types</option>
+              <option value="full_time">Full-Time</option>
+              <option value="part_time">Part-Time</option>
+              <option value="contract">Contract</option>
+              <option value="temporary">Temporary</option>
+              <option value="internship">Internship</option>
+            </select>
+          </div>
+          <button class="search-btn-full" onclick="searchJobs()">
+            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Search Jobs
+          </button>
+        </div>
+        <div class="popular-searches">
+          <p>Popular searches:</p>
+          <div class="popular-tags">
+            <span class="popular-tag" onclick="quickSearch('Software Engineer')">Software Engineer</span>
+            <span class="popular-tag" onclick="quickSearch('Data Analyst')">Data Analyst</span>
+            <span class="popular-tag" onclick="quickSearch('Product Manager')">Product Manager</span>
+            <span class="popular-tag" onclick="quickSearch('Nurse')">Nurse</span>
+            <span class="popular-tag" onclick="quickSearch('Remote')">Remote</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Trust Bar ──────────────────────────────────────────────────────────── -->
+<div class="trust-bar">
+  <div class="container trust-bar-inner">
+    <span class="trust-label">Trusted by leading companies:</span>
+    <div class="trust-logos">
+      <span class="trust-logo">Microsoft</span>
+      <span class="trust-logo">Johnson&nbsp;&amp;&nbsp;Johnson</span>
+      <span class="trust-logo">Goldman Sachs</span>
+      <span class="trust-logo">Amazon</span>
+      <span class="trust-logo">Pfizer</span>
+      <span class="trust-logo">General Motors</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Stats ──────────────────────────────────────────────────────────────── -->
+<div class="stats-band">
+  <div class="container">
+    <div class="stats-grid">
+      <div>
+        <div class="stat-item-num">24,000+</div>
+        <div class="stat-item-label">Open Positions</div>
+      </div>
+      <div>
+        <div class="stat-item-num">3,800+</div>
+        <div class="stat-item-label">Partner Companies</div>
+      </div>
+      <div>
+        <div class="stat-item-num">98%</div>
+        <div class="stat-item-label">Satisfaction Rate</div>
+      </div>
+      <div>
+        <div class="stat-item-num">180,000+</div>
+        <div class="stat-item-label">Successful Placements</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Industries ─────────────────────────────────────────────────────────── -->
+<section class="section" id="industries">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Browse by Industry</div>
+      <h2>Find Opportunities in Your Field</h2>
+      <p>Explore thousands of openings across every sector of the economy</p>
+    </div>
+    <div class="industries-grid fade-in" id="industriesGrid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ─── Featured Jobs ──────────────────────────────────────────────────────── -->
+<section class="section jobs-section" id="jobs">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Featured Opportunities</div>
+      <h2>Jobs Handpicked For You</h2>
+      <p>Thousands of new roles added daily from top employers nationwide</p>
+    </div>
+    <div class="jobs-filters fade-in">
+      <button class="filter-btn active" onclick="filterJobs('all', this)">All</button>
+      <button class="filter-btn" onclick="filterJobs('full_time', this)">Full-Time</button>
+      <button class="filter-btn" onclick="filterJobs('part_time', this)">Part-Time</button>
+      <button class="filter-btn" onclick="filterJobs('contract', this)">Contract</button>
+      <button class="filter-btn" onclick="filterJobs('remote', this)">Remote</button>
+    </div>
+    <div class="jobs-grid fade-in" id="jobsGrid">
+      <!-- populated by JS -->
+    </div>
+    <div class="jobs-cta fade-in">
+      <a href="#" class="btn btn-primary btn-lg" onclick="event.preventDefault();showToast('Showing all available positions…','🔍')">
+        View All Jobs &nbsp;→
+      </a>
+      <p class="job-count" style="margin-top:.75rem" id="jobCount"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── How It Works ───────────────────────────────────────────────────────── -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="how-grid">
+      <div class="fade-in">
+        <div class="label">How It Works</div>
+        <h2 style="margin:.5rem 0 2rem;font-size:clamp(1.8rem,3vw,2.4rem)">Land Your Dream Job in 4 Simple Steps</h2>
+        <div class="how-steps">
+          <div class="how-step">
+            <div class="how-step-num">1</div>
+            <div class="how-step-body">
+              <h3>Create Your Profile</h3>
+              <p>Build a compelling profile that showcases your skills, experience, and career goals to thousands of employers.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="how-step-num">2</div>
+            <div class="how-step-body">
+              <h3>AI-Powered Matching</h3>
+              <p>Our intelligent algorithm analyzes your profile and surfaces the most relevant roles based on your skills and preferences.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="how-step-num">3</div>
+            <div class="how-step-body">
+              <h3>Apply With One Click</h3>
+              <p>Apply to multiple positions instantly. Track every application's status in real-time from your dashboard.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="how-step-num">4</div>
+            <div class="how-step-body">
+              <h3>Get Hired &amp; Thrive</h3>
+              <p>Our dedicated success team supports you through offer negotiations and your first 90 days on the job.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual fade-in">
+        <div class="how-visual-card">
+          <h4 style="color:rgba(255,255,255,.9)">🎯 Match Found!</h4>
+          <p>Senior Software Engineer at Acme Corp</p>
+          <div class="how-visual-match">
+            <div class="match-avatar">👤</div>
+            <div>
+              <div class="match-pct">97%</div>
+              <div class="match-label">Skills Match</div>
+            </div>
+            <div style="margin-left:auto">
+              <div style="font-size:.75rem;color:#22c55e;font-weight:600">● Applied</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.4)">2 min ago</div>
+            </div>
+          </div>
+        </div>
+        <div class="how-visual-card">
+          <h4 style="color:rgba(255,255,255,.9)">📅 Interview Scheduled</h4>
+          <p>Wednesday, April 9 at 2:00 PM EST</p>
+          <div style="display:flex;gap:.5rem;margin-top:.75rem">
+            <div style="padding:.3rem .8rem;background:rgba(34,197,94,.15);border-radius:999px;font-size:.75rem;color:#22c55e;">Confirmed</div>
+            <div style="padding:.3rem .8rem;background:rgba(255,255,255,.08);border-radius:999px;font-size:.75rem;color:rgba(255,255,255,.6);">Google Meet</div>
+          </div>
+        </div>
+        <div class="how-visual-card">
+          <h4 style="color:rgba(255,255,255,.9)">🎉 Offer Received!</h4>
+          <p style="margin-bottom:.5rem">$145,000 / year + equity</p>
+          <div style="background:rgba(34,197,94,.1);border-radius:8px;padding:.5rem .75rem;display:inline-flex;gap:.5rem;align-items:center">
+            <span style="color:#22c55e;font-size:.8rem;font-weight:600">Review Offer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Testimonials ────────────────────────────────────────────────────────── -->
+<section class="section testimonials-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Success Stories</div>
+      <h2>What Our Community Says</h2>
+      <p>Thousands of professionals and employers trust TaIQ every day</p>
+    </div>
+    <div class="testimonials-grid fade-in" id="testimonialsGrid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ─── Why Us ─────────────────────────────────────────────────────────────── -->
+<section class="section" id="employers">
+  <div class="container">
+    <div class="why-grid">
+      <div class="why-features fade-in">
+        <div class="why-feature">
+          <div class="why-icon">🧠</div>
+          <h3>AI-Powered Matching</h3>
+          <p>Proprietary algorithms surface the best candidates for every role, reducing time-to-hire by 60%.</p>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon">🌐</div>
+          <h3>National Reach</h3>
+          <p>Access talent across all 50 states and remote candidates worldwide through our platform.</p>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon">✅</div>
+          <h3>Pre-Screened Candidates</h3>
+          <p>Every applicant is vetted for skills and experience before reaching your inbox.</p>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon">📊</div>
+          <h3>Analytics Dashboard</h3>
+          <p>Real-time data on applications, pipeline velocity, offer acceptance, and DEI metrics.</p>
+        </div>
+      </div>
+      <div class="why-content fade-in">
+        <div class="label">Why TaIQ</div>
+        <h2>The Smarter Way to Hire &amp; Get Hired</h2>
+        <p>
+          Whether you're a job seeker looking for your next move or an employer building a world-class team, TaIQ gives you the tools, network, and expert guidance to succeed.
+        </p>
+        <div class="why-checklist">
+          <div class="why-check"><div class="check-icon"></div>Access to 180,000+ pre-screened candidates</div>
+          <div class="why-check"><div class="check-icon"></div>Average time-to-hire under 14 days</div>
+          <div class="why-check"><div class="check-icon"></div>Dedicated account manager support</div>
+          <div class="why-check"><div class="check-icon"></div>90-day placement guarantee</div>
+          <div class="why-check"><div class="check-icon"></div>ATS integrations with major HR systems</div>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="openModal('register')">Start Hiring Today</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA Band ────────────────────────────────────────────────────────────── -->
+<section class="cta-band">
+  <div class="container cta-band-inner fade-in">
+    <div class="label" style="color:#90c4ff">Ready to Get Started?</div>
+    <h2>Your Next Opportunity Is Waiting</h2>
+    <p>Join over 2 million professionals who found their perfect role through TaIQ.</p>
+    <div class="cta-band-actions">
+      <button class="btn btn-accent btn-lg" onclick="openModal('register')">Create Free Account</button>
+      <button class="btn btn-lg" style="background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.25)" onclick="openModal('register')">Post a Job — Free Trial</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Blog ───────────────────────────────────────────────────────────────── -->
+<section class="section" id="blog">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Career Insights</div>
+      <h2>Resources to Elevate Your Career</h2>
+      <p>Expert advice, industry trends, and hiring guides from our team of career specialists</p>
+    </div>
+    <div class="blog-grid fade-in">
+      <div class="blog-card">
+        <div class="blog-img blog-img-1">💼</div>
+        <div class="blog-body">
+          <span class="blog-cat">Career Advice</span>
+          <h3 class="blog-title">10 Resume Mistakes That Are Costing You Interviews</h3>
+          <p class="blog-excerpt">Discover the most common resume pitfalls and how to fix them to land more callbacks from top employers.</p>
+          <div class="blog-footer">
+            <span class="blog-date">March 28, 2025</span>
+            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
+          </div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-img blog-img-2">📈</div>
+        <div class="blog-body">
+          <span class="blog-cat">Industry Trends</span>
+          <h3 class="blog-title">The 15 Fastest-Growing Jobs in Tech for 2025</h3>
+          <p class="blog-excerpt">AI, cybersecurity, and cloud computing are reshaping the workforce. Here's where the opportunities lie.</p>
+          <div class="blog-footer">
+            <span class="blog-date">March 15, 2025</span>
+            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
+          </div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-img blog-img-3">🤝</div>
+        <div class="blog-body">
+          <span class="blog-cat">Hiring Guide</span>
+          <h3 class="blog-title">How to Build a Winning Employer Brand in 2025</h3>
+          <p class="blog-excerpt">Top candidates have options. Learn how leading companies attract elite talent in a competitive market.</p>
+          <div class="blog-footer">
+            <span class="blog-date">March 5, 2025</span>
+            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ─────────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>TaIQ</h3>
+        <p>Connecting exceptional talent with extraordinary opportunities across every industry since 2018.</p>
+        <div class="footer-social">
+          <div class="social-icon" onclick="showToast('Following on LinkedIn!','👔')">in</div>
+          <div class="social-icon" onclick="showToast('Following on Twitter/X!','🐦')">𝕏</div>
+          <div class="social-icon" onclick="showToast('Following on Facebook!','👍')">f</div>
+          <div class="social-icon" onclick="showToast('Following on Instagram!','📸')">ig</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Job Seekers</h4>
+        <ul>
+          <li><a href="#">Browse Jobs</a></li>
+          <li><a href="#">Career Resources</a></li>
+          <li><a href="#">Resume Builder</a></li>
+          <li><a href="#">Salary Explorer</a></li>
+          <li><a href="#">Interview Prep</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Employers</h4>
+        <ul>
+          <li><a href="#">Post a Job</a></li>
+          <li><a href="#">Search Candidates</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">ATS Integrations</a></li>
+          <li><a href="#">Employer Branding</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 TaIQ Inc. All rights reserved.</span>
+      <div class="footer-bottom-links">
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-service.html">Terms of Service</a>
+        <a href="cookie-policy.html">Cookie Policy</a>
+        <a href="accessibility.html">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── Auth Modal ─────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Welcome Back</h2>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="loginTab" onclick="switchTab('login')" role="tab">Sign In</div>
+      <div class="modal-tab" id="registerTab" onclick="switchTab('register')" role="tab">Create Account</div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">Email Address</label>
+        <input type="email" class="form-input" placeholder="you@example.com" id="loginEmail" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password</label>
+        <input type="password" class="form-input" placeholder="••••••••" id="loginPassword" autocomplete="current-password" />
+      </div>
+      <button class="form-submit" onclick="doLogin()" id="loginBtn">Sign In</button>
+      <div class="form-footer">Don't have an account? <a href="#" onclick="switchTab('register')">Sign up free</a></div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="regFirst">First Name</label>
+          <input type="text" class="form-input" placeholder="Jane" id="regFirst" autocomplete="given-name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regLast">Last Name</label>
+          <input type="text" class="form-input" placeholder="Smith" id="regLast" autocomplete="family-name" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="regEmail">Email Address</label>
+        <input type="email" class="form-input" placeholder="you@example.com" id="regEmail" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="regPassword">Password</label>
+        <div class="password-wrap">
+          <input type="password" class="form-input" placeholder="Min 8 characters" id="regPassword" autocomplete="new-password" oninput="checkPasswordStrength(this.value)" />
+          <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword',this)" aria-label="Show password">👁</button>
+        </div>
+        <div class="pwd-strength" id="pwdStrength"><div class="pwd-bar" id="pwdBar"></div></div>
+        <div class="pwd-hint" id="pwdHint"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="regConfirm">Confirm Password</label>
+        <div class="password-wrap">
+          <input type="password" class="form-input" placeholder="Re-enter your password" id="regConfirm" autocomplete="new-password" />
+          <button type="button" class="pwd-toggle" onclick="togglePwd('regConfirm',this)" aria-label="Show confirm password">👁</button>
+        </div>
+        <div class="confirm-hint" id="confirmHint"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="regRole">I am a…</label>
+        <select class="form-input" id="regRole">
+          <option value="candidate">Job Seeker</option>
+          <option value="employer">Employer / Recruiter</option>
+        </select>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="regTerms" />
+        <label for="regTerms">I agree to the <a href="terms-of-service.html" target="_blank">Terms of Service</a> and <a href="privacy-policy.html" target="_blank">Privacy Policy</a></label>
+      </div>
+      <button class="form-submit" onclick="doRegister()" id="registerBtn">Create Free Account</button>
+      <div class="email-notice">📧 A verification email will be sent to your inbox</div>
+      <div class="form-footer">Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✅</span>
+  <span id="toastMsg">Done!</span>
+</div>
+
+<!-- ─── Job Detail Modal ───────────────────────────────────────────────────── -->
+<div class="job-detail-overlay" id="jobDetailOverlay" role="dialog" aria-modal="true">
+  <div class="job-detail-modal" id="jobDetailModal">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- ─── Application Modal ─────────────────────────────────────────────────── -->
+<div class="apply-overlay" id="applyOverlay" role="dialog" aria-modal="true">
+  <div class="apply-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="applyModalTitle">Apply for this Position</div>
+      <div class="modal-close" onclick="closeApplyModal()">&times;</div>
+    </div>
+
+    <!-- Form view -->
+    <div id="applyFormView">
+      <div class="apply-job-banner" id="applyJobBanner">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" class="form-input" id="applyName" placeholder="Your full name" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" class="form-input" id="applyEmail" placeholder="you@example.com" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-input" id="applyPhone" placeholder="(555) 123-4567" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">LinkedIn Profile</label>
+        <input type="url" class="form-input" id="applyLinkedin" placeholder="https://linkedin.com/in/yourprofile" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Resume / CV *</label>
+        <div class="file-upload-zone" id="resumeZone" onclick="document.getElementById('resumeInput').click()">
+          <div class="file-upload-icon">📄</div>
+          <div class="file-upload-text">Click to upload or drag and drop<br><strong>PDF, DOC, DOCX</strong> (max 5MB)</div>
+          <div class="file-upload-name" id="resumeFileName"></div>
+        </div>
+        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" style="display:none" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cover Letter</label>
+        <textarea class="apply-textarea" id="applyCoverLetter" placeholder="Tell the hiring team why you're a great fit for this role..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">How did you hear about this position?</label>
+        <select class="form-input" id="applySource">
+          <option value="">Select one</option>
+          <option value="taiq">TaIQ Platform</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="referral">Employee Referral</option>
+          <option value="job_board">Job Board</option>
+          <option value="social">Social Media</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-check">
+        <input type="checkbox" id="applyConsent" />
+        <label for="applyConsent">I confirm that the information provided is accurate and I consent to my data being processed for recruitment purposes.</label>
+      </div>
+
+      <button class="form-submit" id="applySubmitBtn" onclick="submitApplication()">Submit Application</button>
+    </div>
+
+    <!-- Success view -->
+    <div id="applySuccessView" style="display:none">
+      <div class="apply-success">
+        <div class="apply-success-icon">🎉</div>
+        <h3>Application Submitted!</h3>
+        <p id="applySuccessMsg">Your application has been sent successfully. The hiring team will review your profile and get back to you soon.</p>
+        <div class="apply-steps">
+          <div class="apply-step"><div class="apply-step-dot active"></div> Applied</div>
+          <div class="apply-step"><div class="apply-step-dot"></div> Under Review</div>
+          <div class="apply-step"><div class="apply-step-dot"></div> Interview</div>
+          <div class="apply-step"><div class="apply-step-dot"></div> Decision</div>
+        </div>
+        <button class="form-submit" style="margin-top:1rem" onclick="closeApplyModal()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── JS ────────────────────────────────────────────────────────────────── -->
+<script>
+  const API = '/api/v1';
+
+  // ── Static data fallback (used when API not available) ──────────────────────
+  const STATIC_JOBS = [
+    { id:1, title:'Senior Software Engineer', company:{name:'Acme Technologies',logo_url:null,headquarters:'New York, NY',is_verified:true}, location:'New York, NY', remote:true, job_type:'full_time', salary_min:130000, salary_max:170000, skills_required:['Python','AWS','React'], is_featured:true, views:842, created_at:new Date(Date.now()-2*86400000).toISOString(),
+      description:'We are looking for a Senior Software Engineer to join our platform team and help build scalable, high-performance systems that power millions of users. You will work closely with product and design teams to deliver features end-to-end, mentor junior engineers, and contribute to architectural decisions.',
+      requirements:['5+ years of professional software engineering experience','Strong proficiency in Python and at least one modern JS framework (React preferred)','Experience with AWS services (EC2, Lambda, S3, RDS)','Solid understanding of distributed systems and microservices architecture','Excellent communication skills and experience mentoring junior developers','BS/MS in Computer Science or equivalent practical experience'],
+      benefits:['Competitive salary + equity package','Unlimited PTO policy','$5,000 annual learning & development budget','401(k) with 4% company match','Comprehensive health, dental, and vision insurance','Flexible remote / hybrid schedule','Home office stipend ($1,500)']
+    },
+    { id:2, title:'Data Scientist – ML Platform', company:{name:'DataFlow Inc.',logo_url:null,headquarters:'San Francisco, CA',is_verified:true}, location:'San Francisco, CA', remote:true, job_type:'full_time', salary_min:120000, salary_max:160000, skills_required:['Python','TensorFlow','SQL'], is_featured:true, views:612, created_at:new Date(Date.now()-1*86400000).toISOString(),
+      description:'DataFlow Inc. is seeking a talented Data Scientist to join our ML Platform team. You will design and implement machine learning models that drive key product decisions, work with terabyte-scale datasets, and deploy production-grade ML pipelines that serve real-time predictions to millions of users.',
+      requirements:['3+ years of experience in data science or machine learning engineering','Expert-level Python skills with experience in TensorFlow or PyTorch','Strong SQL skills and experience with large-scale data processing (Spark, BigQuery)','Understanding of statistical modeling, A/B testing, and experimentation design','Published research or portfolio of ML projects is a plus','MS or PhD in Computer Science, Statistics, or related quantitative field preferred'],
+      benefits:['Base salary + annual performance bonus (15-25%)','RSU equity grants with 4-year vesting','Catered meals 3x per week','$3,000 annual conference and education budget','Premium health, dental, vision, and mental health coverage','12 weeks paid parental leave','Monthly wellness stipend ($200)']
+    },
+    { id:3, title:'Registered Nurse – ICU', company:{name:'MetroHealth System',logo_url:null,headquarters:'Cleveland, OH',is_verified:false}, location:'Cleveland, OH', remote:false, job_type:'full_time', salary_min:72000, salary_max:95000, skills_required:['Critical Care','BLS','ACLS'], is_featured:false, views:389, created_at:new Date(Date.now()-3*86400000).toISOString(),
+      description:'MetroHealth System is seeking dedicated ICU Registered Nurses to join our award-winning critical care unit. You will provide compassionate, evidence-based patient care in a fast-paced environment, collaborate with interdisciplinary teams, and have access to the latest medical technologies.',
+      requirements:['Active RN license in the state of Ohio','BLS and ACLS certifications required','Minimum 2 years of ICU or critical care nursing experience','Proficiency with electronic health record systems (Epic preferred)','Strong clinical assessment and critical thinking skills','CCRN certification preferred but not required'],
+      benefits:['Competitive hourly rates with shift differentials','Sign-on bonus up to $10,000','Tuition reimbursement program ($5,250/year)','Pension plan + 403(b) retirement savings','Comprehensive medical, dental, and vision coverage','Generous PTO accrual from day one','Free parking and employee cafeteria discounts']
+    },
+    { id:4, title:'Product Manager – Growth', company:{name:'FinTech Partners',logo_url:null,headquarters:'Austin, TX',is_verified:true}, location:'Austin, TX', remote:true, job_type:'full_time', salary_min:115000, salary_max:145000, skills_required:['Product Strategy','A/B Testing','SQL'], is_featured:false, views:511, created_at:new Date(Date.now()-1*86400000).toISOString(),
+      description:'FinTech Partners is hiring a Product Manager to lead our Growth squad. You will own the user acquisition and activation funnel, run data-driven experiments, and collaborate with engineering, marketing, and design to deliver features that drive measurable business impact. This is a high-visibility role reporting directly to the VP of Product.',
+      requirements:['4+ years of product management experience, ideally in fintech or SaaS','Demonstrated success driving growth metrics (activation, retention, revenue)','Strong analytical skills with hands-on experience in SQL and experimentation platforms','Excellent stakeholder management and communication skills','Experience leading cross-functional teams in an agile environment','MBA or equivalent experience preferred'],
+      benefits:['Competitive base + performance bonus (up to 20%)','Stock options with early exercise available','Flexible PTO (minimum 15 days encouraged)','$2,500 professional development stipend','Premium health plans including family coverage','Quarterly team offsites','Dog-friendly Austin office with standing desks']
+    },
+    { id:5, title:'DevOps Engineer', company:{name:'CloudNative Corp',logo_url:null,headquarters:'Seattle, WA',is_verified:true}, location:'Remote', remote:true, job_type:'contract', salary_min:95000, salary_max:130000, skills_required:['Kubernetes','Docker','Terraform'], is_featured:false, views:298, created_at:new Date(Date.now()-4*86400000).toISOString(),
+      description:'CloudNative Corp is looking for a DevOps Engineer (contract, 12 months with extension potential) to help us scale our Kubernetes-based infrastructure. You will design CI/CD pipelines, manage infrastructure as code, and ensure 99.99% uptime for our mission-critical services. Fully remote position open to candidates across all US time zones.',
+      requirements:['3+ years of hands-on DevOps / SRE experience','Strong expertise with Kubernetes (CKA certification a plus)','Proficiency with Docker, Terraform, and at least one major cloud provider (AWS/GCP/Azure)','Experience building and maintaining CI/CD pipelines (GitHub Actions, Jenkins, GitLab CI)','Solid Linux systems administration skills','On-call experience and incident management best practices'],
+      benefits:['Competitive contract rate ($75-100/hr depending on experience)','Fully remote with flexible hours','$1,000 home office setup allowance','Access to internal training and certification programs','Conference attendance sponsorship','Option to convert to full-time after contract period','Collaborative, low-meeting culture']
+    },
+    { id:6, title:'UX/UI Designer', company:{name:'DesignCo',logo_url:null,headquarters:'Chicago, IL',is_verified:false}, location:'Chicago, IL', remote:false, job_type:'full_time', salary_min:85000, salary_max:115000, skills_required:['Figma','User Research','Prototyping'], is_featured:false, views:445, created_at:new Date(Date.now()-2*86400000).toISOString(),
+      description:'DesignCo is seeking a talented UX/UI Designer to shape the user experience of our consumer-facing products. You will conduct user research, create wireframes and high-fidelity prototypes, and work hand-in-hand with product managers and engineers to ship beautiful, intuitive interfaces used by hundreds of thousands of people.',
+      requirements:['3+ years of UX/UI design experience with a strong portfolio','Expert proficiency in Figma (components, auto-layout, prototyping)','Experience conducting user research, usability testing, and synthesizing insights','Understanding of accessibility standards (WCAG 2.1) and responsive design','Familiarity with design systems and component libraries','Strong collaboration skills working with engineering teams','Experience with motion design or micro-interactions is a plus'],
+      benefits:['Competitive salary with annual merit increases','Creative Fridays — 20% time for personal design projects','$2,000 annual equipment / software budget','Health, dental, vision + life insurance','4 weeks PTO + company-wide winter break','Beautiful River North office with in-house design library','Sponsored attendance to design conferences (Config, AIGA, etc.)']
+    },
+  ];
+
+  const STATIC_INDUSTRIES = [
+    {id:1,name:'Technology',slug:'technology',icon:'💻',count:6820},
+    {id:2,name:'Healthcare',slug:'healthcare',icon:'🏥',count:4310},
+    {id:3,name:'Finance',slug:'finance',icon:'💰',count:3120},
+    {id:4,name:'Engineering',slug:'engineering',icon:'⚙️',count:2780},
+    {id:5,name:'Marketing',slug:'marketing',icon:'📣',count:1890},
+    {id:6,name:'Education',slug:'education',icon:'🎓',count:1540},
+    {id:7,name:'Manufacturing',slug:'manufacturing',icon:'🏭',count:2200},
+    {id:8,name:'Retail',slug:'retail',icon:'🛍️',count:1680},
+    {id:9,name:'Logistics',slug:'logistics',icon:'🚚',count:1320},
+    {id:10,name:'Legal',slug:'legal',icon:'⚖️',count:980},
+  ];
+
+  const STATIC_TESTIMONIALS = [
+    {id:1,name:'Sarah Johnson',role:'Software Engineer',company:'Google',content:'TaIQ connected me with my dream job in just 2 weeks. The platform is intuitive and the team is incredibly supportive throughout the process.',rating:5},
+    {id:2,name:'Michael Chen',role:'HR Director',company:'Pfizer',content:'We have been using TaIQ to source top-tier candidates and the quality of applicants is consistently excellent.',rating:5},
+    {id:3,name:'Priya Patel',role:'Data Scientist',company:'Goldman Sachs',content:'After months of searching on other platforms, TaIQ matched me with the perfect role that aligned with both my skills and career goals.',rating:5},
+    {id:4,name:'James Williams',role:'Operations Manager',company:'Amazon',content:'The talent pool on TaIQ is exceptional. We filled 12 positions in a single quarter, saving significant time and recruiting costs.',rating:4},
+    {id:5,name:'Emma Rodriguez',role:'UX Designer',company:'Apple',content:'Simple, clean, and effective. I uploaded my resume, filled in my preferences, and had 5 interview invitations within a week.',rating:5},
+    {id:6,name:'David Kim',role:'CFO',company:'Tesla',content:'TaIQ has become our primary recruiting channel. The quality of candidates and the platform support are unmatched.',rating:5},
+  ];
+
+  // ── State ────────────────────────────────────────────────────────────────────
+  let allJobs = STATIC_JOBS;
+  let currentFilter = 'all';
+
+  // ── Boot ─────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    initScrollEffects();
+    renderIndustries(STATIC_INDUSTRIES);
+    renderJobs(STATIC_JOBS);
+    renderTestimonials(STATIC_TESTIMONIALS);
+    loadFromAPI();
+  });
+
+  async function loadFromAPI() {
+    try {
+      const [stats, industries, testimonials, jobs] = await Promise.allSettled([
+        fetch(`${API}/public/stats`).then(r => r.ok ? r.json() : null),
+        fetch(`${API}/public/industries`).then(r => r.ok ? r.json() : null),
+        fetch(`${API}/public/testimonials`).then(r => r.ok ? r.json() : null),
+        fetch(`${API}/jobs?limit=6`).then(r => r.ok ? r.json() : null),
+      ]);
+      if (industries.value) renderIndustries(industries.value);
+      if (testimonials.value) renderTestimonials(testimonials.value);
+      if (jobs.value?.jobs?.length) { allJobs = jobs.value.jobs; renderJobs(allJobs); }
+      if (stats.value) updateStats(stats.value);
+    } catch { /* use static data */ }
+  }
+
+  function updateStats(s) {
+    document.getElementById('heroJobs').textContent = formatNum(s.total_jobs) + '+';
+    document.getElementById('heroCompanies').textContent = formatNum(s.total_companies) + '+';
+    document.getElementById('heroPlaced').textContent = formatNum(s.placements_this_month) + '+';
+  }
+
+  // ── Renderers ────────────────────────────────────────────────────────────────
+  function renderIndustries(list) {
+    const counts = [6820,4310,3120,2780,1890,1540,2200,1680,1320,980];
+    document.getElementById('industriesGrid').innerHTML = list.map((ind,i) => `
+      <div class="industry-card" onclick="filterByIndustry('${ind.slug}')">
+        <div class="industry-icon">${ind.icon || '🏢'}</div>
+        <div class="industry-name">${ind.name}</div>
+        <div class="industry-count">${formatNum(counts[i] ?? 500)} jobs</div>
+      </div>
+    `).join('');
+  }
+
+  function renderJobs(jobs) {
+    const grid = document.getElementById('jobsGrid');
+    const count = document.getElementById('jobCount');
+    if (!jobs.length) {
+      grid.innerHTML = '<p style="color:var(--steel);grid-column:1/-1;text-align:center;padding:2rem">No jobs found. Try a different search.</p>';
+      count.textContent = '';
+      return;
+    }
+    grid.innerHTML = jobs.map(j => `
+      <div class="job-card" onclick="openJobDetail(${j.id})" style="cursor:pointer">
+        <div class="job-card-top">
+          <div class="job-card-logo">${getCompanyEmoji(j.company?.name)}</div>
+          <div class="job-card-badges">
+            ${j.is_featured ? '<span class="badge badge-featured">⭐ Featured</span>' : ''}
+            ${j.remote ? '<span class="badge badge-remote">Remote</span>' : ''}
+            ${isNew(j.created_at) ? '<span class="badge badge-new">New</span>' : ''}
+          </div>
+        </div>
+        <div>
+          <div class="job-title">${j.title}</div>
+          <div class="job-company">
+            ${j.company?.name || 'Company'}
+            ${j.company?.is_verified ? '✅' : ''}
+          </div>
+        </div>
+        <div class="job-meta">
+          <div class="job-meta-item">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${j.location}
+          </div>
+          <div class="job-meta-item">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            ${formatJobType(j.job_type)}
+          </div>
+          ${j.salary_min ? `<div class="job-meta-item job-salary">$${formatNum(+j.salary_min)}–$${formatNum(+j.salary_max)}</div>` : ''}
+        </div>
+        <div class="job-card-footer">
+          <div>
+            <div class="job-posted">Posted ${timeAgo(j.created_at)}</div>
+            <div class="job-count">${j.views} views</div>
+          </div>
+          <button class="btn-apply" onclick="event.stopPropagation();openApplyModal(${j.id})">Apply Now</button>
+        </div>
+      </div>
+    `).join('');
+    count.textContent = `Showing ${jobs.length} of thousands of available positions`;
+  }
+
+  function renderTestimonials(list) {
+    document.getElementById('testimonialsGrid').innerHTML = list.map(t => `
+      <div class="testimonial-card">
+        <div class="tcard-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div>
+        <p class="tcard-quote">"${t.content}"</p>
+        <div class="tcard-author">
+          <div class="tcard-avatar">${t.name.charAt(0)}</div>
+          <div>
+            <div class="tcard-name">${t.name}</div>
+            <div class="tcard-role">${t.role} at ${t.company}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Filters ──────────────────────────────────────────────────────────────────
+  function filterJobs(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = type;
+    if (type === 'all') { renderJobs(allJobs); return; }
+    if (type === 'remote') { renderJobs(allJobs.filter(j => j.remote)); return; }
+    renderJobs(allJobs.filter(j => j.job_type === type));
+  }
+
+  function filterByIndustry(slug) {
+    document.getElementById('jobs').scrollIntoView({behavior:'smooth'});
+    showToast(`Filtering by ${slug}…`, '🔍');
+  }
+
+  // ── Search ───────────────────────────────────────────────────────────────────
+  function searchJobs() {
+    const q = document.getElementById('searchQ').value.trim().toLowerCase();
+    const loc = document.getElementById('searchLoc').value.trim().toLowerCase();
+    const type = document.getElementById('searchType').value;
+    let filtered = allJobs;
+    if (q) filtered = filtered.filter(j => j.title.toLowerCase().includes(q) || (j.skills_required||[]).some(s=>s.toLowerCase().includes(q)));
+    if (loc) filtered = filtered.filter(j => j.location.toLowerCase().includes(loc) || (loc==='remote'&&j.remote));
+    if (type) filtered = filtered.filter(j => j.job_type === type);
+    renderJobs(filtered);
+    document.getElementById('jobs').scrollIntoView({behavior:'smooth'});
+  }
+
+  function quickSearch(term) {
+    document.getElementById('searchQ').value = term;
+    searchJobs();
+  }
+
+  // ── Auth State ───────────────────────────────────────────────────────────────
+  let currentUser = null;
+
+  function saveSession(data) {
+    localStorage.setItem('taiq_token', data.access_token);
+    localStorage.setItem('taiq_user', JSON.stringify(data.user));
+    currentUser = data.user;
+  }
+
+  function loadSession() {
+    const u = localStorage.getItem('taiq_user');
+    if (u) { currentUser = JSON.parse(u); updateNavForUser(); }
+  }
+
+  function clearSession() {
+    localStorage.removeItem('taiq_token');
+    localStorage.removeItem('taiq_user');
+    currentUser = null;
+  }
+
+  function updateNavForUser() {
+    if (!currentUser) return;
+    const actions = document.querySelector('.nav-actions');
+    if (!actions) return;
+    actions.innerHTML = `
+      <span style="font-size:.85rem;color:var(--ink-3);font-weight:500">Hi, ${currentUser.full_name?.split(' ')[0] || 'there'} 👋</span>
+      <a href="dashboard.html" class="btn btn-primary btn-sm">My Dashboard</a>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()">Sign Out</button>
+    `;
+  }
+
+  function doLogout() {
+    clearSession();
+    showToast('Signed out successfully', '👋');
+    setTimeout(() => location.reload(), 800);
+  }
+
+  function redirectToDashboard(user) {
+    showToast(`Welcome${user.full_name ? ', ' + user.full_name.split(' ')[0] : ''}! Redirecting…`, '🎉');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  // ── Modal open/close ──────────────────────────────────────────────────────────
+  function openModal(tab) {
+    document.getElementById('authModal').classList.add('open');
+    switchTab(tab);
+    // Focus first input after transition
+    setTimeout(() => {
+      const first = document.querySelector('#authModal input:not([type=hidden])');
+      if (first) first.focus();
+    }, 150);
+  }
+
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('open');
+    // Clear password fields on close for security
+    ['loginPassword','regPassword','regConfirm'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    resetPasswordUI();
+  }
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? '' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none' : '';
+    document.getElementById('loginTab').classList.toggle('active', isLogin);
+    document.getElementById('registerTab').classList.toggle('active', !isLogin);
+    document.getElementById('modalTitle').textContent = isLogin ? 'Welcome Back' : 'Create Your Account';
+  }
+
+  // ── Password strength ─────────────────────────────────────────────────────────
+  function checkPasswordStrength(val) {
+    const bar = document.getElementById('pwdBar');
+    const hint = document.getElementById('pwdHint');
+    if (!bar) return;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+      { pct:'20%', color:'#ef4444', label:'Too short' },
+      { pct:'40%', color:'#f97316', label:'Weak' },
+      { pct:'65%', color:'#eab308', label:'Fair' },
+      { pct:'85%', color:'#22c55e', label:'Good' },
+      { pct:'100%',color:'#16a34a', label:'Strong ✓' },
+    ];
+    const lvl = val.length === 0 ? null : levels[score];
+    bar.style.width = lvl ? lvl.pct : '0%';
+    bar.style.background = lvl ? lvl.color : '';
+    hint.textContent = lvl ? lvl.label : '';
+    hint.style.color = lvl ? lvl.color : '';
+    return score;
+  }
+
+  function togglePwd(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+  }
+
+  function resetPasswordUI() {
+    const bar = document.getElementById('pwdBar');
+    const hint = document.getElementById('pwdHint');
+    if (bar) { bar.style.width = '0%'; }
+    if (hint) hint.textContent = '';
+  }
+
+  // ── Login ─────────────────────────────────────────────────────────────────────
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) { showToast('Please fill in all fields','⚠️'); return; }
+
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = 'Signing in…'; btn.disabled = true;
+
+    try {
+      const r = await fetch(`${API}/auth/login`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      if (r.ok) {
+        const data = await r.json();
+        saveSession(data);
+        closeModal();
+        redirectToDashboard(data.user);
+      } else {
+        const err = await r.json();
+        if (r.status === 403 && err.detail?.includes('verify your email')) {
+          showToast('Check your inbox and verify your email before signing in 📧', '⚠️');
+        } else {
+          showToast(err.detail || 'Login failed — check your credentials', '❌');
+        }
+      }
+    } catch {
+      showToast('Unable to reach server. Please try again.', '⚠️');
+    } finally {
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    }
+  }
+
+  // ── Register ──────────────────────────────────────────────────────────────────
+  async function doRegister() {
+    const first    = document.getElementById('regFirst').value.trim();
+    const last     = document.getElementById('regLast').value.trim();
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm  = document.getElementById('regConfirm').value;
+    const role     = document.getElementById('regRole').value;
+    const terms    = document.getElementById('regTerms').checked;
+
+    // Validations
+    if (!first || !email || !password || !confirm) {
+      showToast('Please fill in all required fields', '⚠️'); return;
+    }
+    if (password.length < 8) {
+      showToast('Password must be at least 8 characters', '⚠️'); return;
+    }
+    if (password !== confirm) {
+      document.getElementById('confirmHint').textContent = '✗ Passwords do not match';
+      document.getElementById('confirmHint').style.color = '#ef4444';
+      showToast('Passwords do not match', '⚠️'); return;
+    }
+    if (!terms) {
+      showToast('Please accept the Terms of Service to continue', '⚠️'); return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.textContent = 'Creating account…'; btn.disabled = true;
+
+    try {
+      const r = await fetch(`${API}/auth/register`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password, full_name:`${first} ${last}`.trim(), role})
+      });
+      if (r.ok) {
+        closeModal();
+        showToast(`Account created! Check ${email} for your verification link 📧`, '🎉');
+      } else {
+        const err = await r.json();
+        showToast(err.detail || 'Registration failed', '❌');
+      }
+    } catch {
+      showToast('Unable to reach server. Please try again.', '⚠️');
+    } finally {
+      btn.textContent = 'Create Free Account'; btn.disabled = false;
+    }
+  }
+
+  // ── Job Detail Modal ──────────────────────────────────────────────────────
+  let currentJobId = null;
+
+  function findJob(id) {
+    return allJobs.find(j => j.id === id);
+  }
+
+  function openJobDetail(id) {
+    const j = findJob(id);
+    if (!j) return;
+    currentJobId = id;
+
+    const modal = document.getElementById('jobDetailModal');
+    modal.innerHTML = `
+      <div class="jd-header">
+        <div class="jd-header-top">
+          <div style="display:flex;gap:1rem;align-items:flex-start;flex:1">
+            <div class="jd-logo">${getCompanyEmoji(j.company?.name)}</div>
+            <div class="jd-title-wrap">
+              <div class="jd-title">${j.title}</div>
+              <div class="jd-company">
+                ${j.company?.name || 'Company'} ${j.company?.is_verified ? '✅' : ''}
+                ${j.company?.headquarters ? '&nbsp;&middot;&nbsp;' + j.company.headquarters : ''}
+              </div>
+              <div class="jd-badges">
+                ${j.is_featured ? '<span class="badge badge-featured">⭐ Featured</span>' : ''}
+                ${j.remote ? '<span class="badge badge-remote">Remote</span>' : ''}
+                ${isNew(j.created_at) ? '<span class="badge badge-new">New</span>' : ''}
+                <span class="badge" style="background:rgba(0,82,204,.08);color:var(--brand)">${formatJobType(j.job_type)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-close" onclick="closeJobDetail()">&times;</div>
+        </div>
+        <div class="jd-meta-grid">
+          <div class="jd-meta-item">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${j.location}
+          </div>
+          <div class="jd-meta-item">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            ${formatJobType(j.job_type)}
+          </div>
+          ${j.salary_min ? `<div class="jd-meta-item"><strong>$${formatNum(+j.salary_min)} – $${formatNum(+j.salary_max)}</strong> / year</div>` : ''}
+          <div class="jd-meta-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Posted ${timeAgo(j.created_at)}
+          </div>
+          <div class="jd-meta-item">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            ${j.views} views
+          </div>
+        </div>
+      </div>
+      <div class="jd-body">
+        <div class="jd-section">
+          <div class="jd-section-title">📋 About This Role</div>
+          <p>${j.description || 'No description available.'}</p>
+        </div>
+        ${j.requirements?.length ? `
+        <div class="jd-section">
+          <div class="jd-section-title">✅ Requirements</div>
+          <ul class="jd-list">
+            ${j.requirements.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+        ${j.benefits?.length ? `
+        <div class="jd-section">
+          <div class="jd-section-title">🎁 Benefits & Perks</div>
+          <ul class="jd-list jd-benefits-list">
+            ${j.benefits.map(b => `<li>${b}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+        <div class="jd-section">
+          <div class="jd-section-title">🛠 Skills Required</div>
+          <div class="jd-skills">
+            ${(j.skills_required||[]).map(s => `<span class="jd-skill-tag">${s}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="jd-footer">
+        <div class="jd-footer-info">Job ID: TQ-${String(j.id).padStart(5,'0')}</div>
+        <div style="display:flex;gap:.75rem">
+          <button class="jd-apply-btn" style="background:var(--paper);color:var(--ink)" onclick="shareJob(${j.id})">Share</button>
+          <button class="jd-apply-btn" onclick="openApplyModal(${j.id})">Apply Now</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('jobDetailOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeJobDetail() {
+    document.getElementById('jobDetailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function shareJob(id) {
+    const j = findJob(id);
+    if (!j) return;
+    if (navigator.share) {
+      navigator.share({ title: j.title + ' at ' + (j.company?.name || 'Company'), text: j.description?.slice(0,120)+'...', url: window.location.href });
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+      showToast('Job link copied to clipboard!', '🔗');
+    }
+  }
+
+  // Close job detail on overlay click / Escape
+  document.getElementById('jobDetailOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeJobDetail();
+  });
+
+  // ── Application Modal ────────────────────────────────────────────────────
+  let applyJobId = null;
+  let resumeFile = null;
+
+  function openApplyModal(id) {
+    const j = findJob(id);
+    if (!j) return;
+    applyJobId = id;
+
+    // Close job detail if open
+    closeJobDetail();
+
+    // Reset form
+    document.getElementById('applyFormView').style.display = '';
+    document.getElementById('applySuccessView').style.display = 'none';
+    document.getElementById('applyName').value = '';
+    document.getElementById('applyEmail').value = '';
+    document.getElementById('applyPhone').value = '';
+    document.getElementById('applyLinkedin').value = '';
+    document.getElementById('applyCoverLetter').value = '';
+    document.getElementById('applySource').value = '';
+    document.getElementById('applyConsent').checked = false;
+    document.getElementById('resumeFileName').textContent = '';
+    document.getElementById('resumeZone').classList.remove('has-file');
+    resumeFile = null;
+
+    // Pre-fill if user is logged in
+    if (currentUser) {
+      document.getElementById('applyName').value = currentUser.full_name || '';
+      document.getElementById('applyEmail').value = currentUser.email || '';
+    }
+
+    // Set job banner
+    document.getElementById('applyJobBanner').innerHTML = `
+      <div class="apply-job-banner-logo">${getCompanyEmoji(j.company?.name)}</div>
+      <div>
+        <div class="apply-job-banner-title">${j.title}</div>
+        <div class="apply-job-banner-company">${j.company?.name || 'Company'} &middot; ${j.location}</div>
+      </div>
+    `;
+    document.getElementById('applyModalTitle').textContent = 'Apply for ' + j.title;
+
+    document.getElementById('applyOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('applyName').focus(), 150);
+  }
+
+  function closeApplyModal() {
+    document.getElementById('applyOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    applyJobId = null;
+    resumeFile = null;
+  }
+
+  // File upload handling
+  document.getElementById('resumeInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('File too large. Max 5MB allowed.', '⚠️');
+      return;
+    }
+    resumeFile = file;
+    document.getElementById('resumeFileName').textContent = file.name;
+    document.getElementById('resumeZone').classList.add('has-file');
+  });
+
+  // Drag and drop
+  const resumeZone = document.getElementById('resumeZone');
+  resumeZone.addEventListener('dragover', e => { e.preventDefault(); resumeZone.style.borderColor = 'var(--brand)'; });
+  resumeZone.addEventListener('dragleave', () => { resumeZone.style.borderColor = ''; });
+  resumeZone.addEventListener('drop', e => {
+    e.preventDefault();
+    resumeZone.style.borderColor = '';
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      if (file.size > 5*1024*1024) { showToast('File too large. Max 5MB.','⚠️'); return; }
+      resumeFile = file;
+      document.getElementById('resumeInput').files = e.dataTransfer.files;
+      document.getElementById('resumeFileName').textContent = file.name;
+      resumeZone.classList.add('has-file');
+    }
+  });
+
+  function submitApplication() {
+    const name = document.getElementById('applyName').value.trim();
+    const email = document.getElementById('applyEmail').value.trim();
+    const consent = document.getElementById('applyConsent').checked;
+
+    if (!name || !email) {
+      showToast('Please fill in your name and email.', '⚠️');
+      return;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      showToast('Please enter a valid email address.', '⚠️');
+      return;
+    }
+    if (!resumeFile) {
+      showToast('Please upload your resume.', '⚠️');
+      return;
+    }
+    if (!consent) {
+      showToast('Please confirm your consent to proceed.', '⚠️');
+      return;
+    }
+
+    const btn = document.getElementById('applySubmitBtn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+      const j = findJob(applyJobId);
+      document.getElementById('applySuccessMsg').textContent =
+        `Your application for ${j?.title || 'this position'} at ${j?.company?.name || 'the company'} has been submitted successfully. You will receive a confirmation email at ${email} shortly.`;
+
+      document.getElementById('applyFormView').style.display = 'none';
+      document.getElementById('applySuccessView').style.display = '';
+
+      btn.textContent = 'Submit Application';
+      btn.disabled = false;
+
+      showToast('Application submitted successfully!', '🎉');
+    }, 1500);
+  }
+
+  // Close apply modal on overlay click / Escape
+  document.getElementById('applyOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeApplyModal();
+  });
+
+  // Unified Escape key handler
+  document.removeEventListener('keydown', handleEscapeKey);
+  function handleEscapeKey(e) {
+    if (e.key === 'Escape') {
+      if (document.getElementById('applyOverlay').classList.contains('open')) { closeApplyModal(); return; }
+      if (document.getElementById('jobDetailOverlay').classList.contains('open')) { closeJobDetail(); return; }
+      closeModal();
+    }
+  }
+  document.addEventListener('keydown', handleEscapeKey);
+
+  // ── Modal close: backdrop click + Escape key ──────────────────────────────────
+  document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ── Confirm password live validation ─────────────────────────────────────────
+  document.getElementById('regConfirm').addEventListener('input', function() {
+    const pwd = document.getElementById('regPassword').value;
+    const hint = document.getElementById('confirmHint');
+    if (!this.value) { hint.textContent = ''; return; }
+    if (this.value === pwd) {
+      hint.textContent = '✓ Passwords match';
+      hint.style.color = '#22c55e';
+    } else {
+      hint.textContent = '✗ Passwords do not match';
+      hint.style.color = '#ef4444';
+    }
+  });
+
+  // Load session on page load
+  loadSession();
+
+  // Auto-open login if redirected from a protected page
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('openLogin') === '1') {
+    setTimeout(() => openModal('login'), 300);
+    // Clean the URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // ── Tab helper ────────────────────────────────────────────────────────────────
+  function setTab(el, mode) {
+    document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, icon = '✅') {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    document.getElementById('toastIcon').textContent = icon;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── Navbar scroll ─────────────────────────────────────────────────────────────
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ── Mobile nav ────────────────────────────────────────────────────────────────
+  function toggleMobileNav() {
+    document.getElementById('mobileNav').classList.toggle('open');
+  }
+
+  // ── Scroll animations ─────────────────────────────────────────────────────────
+  function initScrollEffects() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  function formatNum(n) {
+    if (n >= 1000) return (n/1000).toFixed(n%1000===0?0:1)+'K';
+    return n?.toString() || '0';
+  }
+
+  function formatJobType(t) {
+    const m = {full_time:'Full-Time',part_time:'Part-Time',contract:'Contract',temporary:'Temporary',internship:'Internship'};
+    return m[t] || t;
+  }
+
+  function isNew(date) {
+    return Date.now() - new Date(date).getTime() < 2*86400000;
+  }
+
+  function timeAgo(date) {
+    const diff = (Date.now() - new Date(date).getTime()) / 1000;
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+  }
+
+  function getCompanyEmoji(name = '') {
+    const m = {tech:'💻',data:'📊',health:'🏥',fin:'💰',cloud:'☁️',design:'🎨',metro:'🏙️'};
+    const n = name.toLowerCase();
+    for (const [k,v] of Object.entries(m)) { if (n.includes(k)) return v; }
+    return '🏢';
+  }
+</script>
+</body>
+</html>

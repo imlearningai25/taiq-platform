@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  // ── Site Mode Guard — injected on all public pages ────────────────────────
+  (async function checkSiteMode() {
+    // Admins always bypass the construction gate
+    try {
+      const u = localStorage.getItem('taiq_user');
+      if (u && JSON.parse(u).role === 'admin') return;
+    } catch {}
+    // Skip the check if we're already on the construction page
+    if (window.location.pathname.includes('under-construction')) return;
+    // Skip admin panel
+    if (window.location.pathname.includes('admin.html')) return;
+    try {
+      const r = await fetch('/api/v1/admin/site-settings');
+      if (r.ok) {
+        const s = await r.json();
+        if (s.mode === 'construction') {
+          window.location.replace('under-construction.html');
+        }
+      }
+    } catch {}
+  })();
+</script>
+
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cookie Policy — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--ink:#0a0f1e;--ink-2:#1c2338;--ink-3:#384060;--steel:#6b7899;--mist:#c8d0e4;--paper:#f4f6fb;--white:#ffffff;--brand:#0052cc;--brand-2:#0040a0;--accent:#ff5c35;--success:#22c55e;--warn:#f5a623;--r1:.5rem;--r2:1rem;--r3:1.5rem;--r-full:9999px;--trans:.25s cubic-bezier(.4,0,.2,1)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);line-height:1.7}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--mist);padding:.9rem 0}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;width:min(1200px,100% - 3rem);margin:auto}
+    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--ink);display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:32px;height:32px;background:var(--brand);border-radius:8px;display:grid;place-items:center}
+    .logo-mark svg{width:18px;height:18px;fill:white}
+    .nav-back{font-size:.85rem;font-weight:500;color:var(--steel);transition:color var(--trans)}
+    .nav-back:hover{color:var(--brand);text-decoration:none}
+
+    .page-hero{background:linear-gradient(135deg,#0f1a2e 0%,#1a3050 55%,#0d4a3a 100%);padding:4rem 0 3rem;color:white;position:relative;overflow:hidden}
+    .page-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 80% 20%,rgba(0,180,120,.15) 0%,transparent 50%),radial-gradient(circle at 20% 80%,rgba(0,82,204,.2) 0%,transparent 50%)}
+    .page-hero-inner{position:relative;width:min(900px,100% - 3rem);margin:auto}
+    .page-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-full);padding:.35rem .9rem;font-size:.75rem;font-weight:600;color:#90c4ff;margin-bottom:1.2rem;letter-spacing:.05em;text-transform:uppercase}
+    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:.75rem}
+    .page-hero p{color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px}
+    .page-meta{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
+    .page-meta-item{font-size:.82rem;color:rgba(255,255,255,.55)}
+    .page-meta-item strong{color:rgba(255,255,255,.85);font-weight:500}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:3rem;align-items:start;width:min(1200px,100% - 3rem);margin:3rem auto 5rem}
+    .toc{position:sticky;top:80px}
+    .toc-title{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-bottom:1rem}
+    .toc-list{list-style:none}
+    .toc-list li{margin-bottom:.1rem}
+    .toc-list a{display:block;padding:.45rem .75rem;border-radius:var(--r1);font-size:.83rem;color:var(--steel);transition:all var(--trans);border-left:2px solid transparent}
+    .toc-list a:hover,.toc-list a.active{color:var(--brand);background:rgba(0,82,204,.06);border-left-color:var(--brand);text-decoration:none}
+    .toc-manage{margin-top:1.5rem}
+    .btn-manage{display:block;width:100%;padding:.7rem 1rem;background:var(--brand);color:white;border-radius:var(--r2);font-size:.85rem;font-weight:600;text-align:center;cursor:pointer;transition:all var(--trans);border:none;font-family:inherit}
+    .btn-manage:hover{background:var(--brand-2)}
+
+    .content section{margin-bottom:3rem;scroll-margin-top:90px}
+    .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:#0d6b4e;color:white;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.6rem;flex-shrink:0;font-family:'Syne',sans-serif}
+    .content h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin-bottom:1rem;display:flex;align-items:center;padding-bottom:.75rem;border-bottom:2px solid var(--paper)}
+    .content h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink-2);margin:1.5rem 0 .6rem}
+    .content p{color:var(--ink-3);margin-bottom:.9rem;font-size:.95rem}
+    .content ul{margin:.5rem 0 1rem 1.5rem;color:var(--ink-3);font-size:.95rem}
+    .content ul li{margin-bottom:.4rem}
+    .content strong{color:var(--ink);font-weight:600}
+
+    .info-box{border-radius:var(--r2);padding:1.25rem 1.5rem;margin:1.25rem 0;font-size:.9rem;display:flex;gap:1rem;align-items:flex-start}
+    .info-box-icon{font-size:1.3rem;flex-shrink:0;line-height:1}
+    .info-box-body{flex:1}
+    .info-box-body strong{display:block;margin-bottom:.25rem;font-size:.88rem}
+    .info-box-body p{margin:0;font-size:.85rem;color:inherit}
+    .info-blue{background:rgba(0,82,204,.06);border:1px solid rgba(0,82,204,.15);color:var(--ink-3)}
+    .info-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:#166534}
+
+    /* Cookie category cards */
+    .cookie-categories{display:flex;flex-direction:column;gap:1rem;margin:1.25rem 0}
+    .cookie-cat{background:var(--white);border:1.5px solid var(--mist);border-radius:var(--r2);overflow:hidden;transition:border-color var(--trans)}
+    .cookie-cat:hover{border-color:var(--mist)}
+    .cookie-cat-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;cursor:pointer;gap:1rem}
+    .cookie-cat-left{display:flex;align-items:center;gap:.9rem}
+    .cookie-cat-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
+    .cat-essential .cookie-cat-icon{background:rgba(34,197,94,.1)}
+    .cat-functional .cookie-cat-icon{background:rgba(0,82,204,.1)}
+    .cat-analytics .cookie-cat-icon{background:rgba(245,166,35,.1)}
+    .cat-marketing .cookie-cat-icon{background:rgba(255,92,53,.1)}
+    .cookie-cat-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--ink)}
+    .cookie-cat-desc{font-size:.8rem;color:var(--steel);margin-top:.15rem}
+    .cookie-cat-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+
+    /* Toggle switch */
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-track{position:absolute;inset:0;background:var(--mist);border-radius:var(--r-full);cursor:pointer;transition:background var(--trans)}
+    .toggle input:checked + .toggle-track{background:var(--brand)}
+    .toggle-track::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:white;border-radius:50%;transition:transform var(--trans);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked + .toggle-track::before{transform:translateX(20px)}
+    .toggle input:disabled + .toggle-track{opacity:.6;cursor:not-allowed}
+    .required-badge{font-size:.7rem;font-weight:600;color:#166534;background:rgba(34,197,94,.1);padding:.15rem .5rem;border-radius:4px}
+
+    /* Cookie table inside each category */
+    .cookie-cat-body{display:none;border-top:1px solid var(--paper)}
+    .cookie-cat-body.open{display:block}
+    .cookie-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .cookie-table th{background:var(--paper);font-weight:600;padding:.6rem .9rem;text-align:left;color:var(--ink-3);font-family:'Syne',sans-serif;font-size:.78rem}
+    .cookie-table td{padding:.6rem .9rem;border-bottom:1px solid var(--paper);color:var(--ink-3);vertical-align:top}
+    .cookie-table tr:last-child td{border-bottom:none}
+    .chevron{transition:transform var(--trans);font-size:.8rem;color:var(--steel)}
+    .chevron.open{transform:rotate(180deg)}
+
+    /* Consent banner preview */
+    .banner-preview{background:var(--ink);border-radius:var(--r3);padding:2rem;margin:1.5rem 0;color:white;position:relative;overflow:hidden}
+    .banner-preview::before{content:'PREVIEW';position:absolute;top:.75rem;right:.75rem;font-size:.65rem;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.3);background:rgba(255,255,255,.08);padding:.2rem .5rem;border-radius:4px}
+    .banner-preview h3{font-family:'Syne',sans-serif;font-size:1rem;margin-bottom:.5rem}
+    .banner-preview p{font-size:.82rem;color:rgba(255,255,255,.7);margin-bottom:1.25rem}
+    .banner-btns{display:flex;gap:.75rem;flex-wrap:wrap}
+    .banner-btn{padding:.55rem 1.25rem;border-radius:var(--r-full);font-size:.82rem;font-weight:600;cursor:pointer;transition:all var(--trans);font-family:inherit;border:none}
+    .banner-btn-accept{background:var(--success);color:white}
+    .banner-btn-accept:hover{background:#16a34a}
+    .banner-btn-reject{background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2)}
+    .banner-btn-reject:hover{background:rgba(255,255,255,.18)}
+    .banner-btn-manage{background:transparent;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.2)}
+    .banner-btn-manage:hover{color:white}
+
+    /* Third-party table */
+    .third-party-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+    .third-party-table th{background:var(--ink);color:white;font-family:'Syne',sans-serif;font-weight:600;padding:.7rem 1rem;text-align:left;font-size:.78rem}
+    .third-party-table td{padding:.7rem 1rem;border-bottom:1px solid var(--mist);color:var(--ink-3);vertical-align:top}
+    .third-party-table tr:last-child td{border-bottom:none}
+    .third-party-table tr:nth-child(even) td{background:var(--paper)}
+    .purpose-tag{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600;margin-right:.25rem}
+    .purpose-analytics{background:rgba(245,166,35,.1);color:#92400e}
+    .purpose-marketing{background:rgba(255,92,53,.1);color:#7f1d1d}
+    .purpose-functional{background:rgba(0,82,204,.1);color:var(--brand)}
+
+    .page-footer{background:var(--ink);color:rgba(255,255,255,.5);padding:2rem 0;font-size:.82rem;text-align:center}
+    .page-footer a{color:rgba(255,255,255,.65)}
+    .page-footer .footer-links{display:flex;justify-content:center;gap:1.5rem;margin-top:.5rem;flex-wrap:wrap}
+    @media(max-width:768px){.layout{grid-template-columns:1fr}.toc{display:none}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      TaIQ
+    </a>
+    <a href="index.html" class="nav-back">← Back to Home</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-badge">🍪 Legal</div>
+    <h1>Cookie Policy</h1>
+    <p>We use cookies and similar tracking technologies to make TaIQ work and to give you the best experience. Here's exactly what we use and why.</p>
+    <div class="page-meta">
+      <div class="page-meta-item"><strong>Effective Date:</strong> April 5, 2025</div>
+      <div class="page-meta-item"><strong>Last Updated:</strong> April 5, 2025</div>
+      <div class="page-meta-item"><strong>Compliant with:</strong> GDPR · ePrivacy · CCPA · IAB TCF 2.2</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#c1">1. What Are Cookies?</a></li>
+      <li><a href="#c2">2. How We Use Cookies</a></li>
+      <li><a href="#c3">3. Cookie Categories</a></li>
+      <li><a href="#c4">4. Third-Party Cookies</a></li>
+      <li><a href="#c5">5. Consent Banner</a></li>
+      <li><a href="#c6">6. Managing Cookies</a></li>
+      <li><a href="#c7">7. Do Not Track</a></li>
+      <li><a href="#c8">8. Cross-Device Tracking</a></li>
+      <li><a href="#c9">9. Changes to Policy</a></li>
+      <li><a href="#c10">10. Contact Us</a></li>
+    </ul>
+    <div class="toc-manage">
+      <button class="btn-manage" onclick="openPreferences()">⚙️ Manage My Cookie Preferences</button>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <div class="info-box info-blue">
+      <div class="info-box-icon">ℹ️</div>
+      <div class="info-box-body">
+        <strong>Quick Summary</strong>
+        <p>We use essential cookies to keep the site working (you can't opt out of these), and optional cookies for analytics and personalization. You can change your preferences at any time using the button in the sidebar or footer.</p>
+      </div>
+    </div>
+
+    <section id="c1">
+      <h2><span class="section-num">1</span>What Are Cookies?</h2>
+      <p>Cookies are small text files placed on your device (computer, phone, tablet) when you visit a website. They allow the website to recognize your device on subsequent visits, remember your preferences, and improve your experience.</p>
+      <p>We also use <strong>similar technologies</strong> including:</p>
+      <ul>
+        <li><strong>Local Storage / Session Storage</strong> — browser-side data storage for keeping you logged in</li>
+        <li><strong>Web beacons / tracking pixels</strong> — tiny images used to track email opens and page loads</li>
+        <li><strong>Fingerprinting data</strong> — aggregated device/browser attributes used for fraud prevention only</li>
+        <li><strong>SDK data</strong> — on our mobile apps, SDKs serve equivalent purposes to cookies</li>
+      </ul>
+      <p>All references to "cookies" in this policy include these similar technologies.</p>
+    </section>
+
+    <section id="c2">
+      <h2><span class="section-num">2</span>How We Use Cookies</h2>
+      <p>We use cookies to:</p>
+      <ul>
+        <li>Keep you securely logged in to your account</li>
+        <li>Remember your job search preferences and filters</li>
+        <li>Personalize job recommendations based on your browsing behavior</li>
+        <li>Measure how features are used so we can improve them</li>
+        <li>Detect and prevent fraud and bot traffic</li>
+        <li>Deliver relevant advertising on other platforms (with your consent)</li>
+        <li>Enable customer support chat functionality</li>
+      </ul>
+    </section>
+
+    <section id="c3">
+      <h2><span class="section-num">3</span>Cookie Categories</h2>
+      <p>We categorize our cookies as follows. Click each category to expand details.</p>
+
+      <div class="cookie-categories">
+
+        <!-- Essential -->
+        <div class="cookie-cat cat-essential">
+          <div class="cookie-cat-header" onclick="toggleCat(this)">
+            <div class="cookie-cat-left">
+              <div class="cookie-cat-icon">🔒</div>
+              <div>
+                <div class="cookie-cat-title">Essential Cookies</div>
+                <div class="cookie-cat-desc">Required for the website to function — cannot be disabled</div>
+              </div>
+            </div>
+            <div class="cookie-cat-right">
+              <span class="required-badge">Always Active</span>
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="cookie-cat-body">
+            <table class="cookie-table">
+              <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th><th>Provider</th></tr></thead>
+              <tbody>
+                <tr><td><code>tb_session</code></td><td>Maintains your login session</td><td>Session</td><td>TaIQ</td></tr>
+                <tr><td><code>tb_csrf</code></td><td>Prevents cross-site request forgery</td><td>Session</td><td>TaIQ</td></tr>
+                <tr><td><code>tb_consent</code></td><td>Stores your cookie consent preferences</td><td>12 months</td><td>TaIQ</td></tr>
+                <tr><td><code>cf_clearance</code></td><td>Cloudflare bot protection and DDoS mitigation</td><td>1 year</td><td>Cloudflare</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Functional -->
+        <div class="cookie-cat cat-functional">
+          <div class="cookie-cat-header" onclick="toggleCat(this)">
+            <div class="cookie-cat-left">
+              <div class="cookie-cat-icon">⚙️</div>
+              <div>
+                <div class="cookie-cat-title">Functional Cookies</div>
+                <div class="cookie-cat-desc">Remember your preferences and settings</div>
+              </div>
+            </div>
+            <div class="cookie-cat-right">
+              <label class="toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" id="toggle-functional" checked onchange="savePref('functional',this.checked)">
+                <span class="toggle-track"></span>
+              </label>
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="cookie-cat-body">
+            <table class="cookie-table">
+              <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th><th>Provider</th></tr></thead>
+              <tbody>
+                <tr><td><code>tb_prefs</code></td><td>Saves your search filters and job preferences</td><td>1 year</td><td>TaIQ</td></tr>
+                <tr><td><code>tb_location</code></td><td>Remembers your preferred job search location</td><td>6 months</td><td>TaIQ</td></tr>
+                <tr><td><code>tb_theme</code></td><td>Stores display preferences (light/dark mode)</td><td>1 year</td><td>TaIQ</td></tr>
+                <tr><td><code>intercom-*</code></td><td>Powers our in-app customer support chat</td><td>9 months</td><td>Intercom</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="cookie-cat cat-analytics">
+          <div class="cookie-cat-header" onclick="toggleCat(this)">
+            <div class="cookie-cat-left">
+              <div class="cookie-cat-icon">📊</div>
+              <div>
+                <div class="cookie-cat-title">Analytics Cookies</div>
+                <div class="cookie-cat-desc">Help us understand how people use TaIQ</div>
+              </div>
+            </div>
+            <div class="cookie-cat-right">
+              <label class="toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" id="toggle-analytics" checked onchange="savePref('analytics',this.checked)">
+                <span class="toggle-track"></span>
+              </label>
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="cookie-cat-body">
+            <table class="cookie-table">
+              <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th><th>Provider</th></tr></thead>
+              <tbody>
+                <tr><td><code>_ga</code></td><td>Google Analytics — distinguishes users</td><td>2 years</td><td>Google</td></tr>
+                <tr><td><code>_ga_*</code></td><td>Google Analytics 4 — session & engagement tracking</td><td>2 years</td><td>Google</td></tr>
+                <tr><td><code>_gid</code></td><td>Google Analytics — identifies user sessions</td><td>24 hours</td><td>Google</td></tr>
+                <tr><td><code>ajs_*</code></td><td>Segment.io — product analytics</td><td>1 year</td><td>Segment</td></tr>
+                <tr><td><code>fullstory_*</code></td><td>Session recording (no passwords captured)</td><td>1 year</td><td>FullStory</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Marketing -->
+        <div class="cookie-cat cat-marketing">
+          <div class="cookie-cat-header" onclick="toggleCat(this)">
+            <div class="cookie-cat-left">
+              <div class="cookie-cat-icon">📣</div>
+              <div>
+                <div class="cookie-cat-title">Marketing &amp; Advertising Cookies</div>
+                <div class="cookie-cat-desc">Used to show you relevant ads on other platforms</div>
+              </div>
+            </div>
+            <div class="cookie-cat-right">
+              <label class="toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" id="toggle-marketing" onchange="savePref('marketing',this.checked)">
+                <span class="toggle-track"></span>
+              </label>
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="cookie-cat-body">
+            <table class="cookie-table">
+              <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th><th>Provider</th></tr></thead>
+              <tbody>
+                <tr><td><code>_fbp</code></td><td>Facebook Pixel — conversion tracking & retargeting</td><td>3 months</td><td>Meta</td></tr>
+                <tr><td><code>li_fat_id</code></td><td>LinkedIn Insight Tag — B2B audience insights</td><td>90 days</td><td>LinkedIn</td></tr>
+                <tr><td><code>_gcl_au</code></td><td>Google Ads conversion tracking</td><td>90 days</td><td>Google</td></tr>
+                <tr><td><code>_ttp</code></td><td>TikTok pixel — ad performance measurement</td><td>13 months</td><td>TikTok</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="c4">
+      <h2><span class="section-num">4</span>Third-Party Cookies</h2>
+      <p>Some cookies on TaIQ are set by third-party services. We have agreements with all of them requiring they protect your data. Here's a summary:</p>
+      <table class="third-party-table">
+        <thead><tr><th>Provider</th><th>Purpose</th><th>Privacy Policy</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Google</strong></td>
+            <td><span class="purpose-tag purpose-analytics">Analytics</span><span class="purpose-tag purpose-marketing">Ads</span>GA4, Google Ads conversion tracking</td>
+            <td><a href="https://policies.google.com/privacy" target="_blank">View</a></td>
+          </tr>
+          <tr>
+            <td><strong>Meta (Facebook)</strong></td>
+            <td><span class="purpose-tag purpose-marketing">Marketing</span>Pixel for ad measurement & retargeting</td>
+            <td><a href="https://www.facebook.com/privacy/policy" target="_blank">View</a></td>
+          </tr>
+          <tr>
+            <td><strong>LinkedIn</strong></td>
+            <td><span class="purpose-tag purpose-analytics">Analytics</span><span class="purpose-tag purpose-marketing">Marketing</span>Insight Tag for B2B audiences</td>
+            <td><a href="https://www.linkedin.com/legal/privacy-policy" target="_blank">View</a></td>
+          </tr>
+          <tr>
+            <td><strong>Cloudflare</strong></td>
+            <td><span class="purpose-tag purpose-functional">Functional</span>Security, DDoS protection, CDN</td>
+            <td><a href="https://www.cloudflare.com/privacypolicy/" target="_blank">View</a></td>
+          </tr>
+          <tr>
+            <td><strong>Intercom</strong></td>
+            <td><span class="purpose-tag purpose-functional">Functional</span>Live chat and customer support</td>
+            <td><a href="https://www.intercom.com/legal/privacy" target="_blank">View</a></td>
+          </tr>
+          <tr>
+            <td><strong>Segment</strong></td>
+            <td><span class="purpose-tag purpose-analytics">Analytics</span>Product analytics pipeline</td>
+            <td><a href="https://www.twilio.com/en-us/legal/privacy" target="_blank">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="c5">
+      <h2><span class="section-num">5</span>Consent Banner</h2>
+      <p>When you first visit TaIQ, you will see a consent banner (shown below). We only place non-essential cookies after you give consent. Your preference is stored in the <code>tb_consent</code> cookie for 12 months.</p>
+      <div class="banner-preview">
+        <h3>🍪 We use cookies</h3>
+        <p>We use essential cookies to keep TaIQ working, and optional cookies for analytics and personalized job recommendations. You can manage your preferences at any time.</p>
+        <div class="banner-btns">
+          <button class="banner-btn banner-btn-accept" onclick="this.textContent='✓ Accepted!'">Accept All</button>
+          <button class="banner-btn banner-btn-reject" onclick="this.textContent='✓ Rejected'">Reject Optional</button>
+          <button class="banner-btn banner-btn-manage" onclick="openPreferences()">Manage Preferences</button>
+        </div>
+      </div>
+      <p>We implement our consent banner in compliance with:</p>
+      <ul>
+        <li>GDPR Article 7 — freely given, specific, informed, and unambiguous consent</li>
+        <li>ePrivacy Directive — prior consent for non-essential cookies</li>
+        <li>IAB Transparency &amp; Consent Framework (TCF) 2.2</li>
+        <li>CCPA — right to opt out of "sale" or "sharing" of personal information</li>
+      </ul>
+    </section>
+
+    <section id="c6">
+      <h2><span class="section-num">6</span>Managing Your Cookie Preferences</h2>
+      <h3>On TaIQ</h3>
+      <p>Use the <strong>⚙️ Manage My Cookie Preferences</strong> button (in the sidebar or footer) at any time to change your consent choices. Changes take effect immediately.</p>
+      <h3>Browser Settings</h3>
+      <p>You can control cookies through your browser settings. Note that blocking essential cookies will impair Platform functionality:</p>
+      <ul>
+        <li><a href="https://support.google.com/chrome/answer/95647" target="_blank">Chrome</a> — Settings → Privacy and Security → Cookies</li>
+        <li><a href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop" target="_blank">Firefox</a> — Settings → Privacy &amp; Security</li>
+        <li><a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank">Safari</a> — Preferences → Privacy</li>
+        <li><a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge" target="_blank">Edge</a> — Settings → Site Permissions → Cookies</li>
+      </ul>
+      <h3>Opt-Out of Specific Networks</h3>
+      <ul>
+        <li><a href="https://optout.aboutads.info/" target="_blank">Digital Advertising Alliance (DAA) opt-out</a></li>
+        <li><a href="https://optout.networkadvertising.org/" target="_blank">Network Advertising Initiative (NAI) opt-out</a></li>
+        <li><a href="https://www.youronlinechoices.com/" target="_blank">Your Online Choices (EU)</a></li>
+        <li><a href="https://www.google.com/settings/ads" target="_blank">Google Ads Settings</a></li>
+      </ul>
+    </section>
+
+    <section id="c7">
+      <h2><span class="section-num">7</span>Do Not Track (DNT)</h2>
+      <p>Some browsers offer a "Do Not Track" (DNT) signal. Because there is no consistent industry standard for honoring DNT signals, TaIQ does not currently respond to DNT browser settings. Instead, we rely on our consent management platform for your privacy choices.</p>
+      <p>California residents may use the <strong>Global Privacy Control (GPC)</strong> browser signal to opt out of the sale/sharing of personal information. We honor GPC signals as required by the CCPA/CPRA.</p>
+    </section>
+
+    <section id="c8">
+      <h2><span class="section-num">8</span>Cross-Device Tracking</h2>
+      <p>If you are logged into your TaIQ account on multiple devices, we may associate your usage across those devices to provide a consistent experience (e.g., syncing saved jobs). This is based on your account login, not probabilistic fingerprinting.</p>
+      <p>For users who have consented to marketing cookies, our advertising partners may use cross-device matching to show you relevant ads across platforms. You can opt out by disabling marketing cookies in your preferences.</p>
+    </section>
+
+    <section id="c9">
+      <h2><span class="section-num">9</span>Changes to This Policy</h2>
+      <p>We may update this Cookie Policy as our use of cookies evolves or legal requirements change. When we make significant changes, we will:</p>
+      <ul>
+        <li>Display a notice on our cookie consent banner</li>
+        <li>Update the "Last Updated" date at the top of this page</li>
+        <li>Re-request your consent where required by law</li>
+      </ul>
+    </section>
+
+    <section id="c10">
+      <h2><span class="section-num">10</span>Contact Us</h2>
+      <div class="info-box info-green">
+        <div class="info-box-icon">📬</div>
+        <div class="info-box-body">
+          <strong>Questions about cookies?</strong>
+          <p>Email us at <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> or write to TaIQ Inc., Attn: Privacy Team, 123 Innovation Drive, Suite 400, Philadelphia, PA 19103.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  <div>© 2025 TaIQ Inc. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <a href="cookie-policy.html">Cookie Policy</a>
+    <a href="accessibility.html">Accessibility</a>
+    <a href="#" onclick="openPreferences();return false">⚙️ Cookie Preferences</a>
+  </div>
+</footer>
+
+<script>
+  // Toggle category expand/collapse
+  function toggleCat(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+
+  // Save preference to localStorage
+  function savePref(category, value) {
+    const prefs = JSON.parse(localStorage.getItem('tb_cookie_prefs') || '{}');
+    prefs[category] = value;
+    localStorage.setItem('tb_cookie_prefs', JSON.stringify(prefs));
+  }
+
+  // Load saved preferences
+  function loadPrefs() {
+    const prefs = JSON.parse(localStorage.getItem('tb_cookie_prefs') || '{}');
+    if ('functional' in prefs) document.getElementById('toggle-functional').checked = prefs.functional;
+    if ('analytics' in prefs) document.getElementById('toggle-analytics').checked = prefs.analytics;
+    if ('marketing' in prefs) document.getElementById('toggle-marketing').checked = prefs.marketing;
+  }
+
+  function openPreferences() {
+    document.querySelector('.cat-analytics .cookie-cat-body').classList.add('open');
+    document.querySelector('.cat-marketing .cookie-cat-body').classList.add('open');
+    document.querySelectorAll('.chevron').forEach(c => c.classList.add('open'));
+    document.getElementById('c3').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // TOC active state
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+
+  loadPrefs();
+</script>
+</body>
+</html>

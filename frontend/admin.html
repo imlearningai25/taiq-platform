@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--ink:#0a0f1e;--ink-2:#1c2338;--ink-3:#384060;--steel:#6b7899;--mist:#c8d0e4;--paper:#f4f6fb;--white:#fff;--brand:#0052cc;--brand-2:#0040a0;--accent:#ff5c35;--success:#22c55e;--warn:#f5a623;--danger:#ef4444;--r1:.5rem;--r2:1rem;--r3:1.5rem;--r-full:9999px;--shadow-sm:0 1px 4px rgba(10,15,30,.08);--shadow-md:0 4px 20px rgba(10,15,30,.12);--trans:.25s cubic-bezier(.4,0,.2,1)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);min-height:100vh}
+    a{color:var(--brand);text-decoration:none}
+
+    /* Nav */
+    .nav{background:var(--ink);padding:.9rem 0;position:sticky;top:0;z-index:100}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;width:min(1300px,100% - 3rem);margin:auto;gap:1rem}
+    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:white;display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:30px;height:30px;background:var(--brand);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    .logo-mark svg{width:16px;height:16px;fill:white}
+    .nav-badge{background:rgba(255,92,53,.2);border:1px solid rgba(255,92,53,.4);color:#fca5a5;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;letter-spacing:.06em;text-transform:uppercase}
+    .nav-right{display:flex;align-items:center;gap:.75rem}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:var(--r-full);font-size:.85rem;font-weight:600;transition:all var(--trans);cursor:pointer;border:none;font-family:inherit}
+    .btn-sm{padding:.4rem .9rem;font-size:.78rem}
+    .btn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.15)}
+    .btn-ghost:hover{background:rgba(255,255,255,.18);color:white}
+    .btn-primary{background:var(--brand);color:white}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn-danger{background:var(--danger);color:white}
+    .btn-danger:hover{background:#dc2626}
+    .btn-success{background:var(--success);color:white}
+    .btn-success:hover{background:#16a34a}
+    .btn-outline{border:1.5px solid var(--mist);color:var(--ink-3);background:none}
+    .btn-outline:hover{border-color:var(--brand);color:var(--brand)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    /* Layout */
+    .page{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 60px)}
+
+    /* Sidebar */
+    .sidebar{background:var(--white);border-right:1px solid var(--mist);padding:1.5rem 1rem}
+    .sidebar-section{margin-bottom:1.75rem}
+    .sidebar-section-title{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);padding:0 .5rem;margin-bottom:.5rem}
+    .sidebar-nav{list-style:none}
+    .sidebar-nav li a,.sidebar-nav li button{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:var(--r1);font-size:.875rem;font-weight:500;color:var(--ink-3);transition:all var(--trans);cursor:pointer;width:100%;border:none;background:none;font-family:inherit;text-align:left}
+    .sidebar-nav li a:hover,.sidebar-nav li button:hover,.sidebar-nav li a.active,.sidebar-nav li button.active{background:rgba(0,82,204,.07);color:var(--brand)}
+    .nav-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+
+    /* Main */
+    .main{padding:2rem;overflow:auto}
+    .page-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:.25rem}
+    .page-subtitle{font-size:.88rem;color:var(--steel);margin-bottom:2rem}
+
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+    .stat-card{background:var(--white);border:1px solid var(--mist);border-radius:var(--r3);padding:1.25rem;transition:box-shadow var(--trans)}
+    .stat-card:hover{box-shadow:var(--shadow-md)}
+    .stat-icon{font-size:1.4rem;margin-bottom:.6rem}
+    .stat-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--ink);line-height:1}
+    .stat-label{font-size:.75rem;color:var(--steel);margin-top:.3rem}
+
+    /* Section panels */
+    .panel{background:var(--white);border:1px solid var(--mist);border-radius:var(--r3);padding:1.75rem;margin-bottom:1.5rem}
+    .panel-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+    .panel-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+    .panel-subtitle{font-size:.82rem;color:var(--steel)}
+
+    /* ════════════════════════════════════════════
+       SITE MODE TOGGLE — the star of the show
+       ════════════════════════════════════════════ */
+    .mode-toggle-wrap{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}
+    .mode-btn{
+      flex:1;min-width:200px;
+      padding:1.5rem;border-radius:var(--r3);
+      border:2.5px solid var(--mist);
+      cursor:pointer;transition:all var(--trans);
+      text-align:left;background:var(--paper);
+      position:relative;overflow:hidden;
+    }
+    .mode-btn.selected-live{
+      border-color:var(--success);background:rgba(34,197,94,.05);
+    }
+    .mode-btn.selected-construction{
+      border-color:var(--warn);background:rgba(245,166,35,.05);
+    }
+    .mode-btn-icon{font-size:2rem;margin-bottom:.75rem;display:block}
+    .mode-btn-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.3rem}
+    .mode-btn-desc{font-size:.82rem;color:var(--steel);line-height:1.5}
+    .mode-check{
+      position:absolute;top:.75rem;right:.75rem;
+      width:22px;height:22px;border-radius:50%;
+      display:none;align-items:center;justify-content:center;
+      font-size:.75rem;font-weight:700;color:white;
+    }
+    .mode-btn.selected-live .mode-check{background:var(--success);display:flex}
+    .mode-btn.selected-construction .mode-check{background:var(--warn);display:flex}
+
+    /* Current status banner */
+    .status-banner{
+      border-radius:var(--r2);padding:1rem 1.25rem;
+      display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;
+      font-size:.9rem;font-weight:500;
+    }
+    .status-banner-live{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#15803d}
+    .status-banner-construction{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);color:#92400e}
+    .status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .dot-live{background:var(--success);animation:pulse-live 2s infinite}
+    .dot-construction{background:var(--warn);animation:pulse-warn 1.5s infinite}
+    @keyframes pulse-live{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+    @keyframes pulse-warn{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* Form fields */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .form-group{margin-bottom:1rem}
+    .form-label{display:block;font-size:.82rem;font-weight:600;color:var(--ink-3);margin-bottom:.4rem}
+    .form-input,.form-textarea{width:100%;padding:.7rem 1rem;border:1.5px solid var(--mist);border-radius:var(--r2);font:inherit;font-size:.9rem;color:var(--ink);outline:none;transition:border-color var(--trans);background:var(--white)}
+    .form-input:focus,.form-textarea:focus{border-color:var(--brand)}
+    .form-textarea{resize:vertical;min-height:90px;line-height:1.6}
+    .form-hint{font-size:.75rem;color:var(--steel);margin-top:.3rem}
+
+    /* Action bar */
+    .action-bar{display:flex;align-items:center;gap:.75rem;padding-top:1.25rem;border-top:1px solid var(--paper);flex-wrap:wrap}
+    .action-bar-info{font-size:.78rem;color:var(--steel);margin-left:auto}
+
+    /* Preview pane */
+    .preview-frame{width:100%;height:320px;border:none;border-radius:var(--r2);background:var(--paper)}
+    .preview-label{font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--steel);margin-bottom:.6rem}
+
+    /* Alert */
+    .alert{border-radius:var(--r2);padding:1rem 1.25rem;font-size:.88rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem}
+    .alert-warn{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);color:#92400e}
+    .alert-info{background:rgba(0,82,204,.06);border:1px solid rgba(0,82,204,.15);color:var(--ink-3)}
+    .alert-icon{font-size:1.1rem;flex-shrink:0}
+
+    /* Confirm overlay */
+    .confirm-overlay{position:fixed;inset:0;z-index:200;background:rgba(10,15,30,.55);backdrop-filter:blur(4px);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity var(--trans)}
+    .confirm-overlay.open{opacity:1;pointer-events:all}
+    .confirm-box{background:var(--white);border-radius:var(--r3);padding:2rem;width:min(440px,100% - 2rem);box-shadow:var(--shadow-md);transform:translateY(16px);transition:transform var(--trans)}
+    .confirm-overlay.open .confirm-box{transform:translateY(0)}
+    .confirm-box h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+    .confirm-box p{color:var(--steel);font-size:.9rem;margin-bottom:1.5rem;line-height:1.6}
+    .confirm-actions{display:flex;gap:.75rem;justify-content:flex-end}
+
+    /* Toast */
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:3000;background:var(--ink);color:white;padding:.9rem 1.4rem;border-radius:var(--r2);box-shadow:var(--shadow-md);font-size:.88rem;display:flex;align-items:center;gap:.65rem;transform:translateY(80px);opacity:0;transition:all var(--trans);max-width:340px}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    /* Activity log */
+    .log-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+    .log-item{display:flex;align-items:flex-start;gap:.75rem;font-size:.83rem;color:var(--ink-3)}
+    .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .log-time{color:var(--steel);font-size:.75rem;margin-left:auto;white-space:nowrap;flex-shrink:0}
+
+    @media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{display:none}.stats-row{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}}
+    @media(max-width:500px){.stats-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      TaIQ
+      <span class="nav-badge">Admin</span>
+    </div>
+    <div class="nav-right">
+      <span id="navAdminName" style="font-size:.83rem;color:rgba(255,255,255,.6)"></span>
+      <a href="index.html" class="btn btn-ghost btn-sm">← View Site</a>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Site</div>
+      <ul class="sidebar-nav">
+        <li><button class="active" onclick="showSection('site-mode')"><span class="nav-icon">🌐</span>Site Mode</button></li>
+        <li><button onclick="showSection('overview')"><span class="nav-icon">📊</span>Overview</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Content</div>
+      <ul class="sidebar-nav">
+        <li><a href="index.html#jobs"><span class="nav-icon">💼</span>Job Listings</a></li>
+        <li><a href="#"><span class="nav-icon">🏢</span>Companies</a></li>
+        <li><a href="#"><span class="nav-icon">👥</span>Users</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">System</div>
+      <ul class="sidebar-nav">
+        <li><a href="/api/docs" target="_blank"><span class="nav-icon">📖</span>API Docs</a></li>
+        <li><a href="/api/health" target="_blank"><span class="nav-icon">❤️</span>Health Check</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- ── SECTION: Site Mode ─────────────────────────────────── -->
+    <div id="section-site-mode">
+      <h1 class="page-title">Site Mode</h1>
+      <p class="page-subtitle">Toggle the site between Live and Under Construction. Visitors see the holding page instantly when Construction mode is active.</p>
+
+      <!-- Current status banner -->
+      <div class="status-banner status-banner-live" id="statusBanner">
+        <div class="status-dot dot-live" id="statusDot"></div>
+        <div id="statusText">Loading current mode…</div>
+      </div>
+
+      <!-- Mode selector cards -->
+      <div class="mode-toggle-wrap">
+        <div class="mode-btn" id="btnLive" onclick="selectMode('live')">
+          <span class="mode-check">✓</span>
+          <span class="mode-btn-icon">🟢</span>
+          <div class="mode-btn-title">Live</div>
+          <div class="mode-btn-desc">The website is publicly accessible. All pages and features are available to visitors.</div>
+        </div>
+        <div class="mode-btn" id="btnConstruction" onclick="selectMode('construction')">
+          <span class="mode-check">✓</span>
+          <span class="mode-btn-icon">🚧</span>
+          <div class="mode-btn-title">Under Construction</div>
+          <div class="mode-btn-desc">Visitors see a branded holding page. Admins can still access the full site.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-warn" id="constructionAlert" style="display:none">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Heads up:</strong> Switching to Construction mode will immediately show the holding page to all non-admin visitors. Make sure you have the message set correctly below before saving.</div>
+      </div>
+
+      <!-- Construction page content editor -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🚧 Construction Page Content</div>
+            <div class="panel-subtitle">Customize what visitors see while the site is under construction</div>
+          </div>
+          <a href="under-construction.html" target="_blank" class="btn btn-outline btn-sm">👁 Preview Page →</a>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="ctitle">Page Title</label>
+            <input type="text" class="form-input" id="ctitle" placeholder="We Are Building Something Great" />
+            <div class="form-hint">Shown as the main heading on the holding page</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ceta">Expected Return (ETA)</label>
+            <input type="text" class="form-input" id="ceta" placeholder="e.g. Monday, April 10 at 9:00 AM EST" />
+            <div class="form-hint">Leave blank to hide the ETA section</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cmsg">Visitor Message</label>
+          <textarea class="form-textarea" id="cmsg" placeholder="TaIQ is currently undergoing scheduled maintenance…"></textarea>
+          <div class="form-hint">Friendly explanation shown below the title</div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="saveSettings()" id="saveBtn">
+            💾 Save & Apply
+          </button>
+          <button class="btn btn-outline" onclick="loadSettings()">↺ Reset</button>
+          <span class="action-bar-info" id="lastSaved"></span>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="panel">
+        <div class="preview-label">Live Preview — Under Construction Page</div>
+        <iframe class="preview-frame" src="under-construction.html" id="previewFrame" title="Under construction page preview"></iframe>
+      </div>
+    </div>
+
+    <!-- ── SECTION: Overview ──────────────────────────────────── -->
+    <div id="section-overview" style="display:none">
+      <h1 class="page-title">Overview</h1>
+      <p class="page-subtitle">Platform statistics at a glance</p>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val" id="ovUsers">—</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💼</div>
+          <div class="stat-val" id="ovJobs">—</div>
+          <div class="stat-label">Job Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-val" id="ovCompanies">—</div>
+          <div class="stat-label">Companies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-val" id="ovApps">—</div>
+          <div class="stat-label">Applications</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Recent Activity</div>
+            <div class="panel-subtitle">Latest system events</div>
+          </div>
+        </div>
+        <ul class="log-list" id="activityLog">
+          <li style="color:var(--steel);font-size:.85rem;padding:.5rem">Loading…</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Confirm modal -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Confirm Action</h3>
+    <p id="confirmMsg">Are you sure?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn" onclick="confirmOk()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+  const API = '/api/v1';
+  let pendingMode = null;
+  let currentSettings = {};
+  let confirmCallback = null;
+
+  // ── Auth guard ────────────────────────────────────────────────────────────────
+  const token = localStorage.getItem('taiq_token');
+  const userRaw = localStorage.getItem('taiq_user');
+
+  if (!token || !userRaw) {
+    window.location.href = 'index.html?openLogin=1';
+  } else {
+    const user = JSON.parse(userRaw);
+    if (user.role !== 'admin') {
+      alert('Admin access required.');
+      window.location.href = 'dashboard.html';
+    }
+    document.getElementById('navAdminName').textContent = user.full_name || user.email;
+  }
+
+  // ── Section routing ───────────────────────────────────────────────────────────
+  function showSection(name) {
+    document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+    document.getElementById(`section-${name}`).style.display = '';
+    document.querySelectorAll('.sidebar-nav button, .sidebar-nav a').forEach(el => el.classList.remove('active'));
+    event.currentTarget && event.currentTarget.classList.add('active');
+    if (name === 'overview') loadOverview();
+  }
+
+  // ── Load settings ─────────────────────────────────────────────────────────────
+  async function loadSettings() {
+    try {
+      const r = await fetch(`${API}/admin/site-settings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error('Auth failed');
+      const s = await r.json();
+      currentSettings = s;
+      applySettingsToUI(s);
+    } catch(e) {
+      showToast('Could not load settings — ' + e.message, '❌');
+    }
+  }
+
+  function applySettingsToUI(s) {
+    // Mode buttons
+    document.getElementById('btnLive').className = 'mode-btn' + (s.mode === 'live' ? ' selected-live' : '');
+    document.getElementById('btnConstruction').className = 'mode-btn' + (s.mode === 'construction' ? ' selected-construction' : '');
+    pendingMode = s.mode;
+
+    // Status banner
+    const banner = document.getElementById('statusBanner');
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    if (s.mode === 'live') {
+      banner.className = 'status-banner status-banner-live';
+      dot.className = 'status-dot dot-live';
+      text.textContent = '✅ Site is LIVE — visitors can access all pages';
+    } else {
+      banner.className = 'status-banner status-banner-construction';
+      dot.className = 'status-dot dot-construction';
+      text.textContent = '🚧 UNDER CONSTRUCTION — visitors see the holding page';
+    }
+
+    // Construction alert
+    document.getElementById('constructionAlert').style.display =
+      pendingMode === 'construction' ? 'flex' : 'none';
+
+    // Form fields
+    document.getElementById('ctitle').value = s.construction_title || '';
+    document.getElementById('cmsg').value = s.construction_message || '';
+    document.getElementById('ceta').value = s.construction_eta || '';
+
+    // Last saved timestamp
+    if (s.updated_at) {
+      document.getElementById('lastSaved').textContent =
+        'Last saved: ' + new Date(s.updated_at).toLocaleString();
+    }
+  }
+
+  // ── Mode selection ────────────────────────────────────────────────────────────
+  function selectMode(mode) {
+    pendingMode = mode;
+    document.getElementById('btnLive').className = 'mode-btn' + (mode === 'live' ? ' selected-live' : '');
+    document.getElementById('btnConstruction').className = 'mode-btn' + (mode === 'construction' ? ' selected-construction' : '');
+    document.getElementById('constructionAlert').style.display =
+      mode === 'construction' ? 'flex' : 'none';
+  }
+
+  // ── Save settings ─────────────────────────────────────────────────────────────
+  async function saveSettings() {
+    const isToggling = pendingMode !== currentSettings.mode;
+    const goingOffline = pendingMode === 'construction' && isToggling;
+
+    if (goingOffline) {
+      showConfirm(
+        '🚧 Take Site Offline?',
+        'This will immediately show the Under Construction page to all non-admin visitors. Are you sure you want to continue?',
+        'btn-danger',
+        'Go Offline',
+        doSave
+      );
+    } else if (pendingMode === 'live' && isToggling) {
+      showConfirm(
+        '🟢 Make Site Live?',
+        'All visitors will immediately be able to access the full website. Confirm?',
+        'btn-success',
+        'Go Live',
+        doSave
+      );
+    } else {
+      await doSave();
+    }
+  }
+
+  async function doSave() {
+    closeConfirm();
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+
+    const payload = {
+      mode: pendingMode,
+      construction_title: document.getElementById('ctitle').value,
+      construction_message: document.getElementById('cmsg').value,
+      construction_eta: document.getElementById('ceta').value,
+    };
+
+    try {
+      const r = await fetch(`${API}/admin/site-settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) {
+        // Parse error body — could be JSON {detail:...} or plain text
+        let errMsg = `HTTP ${r.status}`;
+        try {
+          const errBody = await r.json();
+          errMsg = errBody.detail || JSON.stringify(errBody);
+        } catch {
+          try { errMsg = await r.text(); } catch {}
+        }
+        throw new Error(errMsg);
+      }
+      const s = await r.json();
+      currentSettings = s;
+      applySettingsToUI(s);
+      // Reload preview iframe
+      document.getElementById('previewFrame').src = 'under-construction.html?' + Date.now();
+      showToast(
+        pendingMode === 'live' ? '🟢 Site is now LIVE!' : '🚧 Site is now Under Construction',
+        pendingMode === 'live' ? '✅' : '🔧'
+      );
+    } catch(e) {
+      showToast('Error: ' + e.message, '❌');
+    } finally {
+      btn.textContent = '💾 Save & Apply'; btn.disabled = false;
+    }
+  }
+
+  // ── Overview ──────────────────────────────────────────────────────────────────
+  async function loadOverview() {
+    try {
+      const r = await fetch(`${API}/admin/overview`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      document.getElementById('ovUsers').textContent = d.total_users.toLocaleString();
+      document.getElementById('ovJobs').textContent = d.total_jobs.toLocaleString();
+      document.getElementById('ovCompanies').textContent = d.total_companies.toLocaleString();
+      document.getElementById('ovApps').textContent = d.total_applications.toLocaleString();
+
+      const log = document.getElementById('activityLog');
+      log.innerHTML = [
+        { color:'#22c55e', text:`Site is currently <strong>${d.site_mode === 'live' ? '🟢 Live' : '🚧 Under Construction'}</strong>` },
+        { color:'#0052cc', text:`${d.total_users} registered users on the platform` },
+        { color:'#0052cc', text:`${d.total_jobs} total job listings` },
+        { color:'#f59e0b', text:`${d.total_applications} applications submitted` },
+      ].map(item => `
+        <li class="log-item">
+          <div class="log-dot" style="background:${item.color}"></div>
+          <div>${item.text}</div>
+          <span class="log-time">Now</span>
+        </li>
+      `).join('');
+    } catch {
+      showToast('Could not load overview stats', '❌');
+    }
+  }
+
+  // ── Confirm modal ─────────────────────────────────────────────────────────────
+  function showConfirm(title, msg, btnClass, btnText, callback) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    const okBtn = document.getElementById('confirmOkBtn');
+    okBtn.className = `btn ${btnClass}`;
+    okBtn.textContent = btnText;
+    confirmCallback = callback;
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+  function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+  function confirmOk() { if (confirmCallback) confirmCallback(); }
+  document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirm(); });
+
+  // ── Toast ─────────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, icon = '✅') {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    document.getElementById('toastIcon').textContent = icon;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  // ── Logout ────────────────────────────────────────────────────────────────────
+  function doLogout() {
+    localStorage.removeItem('taiq_token');
+    localStorage.removeItem('taiq_user');
+    window.location.href = 'index.html';
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────────
+  loadSettings();
+</script>
+</body>
+</html>

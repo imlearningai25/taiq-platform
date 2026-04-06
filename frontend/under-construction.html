@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Under Construction — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --ink:#0a0f1e; --brand:#0052cc; --accent:#ff5c35;
+      --teal:#00b4d8; --mist:#c8d0e4; --paper:#f4f6fb;
+      --r2:1rem; --r3:1.5rem; --r-full:9999px;
+      --trans:.3s cubic-bezier(.4,0,.2,1);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body {
+      font-family:'DM Sans',sans-serif;
+      background: #050c1f;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    .bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .bg-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .45;
+    }
+    .bg-orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,82,204,.5) 0%, transparent 70%);
+      top: -200px; right: -150px;
+      animation: float1 10s ease-in-out infinite;
+    }
+    .bg-orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,180,216,.4) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+      animation: float2 13s ease-in-out infinite;
+    }
+    .bg-orb-3 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(255,92,53,.25) 0%, transparent 70%);
+      top: 50%; left: 55%;
+      animation: float1 8s ease-in-out infinite reverse;
+    }
+    .bg-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-30px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-25px,25px)} }
+
+    /* Main card */
+    .card {
+      position: relative; z-index: 1;
+      text-align: center;
+      max-width: 640px;
+      width: calc(100% - 3rem);
+      padding: 3rem 2.5rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      animation: slideUp .7s ease both;
+    }
+    @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Logo */
+    .logo {
+      display: inline-flex; align-items: center; gap: .6rem;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+      color: white; margin-bottom: 2.5rem;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 38px; height: 38px; background: var(--brand);
+      border-radius: 10px; display: grid; place-items: center;
+    }
+    .logo-mark svg { width: 20px; height: 20px; fill: white; }
+
+    /* Icon animation */
+    .main-icon {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem; margin: 0 auto 1.75rem;
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,82,204,.3); }
+      50% { box-shadow: 0 0 0 18px rgba(0,82,204,0); }
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(245,166,35,.15); border: 1px solid rgba(245,166,35,.3);
+      color: #fbbf24; border-radius: var(--r-full);
+      padding: .35rem 1rem; font-size: .75rem; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #fbbf24;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    h1 span { color: #60a5fa; }
+
+    .message {
+      font-size: 1rem; color: rgba(255,255,255,.65);
+      line-height: 1.7; margin-bottom: 1.75rem;
+      max-width: 480px; margin-inline: auto;
+    }
+
+    /* ETA pill */
+    .eta {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r-full); padding: .5rem 1.25rem;
+      font-size: .85rem; color: rgba(255,255,255,.75);
+      margin-bottom: 2rem;
+    }
+    .eta-icon { font-size: 1rem; }
+    .eta span strong { color: white; }
+
+    /* Notify form */
+    .notify-form {
+      display: flex; gap: .5rem; max-width: 400px; margin: 0 auto 2rem;
+    }
+    .notify-input {
+      flex: 1; padding: .7rem 1rem;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--r-full); color: white; font: inherit; font-size: .88rem;
+      outline: none; transition: border-color var(--trans);
+    }
+    .notify-input::placeholder { color: rgba(255,255,255,.35); }
+    .notify-input:focus { border-color: rgba(96,165,250,.6); }
+    .notify-btn {
+      padding: .7rem 1.4rem; background: var(--brand); color: white;
+      border: none; border-radius: var(--r-full); font: inherit; font-size: .88rem;
+      font-weight: 600; cursor: pointer; transition: all var(--trans); white-space: nowrap;
+    }
+    .notify-btn:hover { background: #0040a0; transform: translateY(-1px); }
+    .notify-success {
+      display: none; font-size: .83rem; color: #4ade80;
+      margin-top: .5rem; margin-bottom: 1.5rem;
+    }
+
+    /* Progress bar */
+    .progress-section { margin-bottom: 2rem; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: .78rem; color: rgba(255,255,255,.45); margin-bottom: .5rem;
+    }
+    .progress-track {
+      height: 5px; background: rgba(255,255,255,.1);
+      border-radius: var(--r-full); overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--teal));
+      border-radius: var(--r-full);
+      transition: width 1.5s ease;
+      width: 0%;
+    }
+
+    /* Social / links */
+    .links {
+      display: flex; justify-content: center; gap: 1rem;
+      flex-wrap: wrap; margin-top: .5rem;
+    }
+    .link-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .5rem 1.1rem; border-radius: var(--r-full);
+      border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.65);
+      font-size: .82rem; font-weight: 500; cursor: pointer;
+      transition: all var(--trans); text-decoration: none; background: none;
+    }
+    .link-btn:hover { border-color: rgba(255,255,255,.4); color: white; background: rgba(255,255,255,.06); }
+
+    /* Admin pill — only visible when admin is logged in */
+    .admin-bar {
+      display: none;
+      position: fixed; top: 1.25rem; right: 1.25rem; z-index: 10;
+      background: rgba(255,92,53,.15); border: 1px solid rgba(255,92,53,.35);
+      border-radius: var(--r-full); padding: .45rem 1rem;
+      font-size: .78rem; font-weight: 600; color: #fca5a5;
+      display: none; align-items: center; gap: .5rem;
+    }
+    .admin-bar a {
+      color: white; text-decoration: underline; cursor: pointer;
+    }
+
+    footer {
+      position: relative; z-index: 1;
+      margin-top: 1.5rem;
+      font-size: .75rem; color: rgba(255,255,255,.25);
+      text-align: center;
+    }
+    footer a { color: rgba(255,255,255,.4); text-decoration: none; }
+    footer a:hover { color: rgba(255,255,255,.7); }
+
+    @media(max-width:480px) {
+      .card { padding: 2rem 1.5rem; }
+      .notify-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+</div>
+
+<!-- Admin shortcut bar (shown if admin is logged in) -->
+<div class="admin-bar" id="adminBar">
+  🔧 Admin View —
+  <a href="admin.html">Go to Admin Panel</a>
+</div>
+
+<div class="card">
+  <a href="#" class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    TaIQ
+  </a>
+
+  <div class="main-icon" id="mainIcon">🚧</div>
+
+  <div class="status-badge">
+    <span class="status-dot"></span>
+    Under Construction
+  </div>
+
+  <h1 id="ucTitle">We're Building<br><span>Something Great</span></h1>
+
+  <p class="message" id="ucMessage">
+    TaIQ is currently undergoing scheduled maintenance. We're working hard to bring you an even better experience. We will be back shortly.
+  </p>
+
+  <div class="eta" id="etaSection" style="display:none">
+    <span class="eta-icon">⏱️</span>
+    <span>Expected back: <strong id="etaText"></strong></span>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Work in progress</span>
+      <span id="progressPct">75%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="notify-form">
+    <input type="email" class="notify-input" placeholder="Get notified when we're back" id="notifyEmail"/>
+    <button class="notify-btn" onclick="subscribeNotify()">Notify Me</button>
+  </div>
+  <div class="notify-success" id="notifySuccess">
+    ✅ You're on the list! We'll email you when TaIQ is back online.
+  </div>
+
+  <div class="links">
+    <a href="mailto:support@taiq.us" class="link-btn">📧 Contact Support</a>
+    <a href="https://twitter.com" target="_blank" class="link-btn">𝕏 Follow Updates</a>
+    <a href="#" class="link-btn" id="adminLink" style="display:none" onclick="window.location.href='admin.html'">⚙️ Admin Panel</a>
+  </div>
+</div>
+
+<footer>
+  © 2025 TaIQ Inc. ·
+  <a href="privacy-policy.html">Privacy</a> ·
+  <a href="terms-of-service.html">Terms</a>
+</footer>
+
+<script>
+  const API = '/api/v1';
+
+  async function loadSettings() {
+    try {
+      const r = await fetch(`${API}/admin/site-settings`);
+      if (!r.ok) return;
+      const s = await r.json();
+
+      // Update content from DB
+      if (s.construction_title)
+        document.getElementById('ucTitle').innerHTML =
+          s.construction_title.replace(' ', '<br><span>') + '</span>';
+      if (s.construction_message)
+        document.getElementById('ucMessage').textContent = s.construction_message;
+      if (s.construction_eta) {
+        document.getElementById('etaText').textContent = s.construction_eta;
+        document.getElementById('etaSection').style.display = 'inline-flex';
+      }
+    } catch {}
+  }
+
+  function checkAdminAccess() {
+    const userRaw = localStorage.getItem('taiq_user');
+    if (!userRaw) return;
+    const user = JSON.parse(userRaw);
+    if (user.role === 'admin') {
+      document.getElementById('adminBar').style.display = 'flex';
+      document.getElementById('adminLink').style.display = 'inline-flex';
+    }
+  }
+
+  function subscribeNotify() {
+    const email = document.getElementById('notifyEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('notifyEmail').style.borderColor = '#ef4444';
+      return;
+    }
+    document.getElementById('notifyEmail').style.borderColor = '';
+    document.querySelector('.notify-form').style.display = 'none';
+    document.getElementById('notifySuccess').style.display = 'block';
+  }
+
+  // Animate progress bar on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('progressFill').style.width = '75%';
+    }, 600);
+    loadSettings();
+    checkAdminAccess();
+  });
+</script>
+</body>
+</html>

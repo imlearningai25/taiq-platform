@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  // ── Site Mode Guard — injected on all public pages ────────────────────────
+  (async function checkSiteMode() {
+    // Admins always bypass the construction gate
+    try {
+      const u = localStorage.getItem('taiq_user');
+      if (u && JSON.parse(u).role === 'admin') return;
+    } catch {}
+    // Skip the check if we're already on the construction page
+    if (window.location.pathname.includes('under-construction')) return;
+    // Skip admin panel
+    if (window.location.pathname.includes('admin.html')) return;
+    try {
+      const r = await fetch('/api/v1/admin/site-settings');
+      if (r.ok) {
+        const s = await r.json();
+        if (s.mode === 'construction') {
+          window.location.replace('under-construction.html');
+        }
+      }
+    } catch {}
+  })();
+</script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--ink:#0a0f1e;--ink-2:#1c2338;--ink-3:#384060;--steel:#6b7899;--mist:#c8d0e4;--paper:#f4f6fb;--white:#ffffff;--brand:#0052cc;--accent:#ff5c35;--success:#22c55e;--r1:.5rem;--r2:1rem;--r3:1.5rem;--r-full:9999px;--shadow-sm:0 1px 4px rgba(10,15,30,.08);--trans:.25s cubic-bezier(.4,0,.2,1)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);line-height:1.7}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--mist);padding:.9rem 0}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;width:min(1200px,100% - 3rem);margin:auto}
+    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--ink);display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:32px;height:32px;background:var(--brand);border-radius:8px;display:grid;place-items:center}
+    .logo-mark svg{width:18px;height:18px;fill:white}
+    .nav-back{font-size:.85rem;font-weight:500;color:var(--steel);display:flex;align-items:center;gap:.3rem;transition:color var(--trans)}
+    .nav-back:hover{color:var(--brand);text-decoration:none}
+    .page-hero{background:linear-gradient(135deg,#0a0f1e 0%,#1c2338 60%,#2d3a5e 100%);padding:4rem 0 3rem;color:white;position:relative;overflow:hidden}
+    .page-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:50px 50px}
+    .page-hero-inner{position:relative;width:min(900px,100% - 3rem);margin:auto}
+    .page-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-full);padding:.35rem .9rem;font-size:.75rem;font-weight:600;color:#90c4ff;margin-bottom:1.2rem;letter-spacing:.05em;text-transform:uppercase}
+    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:.75rem}
+    .page-hero p{color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px}
+    .page-meta{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
+    .page-meta-item{font-size:.82rem;color:rgba(255,255,255,.55)}
+    .page-meta-item strong{color:rgba(255,255,255,.85);font-weight:500}
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:3rem;align-items:start;width:min(1200px,100% - 3rem);margin:3rem auto 5rem}
+    .toc{position:sticky;top:80px}
+    .toc-title{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-bottom:1rem}
+    .toc-list{list-style:none}
+    .toc-list li{margin-bottom:.1rem}
+    .toc-list a{display:block;padding:.45rem .75rem;border-radius:var(--r1);font-size:.83rem;color:var(--steel);transition:all var(--trans);border-left:2px solid transparent}
+    .toc-list a:hover,.toc-list a.active{color:var(--brand);background:rgba(0,82,204,.06);border-left-color:var(--brand);text-decoration:none}
+    .toc-highlight{margin-top:1.5rem;background:rgba(255,92,53,.05);border:1px solid rgba(255,92,53,.2);border-radius:var(--r2);padding:1rem}
+    .toc-highlight p{font-size:.8rem;color:var(--ink-3);line-height:1.6;margin-bottom:.4rem}
+    .toc-highlight a{font-size:.8rem;font-weight:600}
+    .content section{margin-bottom:3rem;scroll-margin-top:90px}
+    .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--ink);color:white;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.6rem;flex-shrink:0;font-family:'Syne',sans-serif}
+    .content h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin-bottom:1rem;display:flex;align-items:center;padding-bottom:.75rem;border-bottom:2px solid var(--paper)}
+    .content h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink-2);margin:1.5rem 0 .6rem}
+    .content p{color:var(--ink-3);margin-bottom:.9rem;font-size:.95rem}
+    .content ul,.content ol{margin:.5rem 0 1rem 1.5rem;color:var(--ink-3);font-size:.95rem}
+    .content ul li,.content ol li{margin-bottom:.4rem}
+    .content strong{color:var(--ink);font-weight:600}
+    .info-box{border-radius:var(--r2);padding:1.25rem 1.5rem;margin:1.25rem 0;font-size:.9rem;display:flex;gap:1rem;align-items:flex-start}
+    .info-box-icon{font-size:1.3rem;flex-shrink:0;line-height:1}
+    .info-box-body{flex:1}
+    .info-box-body strong{display:block;margin-bottom:.25rem;font-size:.88rem}
+    .info-box-body p{margin:0;font-size:.85rem;color:inherit}
+    .info-red{background:rgba(255,92,53,.06);border:1px solid rgba(255,92,53,.2);color:#7f1d1d}
+    .info-blue{background:rgba(0,82,204,.06);border:1px solid rgba(0,82,204,.15);color:var(--ink-3)}
+    .info-amber{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);color:#92400e}
+    .info-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:#166534}
+
+    /* Two-col grid */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0}
+    .feature-card{background:var(--paper);border:1.5px solid var(--mist);border-radius:var(--r2);padding:1.25rem}
+    .feature-card h4{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:.4rem;color:var(--ink)}
+    .feature-card p{font-size:.8rem;color:var(--steel);margin:0}
+    .feature-card-icon{font-size:1.3rem;margin-bottom:.5rem}
+
+    /* Prohibited list with icons */
+    .prohibited-list{list-style:none;margin:0 0 1rem 0}
+    .prohibited-list li{display:flex;gap:.75rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid var(--paper);font-size:.9rem;color:var(--ink-3)}
+    .prohibited-list li::before{content:'✗';color:var(--accent);font-weight:700;flex-shrink:0;margin-top:2px}
+
+    /* Plan table */
+    .plan-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+    .plan-table th{background:var(--ink);color:white;font-family:'Syne',sans-serif;font-weight:600;padding:.7rem 1rem;text-align:left;font-size:.8rem}
+    .plan-table td{padding:.7rem 1rem;border-bottom:1px solid var(--mist);color:var(--ink-3);vertical-align:top}
+    .plan-table tr:last-child td{border-bottom:none}
+    .plan-table tr:nth-child(even) td{background:var(--paper)}
+    .tag{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.72rem;font-weight:600}
+    .tag-free{background:rgba(34,197,94,.1);color:#166534}
+    .tag-paid{background:rgba(0,82,204,.1);color:var(--brand)}
+
+    .contact-card{background:linear-gradient(135deg,#0a0f1e,#1c2338);color:white;border-radius:var(--r3);padding:2rem;margin-top:1.5rem}
+    .contact-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:.75rem;color:white}
+    .contact-card p{font-size:.88rem;color:rgba(255,255,255,.7);margin-bottom:.5rem}
+    .contact-card a{color:#90c4ff}
+    .page-footer{background:var(--ink);color:rgba(255,255,255,.5);padding:2rem 0;font-size:.82rem;text-align:center}
+    .page-footer a{color:rgba(255,255,255,.65)}
+    .page-footer .footer-links{display:flex;justify-content:center;gap:1.5rem;margin-top:.5rem;flex-wrap:wrap}
+    @media(max-width:768px){.layout{grid-template-columns:1fr}.toc{display:none}.two-col{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      TaIQ
+    </a>
+    <a href="index.html" class="nav-back">← Back to Home</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-badge">📋 Legal</div>
+    <h1>Terms of Service</h1>
+    <p>These terms govern your use of TaIQ. Please read them carefully before creating an account or using our platform.</p>
+    <div class="page-meta">
+      <div class="page-meta-item"><strong>Effective Date:</strong> April 5, 2025</div>
+      <div class="page-meta-item"><strong>Last Updated:</strong> April 5, 2025</div>
+      <div class="page-meta-item"><strong>Governing Law:</strong> Pennsylvania, USA</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#t1">1. Acceptance of Terms</a></li>
+      <li><a href="#t2">2. Eligibility</a></li>
+      <li><a href="#t3">3. Account Registration</a></li>
+      <li><a href="#t4">4. Platform Services</a></li>
+      <li><a href="#t5">5. Candidate Obligations</a></li>
+      <li><a href="#t6">6. Employer Obligations</a></li>
+      <li><a href="#t7">7. Prohibited Conduct</a></li>
+      <li><a href="#t8">8. Content & IP</a></li>
+      <li><a href="#t9">9. Fees & Payments</a></li>
+      <li><a href="#t10">10. Disclaimers</a></li>
+      <li><a href="#t11">11. Limitation of Liability</a></li>
+      <li><a href="#t12">12. Indemnification</a></li>
+      <li><a href="#t13">13. Dispute Resolution</a></li>
+      <li><a href="#t14">14. Termination</a></li>
+      <li><a href="#t15">15. General Provisions</a></li>
+    </ul>
+    <div class="toc-highlight">
+      <p>⚠️ Important: Section 13 contains a mandatory arbitration clause and class action waiver.</p>
+      <a href="#t13">Review Dispute Resolution →</a>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <div class="info-box info-blue">
+      <div class="info-box-icon">📌</div>
+      <div class="info-box-body">
+        <strong>Agreement Summary</strong>
+        <p>By using TaIQ, you agree to these Terms. Key points: you must be 16+, you're responsible for your account and content, we don't guarantee job placement, disputes are resolved through arbitration, and our liability is limited to fees paid in the last 12 months.</p>
+      </div>
+    </div>
+
+    <section id="t1">
+      <h2><span class="section-num">1</span>Acceptance of Terms</h2>
+      <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you") and TaIQ Inc. ("TaIQ," "we," "us"). By accessing or using our website, mobile applications, or any related services (collectively, the "Platform"), you agree to be bound by these Terms and our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+      <p>If you are using the Platform on behalf of a company or organization, you represent that you have authority to bind that entity, and "you" refers to that entity.</p>
+      <p><strong>If you do not agree to these Terms, do not use the Platform.</strong></p>
+    </section>
+
+    <section id="t2">
+      <h2><span class="section-num">2</span>Eligibility</h2>
+      <p>You may use TaIQ only if:</p>
+      <ul>
+        <li>You are at least <strong>16 years old</strong> (or the minimum age in your jurisdiction)</li>
+        <li>You have the legal capacity to enter into a binding contract</li>
+        <li>You are not prohibited from using the Platform under applicable law</li>
+        <li>Your account has not been previously suspended or terminated by TaIQ</li>
+      </ul>
+      <p>Employers must be validly registered business entities with authority to hire in the jurisdictions where they post jobs.</p>
+    </section>
+
+    <section id="t3">
+      <h2><span class="section-num">3</span>Account Registration &amp; Security</h2>
+      <p>To access most Platform features, you must create an account. You agree to:</p>
+      <ul>
+        <li>Provide <strong>accurate, current, and complete</strong> information during registration</li>
+        <li>Maintain and promptly update your account information</li>
+        <li>Keep your password confidential and not share it with any third party</li>
+        <li>Notify us immediately at <a href="mailto:security@taiq.us">security@taiq.us</a> of any unauthorized access</li>
+        <li>Accept responsibility for all activity that occurs under your account</li>
+      </ul>
+      <p>TaIQ reserves the right to refuse registration or cancel accounts at our sole discretion.</p>
+    </section>
+
+    <section id="t4">
+      <h2><span class="section-num">4</span>Platform Services</h2>
+      <div class="two-col">
+        <div class="feature-card">
+          <div class="feature-card-icon">👤</div>
+          <h4>For Candidates</h4>
+          <p>Create profiles, upload resumes, search and apply for jobs, track applications, receive employer messages.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-icon">🏢</div>
+          <h4>For Employers</h4>
+          <p>Post job listings, search candidate profiles, manage applications, communicate with candidates, access analytics.</p>
+        </div>
+      </div>
+      <p>We act as a <strong>neutral marketplace</strong> connecting candidates and employers. We are not a party to any employment agreement between users. We do not guarantee that candidates will receive job offers or that employers will find suitable candidates.</p>
+      <p>We reserve the right to modify, suspend, or discontinue any part of the Platform at any time, with reasonable advance notice for material changes.</p>
+    </section>
+
+    <section id="t5">
+      <h2><span class="section-num">5</span>Candidate Obligations</h2>
+      <p>As a job seeker on TaIQ, you agree to:</p>
+      <ul>
+        <li>Only post truthful and accurate information on your profile and in applications</li>
+        <li>Not misrepresent your qualifications, experience, or identity</li>
+        <li>Only apply for positions you genuinely intend to pursue</li>
+        <li>Respond to employer communications in a timely and professional manner</li>
+        <li>Not create multiple accounts or impersonate another person</li>
+        <li>Comply with all employer-specific application requirements and confidentiality requests</li>
+      </ul>
+      <div class="info-box info-amber">
+        <div class="info-box-icon">⚠️</div>
+        <div class="info-box-body">
+          <strong>Profile Accuracy</strong>
+          <p>Submitting false information — including fabricated credentials, degrees, or employment history — may result in immediate account termination and could expose you to legal liability.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="t6">
+      <h2><span class="section-num">6</span>Employer Obligations</h2>
+      <p>As an employer on TaIQ, you agree to:</p>
+      <ul>
+        <li>Only post <strong>genuine, bona fide job openings</strong> — no phantom listings or data harvesting</li>
+        <li>Ensure job postings comply with all applicable employment laws, including equal opportunity requirements</li>
+        <li>Not engage in discriminatory hiring practices based on race, color, religion, sex, national origin, age, disability, or any other protected characteristic</li>
+        <li>Maintain the confidentiality of candidate information and use it only for hiring purposes</li>
+        <li>Not use candidate data for unsolicited marketing or share it with third parties without consent</li>
+        <li>Respond to candidates who have submitted applications within a reasonable timeframe</li>
+        <li>Promptly remove or mark job listings as filled when positions are no longer available</li>
+      </ul>
+      <p>TaIQ reserves the right to remove any job listing that violates these terms without refund.</p>
+    </section>
+
+    <section id="t7">
+      <h2><span class="section-num">7</span>Prohibited Conduct</h2>
+      <p>The following activities are strictly prohibited on TaIQ:</p>
+      <ul class="prohibited-list">
+        <li>Posting spam, unsolicited messages, or bulk communications</li>
+        <li>Scraping, crawling, or automated data collection without written permission</li>
+        <li>Using the Platform to distribute malware, viruses, or harmful code</li>
+        <li>Attempting to gain unauthorized access to our systems or other users' accounts</li>
+        <li>Impersonating any person, company, or TaIQ employee</li>
+        <li>Posting fraudulent, misleading, or deceptive content of any kind</li>
+        <li>Soliciting users off-platform to circumvent our fees or terms</li>
+        <li>Using artificial means to inflate profile views, search rankings, or engagement metrics</li>
+        <li>Engaging in any form of harassment, threats, or abusive conduct toward other users</li>
+        <li>Violating any applicable local, state, national, or international law or regulation</li>
+        <li>Reverse engineering, decompiling, or attempting to extract source code from our Platform</li>
+        <li>Posting jobs that require illegal activities or compensation below minimum wage</li>
+      </ul>
+      <p>Violations may result in immediate account suspension, termination, and referral to law enforcement where appropriate.</p>
+    </section>
+
+    <section id="t8">
+      <h2><span class="section-num">8</span>Content &amp; Intellectual Property</h2>
+      <h3>Your Content</h3>
+      <p>You retain ownership of content you submit to TaIQ (your resume, profile, job postings). By submitting content, you grant TaIQ a <strong>non-exclusive, worldwide, royalty-free license</strong> to use, display, and distribute your content solely for the purpose of operating and improving the Platform.</p>
+      <p>You represent that you own or have the necessary rights to all content you submit, and that your content does not infringe any third party's intellectual property rights.</p>
+
+      <h3>TaIQ IP</h3>
+      <p>All Platform content not owned by users — including our logo, branding, software, algorithms, and design — is owned by TaIQ Inc. and protected by copyright, trademark, and other intellectual property laws. You may not use our intellectual property without written permission.</p>
+
+      <h3>DMCA / Copyright Notices</h3>
+      <p>To report copyright infringement, contact our designated DMCA agent at <a href="mailto:legal@taiq.us">legal@taiq.us</a>. We respond to valid takedown notices per the Digital Millennium Copyright Act.</p>
+    </section>
+
+    <section id="t9">
+      <h2><span class="section-num">9</span>Fees &amp; Payments</h2>
+      <table class="plan-table">
+        <thead><tr><th>Feature</th><th>Candidate</th><th>Employer</th></tr></thead>
+        <tbody>
+          <tr><td>Browse jobs</td><td><span class="tag tag-free">Free</span></td><td>N/A</td></tr>
+          <tr><td>Create profile</td><td><span class="tag tag-free">Free</span></td><td>N/A</td></tr>
+          <tr><td>Apply to jobs</td><td><span class="tag tag-free">Free</span></td><td>N/A</td></tr>
+          <tr><td>Post job listings</td><td>N/A</td><td><span class="tag tag-paid">Paid</span></td></tr>
+          <tr><td>Search candidates</td><td>N/A</td><td><span class="tag tag-paid">Paid</span></td></tr>
+          <tr><td>Featured listings</td><td>N/A</td><td><span class="tag tag-paid">Paid</span></td></tr>
+          <tr><td>Analytics dashboard</td><td>N/A</td><td><span class="tag tag-paid">Paid</span></td></tr>
+        </tbody>
+      </table>
+      <p>Paid services are billed in advance. Prices are listed on our <a href="#">Pricing page</a> and are subject to change with 30 days' notice. All fees are in USD and are non-refundable except as required by law, unless otherwise stated in a specific service agreement.</p>
+      <p>Chargebacks initiated without first contacting our support team may result in account suspension. Overdue invoices accrue interest at 1.5% per month.</p>
+    </section>
+
+    <section id="t10">
+      <h2><span class="section-num">10</span>Disclaimers</h2>
+      <div class="info-box info-red">
+        <div class="info-box-icon">⚖️</div>
+        <div class="info-box-body">
+          <strong>No Employment Guarantee</strong>
+          <p>TaIQ does not guarantee employment, job placement, or candidate hires. We are a marketplace platform and are not responsible for the accuracy of job listings or candidate profiles posted by third-party users.</p>
+        </div>
+      </div>
+      <p>THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>
+      <p>We do not warrant that the Platform will be uninterrupted, error-free, or free of viruses or harmful components. We do not endorse any employer, job listing, or candidate on the Platform.</p>
+    </section>
+
+    <section id="t11">
+      <h2><span class="section-num">11</span>Limitation of Liability</h2>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, TALENTBRIDGE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, LOST DATA, OR LOSS OF GOODWILL, ARISING FROM YOUR USE OF OR INABILITY TO USE THE PLATFORM.</p>
+      <p>IN NO EVENT WILL TALENTBRIDGE'S TOTAL LIABILITY TO YOU EXCEED THE <strong>GREATER OF (A) $100 OR (B) THE TOTAL FEES PAID BY YOU TO TALENTBRIDGE IN THE 12 MONTHS PRECEDING THE CLAIM</strong>.</p>
+      <p>Some jurisdictions do not allow the exclusion of certain warranties or limitations on liability, so the above limitations may not apply to you.</p>
+    </section>
+
+    <section id="t12">
+      <h2><span class="section-num">12</span>Indemnification</h2>
+      <p>You agree to defend, indemnify, and hold harmless TaIQ, its officers, directors, employees, and agents from any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or related to:</p>
+      <ul>
+        <li>Your use of the Platform or violation of these Terms</li>
+        <li>Content you submit to the Platform</li>
+        <li>Your violation of any third party's rights, including intellectual property or privacy rights</li>
+        <li>Any employment dispute between you and another user of the Platform</li>
+      </ul>
+    </section>
+
+    <section id="t13">
+      <h2><span class="section-num">13</span>Dispute Resolution</h2>
+      <div class="info-box info-amber">
+        <div class="info-box-icon">⚠️</div>
+        <div class="info-box-body">
+          <strong>Please read this section carefully — it affects your legal rights.</strong>
+          <p>This section requires binding arbitration for most disputes and waives your right to a jury trial and class action participation.</p>
+        </div>
+      </div>
+      <h3>Informal Resolution First</h3>
+      <p>Before initiating formal proceedings, you agree to first contact us at <a href="mailto:legal@taiq.us">legal@taiq.us</a> and give us 60 days to attempt informal resolution.</p>
+      <h3>Binding Arbitration</h3>
+      <p>If informal resolution fails, any dispute arising from these Terms or the Platform shall be resolved by <strong>binding individual arbitration</strong> administered by JAMS under its Streamlined Arbitration Rules. The arbitration shall take place in Philadelphia, Pennsylvania, or by video conference. The arbitrator's decision shall be final and binding.</p>
+      <h3>Class Action Waiver</h3>
+      <p><strong>YOU AND TALENTBRIDGE WAIVE THE RIGHT TO PARTICIPATE IN CLASS ACTION LITIGATION OR CLASS-WIDE ARBITRATION.</strong> All disputes must be brought individually.</p>
+      <h3>Exceptions</h3>
+      <p>Either party may seek emergency injunctive relief in a court of competent jurisdiction to protect intellectual property or confidential information. Users in jurisdictions that prohibit mandatory arbitration are not subject to this clause.</p>
+      <h3>Governing Law</h3>
+      <p>These Terms are governed by the laws of the Commonwealth of Pennsylvania, without regard to conflict of law principles.</p>
+    </section>
+
+    <section id="t14">
+      <h2><span class="section-num">14</span>Termination</h2>
+      <p>Either party may terminate this agreement at any time:</p>
+      <ul>
+        <li><strong>You:</strong> May delete your account at any time from account settings or by contacting support</li>
+        <li><strong>TaIQ:</strong> May suspend or terminate your account for violation of these Terms, fraudulent activity, or at our discretion with 30 days' notice for non-violation terminations</li>
+      </ul>
+      <p>Upon termination: your right to access the Platform ceases immediately; your content may be deleted subject to our data retention policy; sections that by their nature should survive (IP rights, indemnification, liability limitations, dispute resolution) will remain in effect.</p>
+    </section>
+
+    <section id="t15">
+      <h2><span class="section-num">15</span>General Provisions</h2>
+      <h3>Entire Agreement</h3>
+      <p>These Terms, together with our Privacy Policy and Cookie Policy, constitute the entire agreement between you and TaIQ regarding the Platform and supersede all prior agreements.</p>
+      <h3>Severability</h3>
+      <p>If any provision of these Terms is found unenforceable, the remaining provisions will continue in full force and effect.</p>
+      <h3>Waiver</h3>
+      <p>Our failure to enforce any provision of these Terms does not constitute a waiver of our right to enforce it in the future.</p>
+      <h3>Assignment</h3>
+      <p>You may not assign your rights under these Terms. We may assign our rights in connection with a merger, acquisition, or sale of assets, with notice to you.</p>
+      <h3>Updates</h3>
+      <p>We may update these Terms with 30 days' notice for material changes via email. Continued use constitutes acceptance.</p>
+
+      <div class="contact-card">
+        <h3>Legal &amp; Compliance Contact</h3>
+        <p>📧 Legal inquiries: <a href="mailto:legal@taiq.us">legal@taiq.us</a></p>
+        <p>📧 General support: <a href="mailto:support@taiq.us">support@taiq.us</a></p>
+        <p>📬 TaIQ Inc., Attn: Legal Department<br>123 Innovation Drive, Suite 400, Philadelphia, PA 19103</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  <div>© 2025 TaIQ Inc. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <a href="cookie-policy.html">Cookie Policy</a>
+    <a href="accessibility.html">Accessibility</a>
+  </div>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

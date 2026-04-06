@@ -1,0 +1,53 @@
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+from app.core.config import settings
+from app.core.database import engine, Base
+from app.api import auth, jobs, public, applications, companies, employer, profile, admin
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+    logger.info("Database tables ready")
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    lifespan=lifespan,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ── API routes ────────────────────────────────────────────────────────────────
+app.include_router(auth.router,         prefix="/api/v1")
+app.include_router(jobs.router,         prefix="/api/v1")
+app.include_router(public.router,       prefix="/api/v1")
+app.include_router(applications.router, prefix="/api/v1")
+app.include_router(companies.router,    prefix="/api/v1")
+app.include_router(employer.router,         prefix="/api/v1")
+app.include_router(employer.employer_router, prefix="/api/v1")
+app.include_router(profile.router,      prefix="/api/v1")
+app.include_router(admin.router,        prefix="/api/v1")
+
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok", "version": settings.APP_VERSION}

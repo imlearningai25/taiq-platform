@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  // ── Site Mode Guard — injected on all public pages ────────────────────────
+  (async function checkSiteMode() {
+    // Admins always bypass the construction gate
+    try {
+      const u = localStorage.getItem('taiq_user');
+      if (u && JSON.parse(u).role === 'admin') return;
+    } catch {}
+    // Skip the check if we're already on the construction page
+    if (window.location.pathname.includes('under-construction')) return;
+    // Skip admin panel
+    if (window.location.pathname.includes('admin.html')) return;
+    try {
+      const r = await fetch('/api/v1/admin/site-settings');
+      if (r.ok) {
+        const s = await r.json();
+        if (s.mode === 'construction') {
+          window.location.replace('under-construction.html');
+        }
+      }
+    } catch {}
+  })();
+</script>
+
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accessibility Statement — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--ink:#0a0f1e;--ink-2:#1c2338;--ink-3:#384060;--steel:#6b7899;--mist:#c8d0e4;--paper:#f4f6fb;--white:#ffffff;--brand:#0052cc;--brand-2:#0040a0;--accent:#ff5c35;--success:#22c55e;--warn:#f5a623;--purple:#7c3aed;--r1:.5rem;--r2:1rem;--r3:1.5rem;--r-full:9999px;--trans:.25s cubic-bezier(.4,0,.2,1)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);line-height:1.7}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Skip link — must be first focusable element */
+    .skip-link{position:absolute;left:-9999px;top:1rem;background:var(--brand);color:white;padding:.7rem 1.4rem;border-radius:var(--r2);font-weight:600;z-index:9999;transition:left 0s}
+    .skip-link:focus{left:1rem}
+
+    .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--mist);padding:.9rem 0}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;width:min(1200px,100% - 3rem);margin:auto}
+    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--ink);display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:32px;height:32px;background:var(--brand);border-radius:8px;display:grid;place-items:center}
+    .logo-mark svg{width:18px;height:18px;fill:white}
+    .nav-back{font-size:.85rem;font-weight:500;color:var(--steel);transition:color var(--trans)}
+    .nav-back:hover{color:var(--brand);text-decoration:none}
+
+    .page-hero{background:linear-gradient(135deg,#1a0533 0%,#2d1057 55%,#0d2654 100%);padding:4rem 0 3rem;color:white;position:relative;overflow:hidden}
+    .page-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 75% 30%,rgba(124,58,237,.3) 0%,transparent 50%),radial-gradient(circle at 25% 70%,rgba(0,82,204,.25) 0%,transparent 50%)}
+    .page-hero-inner{position:relative;width:min(900px,100% - 3rem);margin:auto}
+    .page-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-full);padding:.35rem .9rem;font-size:.75rem;font-weight:600;color:#c4b5fd;margin-bottom:1.2rem;letter-spacing:.05em;text-transform:uppercase}
+    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:.75rem}
+    .page-hero p{color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px}
+    .page-meta{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
+    .page-meta-item{font-size:.82rem;color:rgba(255,255,255,.55)}
+    .page-meta-item strong{color:rgba(255,255,255,.85);font-weight:500}
+
+    /* Conformance banner below hero */
+    .conformance-bar{background:var(--paper);border-bottom:1px solid var(--mist);padding:1.25rem 0}
+    .conformance-inner{width:min(1200px,100% - 3rem);margin:auto;display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap}
+    .conformance-badge{display:flex;align-items:center;gap:.75rem;background:var(--white);border:1.5px solid var(--mist);border-radius:var(--r2);padding:.6rem 1.1rem}
+    .conformance-badge-icon{font-size:1.5rem}
+    .conformance-badge-text{font-size:.82rem;color:var(--ink-3)}
+    .conformance-badge-text strong{color:var(--ink);font-size:.85rem;display:block}
+    .conformance-score{display:flex;align-items:center;gap:.5rem}
+    .score-bar{width:160px;height:8px;background:var(--mist);border-radius:var(--r-full);overflow:hidden}
+    .score-fill{height:100%;background:linear-gradient(90deg,var(--success),#16a34a);border-radius:var(--r-full);transition:width 1s ease}
+    .score-label{font-size:.82rem;font-weight:600;color:var(--success)}
+
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:3rem;align-items:start;width:min(1200px,100% - 3rem);margin:3rem auto 5rem}
+    .toc{position:sticky;top:80px}
+    .toc-title{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-bottom:1rem}
+    .toc-list{list-style:none}
+    .toc-list li{margin-bottom:.1rem}
+    .toc-list a{display:block;padding:.45rem .75rem;border-radius:var(--r1);font-size:.83rem;color:var(--steel);transition:all var(--trans);border-left:2px solid transparent}
+    .toc-list a:hover,.toc-list a.active{color:var(--purple);background:rgba(124,58,237,.06);border-left-color:var(--purple);text-decoration:none}
+    .toc-feedback{margin-top:1.5rem;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);border-radius:var(--r2);padding:1rem}
+    .toc-feedback p{font-size:.8rem;color:var(--ink-3);line-height:1.6;margin-bottom:.4rem}
+    .btn-feedback{display:inline-block;padding:.5rem .9rem;background:var(--purple);color:white;border-radius:var(--r-full);font-size:.8rem;font-weight:600;transition:all var(--trans)}
+    .btn-feedback:hover{background:#6d28d9;text-decoration:none}
+
+    .content section{margin-bottom:3rem;scroll-margin-top:90px}
+    .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--purple);color:white;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.6rem;flex-shrink:0;font-family:'Syne',sans-serif}
+    .content h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin-bottom:1rem;display:flex;align-items:center;padding-bottom:.75rem;border-bottom:2px solid var(--paper)}
+    .content h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink-2);margin:1.5rem 0 .6rem}
+    .content p{color:var(--ink-3);margin-bottom:.9rem;font-size:.95rem}
+    .content ul{margin:.5rem 0 1rem 1.5rem;color:var(--ink-3);font-size:.95rem}
+    .content ul li{margin-bottom:.4rem}
+    .content strong{color:var(--ink);font-weight:600}
+
+    .info-box{border-radius:var(--r2);padding:1.25rem 1.5rem;margin:1.25rem 0;font-size:.9rem;display:flex;gap:1rem;align-items:flex-start}
+    .info-box-icon{font-size:1.3rem;flex-shrink:0;line-height:1}
+    .info-box-body{flex:1}
+    .info-box-body strong{display:block;margin-bottom:.25rem;font-size:.88rem}
+    .info-box-body p{margin:0;font-size:.85rem;color:inherit}
+    .info-purple{background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);color:var(--ink-3)}
+    .info-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:#166534}
+    .info-amber{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);color:#92400e}
+
+    /* WCAG criteria grid */
+    .criteria-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1.25rem 0}
+    .criterion{background:var(--white);border:1.5px solid var(--mist);border-radius:var(--r2);padding:1rem;display:flex;gap:.75rem;align-items:flex-start}
+    .criterion-status{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:.7rem;margin-top:2px}
+    .status-pass{background:rgba(34,197,94,.15);color:#15803d}
+    .status-partial{background:rgba(245,166,35,.15);color:#b45309}
+    .status-progress{background:rgba(0,82,204,.12);color:var(--brand)}
+    .criterion h4{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+    .criterion p{font-size:.78rem;color:var(--steel);margin:0}
+
+    /* Feature cards — assistive tech */
+    .at-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.25rem 0}
+    .at-card{background:var(--paper);border:1.5px solid var(--mist);border-radius:var(--r2);padding:1.25rem;text-align:center;transition:all var(--trans)}
+    .at-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+    .at-card-icon{font-size:2rem;margin-bottom:.5rem}
+    .at-card h4{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:.3rem;color:var(--ink)}
+    .at-card p{font-size:.78rem;color:var(--steel)}
+    .at-tested{font-size:.7rem;color:var(--success);font-weight:600;margin-top:.4rem}
+
+    /* Roadmap table */
+    .roadmap-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:1rem 0}
+    .roadmap-table th{background:var(--ink);color:white;font-family:'Syne',sans-serif;font-weight:600;padding:.7rem 1rem;text-align:left;font-size:.78rem}
+    .roadmap-table td{padding:.7rem 1rem;border-bottom:1px solid var(--mist);color:var(--ink-3);vertical-align:top}
+    .roadmap-table tr:last-child td{border-bottom:none}
+    .roadmap-table tr:nth-child(even) td{background:var(--paper)}
+    .status-tag{display:inline-block;padding:.15rem .6rem;border-radius:4px;font-size:.72rem;font-weight:600}
+    .status-done{background:rgba(34,197,94,.1);color:#166534}
+    .status-q2{background:rgba(0,82,204,.1);color:var(--brand)}
+    .status-q3{background:rgba(245,166,35,.1);color:#92400e}
+    .status-q4{background:rgba(124,58,237,.1);color:var(--purple)}
+
+    /* Keyboard shortcuts table */
+    .shortcuts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:1rem 0}
+    .shortcut{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--mist);border-radius:var(--r1);padding:.6rem .9rem;font-size:.83rem}
+    .shortcut-action{color:var(--ink-3)}
+    .shortcut-keys{display:flex;gap:.3rem}
+    .key{background:white;border:1px solid var(--mist);border-radius:4px;padding:.1rem .4rem;font-size:.75rem;font-family:monospace;color:var(--ink);box-shadow:0 1px 0 var(--mist)}
+
+    /* Contact */
+    .contact-card{background:linear-gradient(135deg,#1a0533,#2d1057);color:white;border-radius:var(--r3);padding:2rem;margin-top:1.5rem}
+    .contact-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:.75rem;color:white}
+    .contact-card p{font-size:.88rem;color:rgba(255,255,255,.7);margin-bottom:.5rem}
+    .contact-card a{color:#c4b5fd}
+
+    .page-footer{background:var(--ink);color:rgba(255,255,255,.5);padding:2rem 0;font-size:.82rem;text-align:center}
+    .page-footer a{color:rgba(255,255,255,.65)}
+    .page-footer .footer-links{display:flex;justify-content:center;gap:1.5rem;margin-top:.5rem;flex-wrap:wrap}
+
+    /* High-contrast mode support */
+    @media (prefers-contrast: high) {
+      .criterion,.at-card,.shortcut{border-width:2px;border-color:currentColor}
+    }
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+    }
+    @media(max-width:768px){.layout{grid-template-columns:1fr}.toc{display:none}.criteria-grid,.at-grid,.shortcuts-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<nav class="nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="TaIQ home">
+      <div class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      TaIQ
+    </a>
+    <a href="index.html" class="nav-back">← Back to Home</a>
+  </div>
+</nav>
+
+<div class="page-hero" role="banner">
+  <div class="page-hero-inner">
+    <div class="page-badge" aria-hidden="true">♿ Accessibility</div>
+    <h1>Accessibility Statement</h1>
+    <p>TaIQ is committed to making our platform usable by everyone, regardless of disability, technology, or circumstance.</p>
+    <div class="page-meta">
+      <div class="page-meta-item"><strong>Standard:</strong> WCAG 2.2 Level AA</div>
+      <div class="page-meta-item"><strong>Last Audit:</strong> March 2025</div>
+      <div class="page-meta-item"><strong>Next Review:</strong> September 2025</div>
+    </div>
+  </div>
+</div>
+
+<div class="conformance-bar" role="region" aria-label="Conformance status">
+  <div class="conformance-inner">
+    <div class="conformance-badge">
+      <div class="conformance-badge-icon" aria-hidden="true">🏆</div>
+      <div class="conformance-badge-text"><strong>WCAG 2.2 AA Compliant</strong>Partially conformant — 3 known issues (in progress)</div>
+    </div>
+    <div class="conformance-badge">
+      <div class="conformance-badge-icon" aria-hidden="true">♿</div>
+      <div class="conformance-badge-text"><strong>ADA Title III</strong>Section 508 aligned</div>
+    </div>
+    <div class="conformance-badge">
+      <div class="conformance-badge-icon" aria-hidden="true">🇪🇺</div>
+      <div class="conformance-badge-text"><strong>EN 301 549</strong>European accessibility standard</div>
+    </div>
+    <div class="conformance-score" aria-label="Accessibility score: 94 percent">
+      <div class="score-bar" role="progressbar" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100">
+        <div class="score-fill" style="width:94%" id="scoreBar"></div>
+      </div>
+      <span class="score-label">94%</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc" aria-label="Table of contents">
+    <div class="toc-title" id="toc-heading">On this page</div>
+    <ul class="toc-list" aria-labelledby="toc-heading">
+      <li><a href="#a1">1. Our Commitment</a></li>
+      <li><a href="#a2">2. Conformance Status</a></li>
+      <li><a href="#a3">3. WCAG 2.2 Coverage</a></li>
+      <li><a href="#a4">4. Assistive Technology</a></li>
+      <li><a href="#a5">5. Keyboard Navigation</a></li>
+      <li><a href="#a6">6. Visual Accessibility</a></li>
+      <li><a href="#a7">7. Known Issues</a></li>
+      <li><a href="#a8">8. Accessibility Roadmap</a></li>
+      <li><a href="#a9">9. Third-Party Content</a></li>
+      <li><a href="#a10">10. Feedback & Support</a></li>
+    </ul>
+    <div class="toc-feedback">
+      <p>Encountered a barrier? We want to fix it.</p>
+      <a href="mailto:accessibility@taiq.us" class="btn-feedback">Report an Issue</a>
+    </div>
+  </aside>
+
+  <main id="main-content" class="content">
+
+    <div class="info-box info-purple">
+      <div class="info-box-icon" aria-hidden="true">♿</div>
+      <div class="info-box-body">
+        <strong>Our Accessibility Pledge</strong>
+        <p>We believe that accessible hiring platforms create more equitable opportunities. We are committed to continuous improvement and welcome feedback from all users about how we can do better.</p>
+      </div>
+    </div>
+
+    <section id="a1" aria-labelledby="h-a1">
+      <h2 id="h-a1"><span class="section-num" aria-hidden="true">1</span>Our Commitment</h2>
+      <p>TaIQ is committed to ensuring digital accessibility for people with disabilities. We continuously work to improve the user experience for everyone and apply relevant accessibility standards to our website and mobile applications.</p>
+      <p>Our accessibility efforts are guided by the Web Content Accessibility Guidelines (WCAG) 2.2, the Americans with Disabilities Act (ADA), Section 508 of the Rehabilitation Act, and the European Accessibility Act (EAA). We aim for at minimum <strong>WCAG 2.2 Level AA conformance</strong> across all of our digital products.</p>
+      <p>We have a dedicated Accessibility Working Group that meets bi-weekly to review reported issues, plan improvements, and conduct testing with people with disabilities.</p>
+    </section>
+
+    <section id="a2" aria-labelledby="h-a2">
+      <h2 id="h-a2"><span class="section-num" aria-hidden="true">2</span>Conformance Status</h2>
+      <p>TaIQ is <strong>partially conformant</strong> with WCAG 2.2 Level AA. Partially conformant means that some parts of the content do not fully conform to the accessibility standard. We are actively working to resolve all known issues.</p>
+      <div class="info-box info-green">
+        <div class="info-box-icon" aria-hidden="true">✅</div>
+        <div class="info-box-body">
+          <strong>Most recent audit: March 2025 by Deque Systems</strong>
+          <p>Third-party audit using axe DevTools, manual keyboard testing, and user testing with screen reader users. Overall score: 94/100. Three Level AA criteria require remediation (see Section 7).</p>
+        </div>
+      </div>
+      <p>Our mobile applications (iOS and Android) target WCAG 2.2 AA and are tested with VoiceOver (iOS) and TalkBack (Android).</p>
+    </section>
+
+    <section id="a3" aria-labelledby="h-a3">
+      <h2 id="h-a3"><span class="section-num" aria-hidden="true">3</span>WCAG 2.2 Coverage</h2>
+      <p>Below is our status against WCAG 2.2's four principles — Perceivable, Operable, Understandable, and Robust:</p>
+      <div class="criteria-grid">
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Text Alternatives (1.1)</h4><p>All images, icons, and non-text content have descriptive alt text or are marked decorative.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Captions & Audio (1.2)</h4><p>Video content includes closed captions. Audio descriptions available on request.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Adaptable Content (1.3)</h4><p>Semantic HTML structure, proper heading hierarchy, and meaningful reading order throughout.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Contrast Ratios (1.4.3)</h4><p>All text meets 4.5:1 minimum contrast ratio. Large text meets 3:1. Verified with Colour Contrast Analyser.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Keyboard Accessible (2.1)</h4><p>All interactive elements reachable and operable by keyboard alone. No keyboard traps.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Enough Time (2.2)</h4><p>Session timeouts warn users 2 minutes in advance. Carousels and animations pauseable.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Skip Navigation (2.4.1)</h4><p>"Skip to main content" link appears at top on keyboard focus for all pages.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Focus Visible (2.4.7)</h4><p>Keyboard focus indicators are clearly visible on all interactive elements.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Focus Appearance (2.4.11) <small>WCAG 2.2</small></h4><p>Focus indicators meet minimum size and contrast requirements per the new WCAG 2.2 criterion.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Drag Movements (2.5.7) <small>WCAG 2.2</small></h4><p>All drag-based interactions have single-pointer alternatives.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-partial" aria-label="Partial">~</div>
+          <div><h4>Redundant Entry (3.3.7) <small>WCAG 2.2</small></h4><p>Multi-step forms partially remeber previously entered info. Full fix in Q2 2025.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Error Prevention (3.3)</h4><p>Forms validate inline, display descriptive error messages, and allow review before submission.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-pass" aria-label="Pass">✓</div>
+          <div><h4>Parsing / Name, Role, Value (4.1)</h4><p>All UI components have ARIA roles, states, and properties properly implemented.</p></div>
+        </div>
+        <div class="criterion">
+          <div class="criterion-status status-progress" aria-label="In progress">→</div>
+          <div><h4>Text Spacing (1.4.12)</h4><p>Most content adapts to custom text spacing. One legacy PDF viewer component under remediation (Q2).</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="a4" aria-labelledby="h-a4">
+      <h2 id="h-a4"><span class="section-num" aria-hidden="true">4</span>Assistive Technology Support</h2>
+      <p>TaIQ is regularly tested with the following assistive technologies:</p>
+      <div class="at-grid">
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">🖥️</div>
+          <h4>NVDA + Chrome</h4>
+          <p>Windows screen reader, primary desktop testing combination</p>
+          <div class="at-tested">✓ Tested Mar 2025</div>
+        </div>
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">🍎</div>
+          <h4>VoiceOver + Safari</h4>
+          <p>macOS & iOS built-in screen reader</p>
+          <div class="at-tested">✓ Tested Mar 2025</div>
+        </div>
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">📱</div>
+          <h4>TalkBack + Chrome</h4>
+          <p>Android screen reader for mobile users</p>
+          <div class="at-tested">✓ Tested Mar 2025</div>
+        </div>
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">🔊</div>
+          <h4>JAWS + Edge</h4>
+          <p>Enterprise screen reader, popular in corporate environments</p>
+          <div class="at-tested">✓ Tested Feb 2025</div>
+        </div>
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">🔎</div>
+          <h4>ZoomText + Chrome</h4>
+          <p>Screen magnification with speech support</p>
+          <div class="at-tested">✓ Tested Feb 2025</div>
+        </div>
+        <div class="at-card">
+          <div class="at-card-icon" aria-hidden="true">🎙️</div>
+          <h4>Dragon NaturallySpeaking</h4>
+          <p>Voice control and dictation software</p>
+          <div class="at-tested">✓ Tested Jan 2025</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="a5" aria-labelledby="h-a5">
+      <h2 id="h-a5"><span class="section-num" aria-hidden="true">5</span>Keyboard Navigation</h2>
+      <p>Every feature on TaIQ can be operated using a keyboard alone. Standard browser keyboard shortcuts apply, and we provide additional shortcuts for key actions:</p>
+      <div class="shortcuts-grid" role="table" aria-label="Keyboard shortcuts">
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Skip to main content</span>
+          <span class="shortcut-keys" role="cell" aria-label="Tab key"><span class="key">Tab</span> (first press)</span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Open job search</span>
+          <span class="shortcut-keys" role="cell" aria-label="Slash key"><span class="key">/</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Close modal / dialog</span>
+          <span class="shortcut-keys" role="cell" aria-label="Escape key"><span class="key">Esc</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Activate button / link</span>
+          <span class="shortcut-keys" role="cell" aria-label="Enter or Space key"><span class="key">Enter</span> / <span class="key">Space</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Navigate form fields</span>
+          <span class="shortcut-keys" role="cell" aria-label="Tab key"><span class="key">Tab</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Go back in form</span>
+          <span class="shortcut-keys" role="cell" aria-label="Shift plus Tab"><span class="key">Shift</span>+<span class="key">Tab</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Select dropdown option</span>
+          <span class="shortcut-keys" role="cell" aria-label="Arrow keys"><span class="key">↑</span> <span class="key">↓</span></span>
+        </div>
+        <div class="shortcut" role="row">
+          <span class="shortcut-action" role="cell">Save / apply current job</span>
+          <span class="shortcut-keys" role="cell" aria-label="Alt plus A"><span class="key">Alt</span>+<span class="key">A</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="a6" aria-labelledby="h-a6">
+      <h2 id="h-a6"><span class="section-num" aria-hidden="true">6</span>Visual Accessibility Features</h2>
+      <ul>
+        <li><strong>Text resizing:</strong> Our layout adapts gracefully up to 200% zoom without horizontal scrolling or loss of functionality</li>
+        <li><strong>Color independence:</strong> We never use color as the only means of conveying information — all status indicators include icons and/or text labels</li>
+        <li><strong>High contrast mode:</strong> We support <code>prefers-contrast: high</code> via CSS media queries; enhanced borders and contrast are applied automatically</li>
+        <li><strong>Dark mode:</strong> We support <code>prefers-color-scheme: dark</code> for users who prefer reduced screen brightness</li>
+        <li><strong>Reduced motion:</strong> All animations respect the <code>prefers-reduced-motion</code> setting — users who opt out of animations will experience static transitions only</li>
+        <li><strong>Font scaling:</strong> Our typography uses relative units (rem/em) so system-level font size preferences are respected</li>
+        <li><strong>Link underlines:</strong> All links are underlined or have a visible non-color indicator when not on a white background</li>
+      </ul>
+    </section>
+
+    <section id="a7" aria-labelledby="h-a7">
+      <h2 id="h-a7"><span class="section-num" aria-hidden="true">7</span>Known Issues &amp; Limitations</h2>
+      <div class="info-box info-amber">
+        <div class="info-box-icon" aria-hidden="true">⚠️</div>
+        <div class="info-box-body">
+          <strong>We are transparent about limitations</strong>
+          <p>The following issues have been identified and are actively being remediated. We expect all items to be resolved by Q3 2025.</p>
+        </div>
+      </div>
+      <table class="roadmap-table" aria-label="Known accessibility issues">
+        <thead><tr><th>Issue</th><th>WCAG Criterion</th><th>Affected Area</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>PDF resume viewer lacks accessible text layer for screen readers</td>
+            <td>1.1.1 Non-text Content</td>
+            <td>Employer dashboard</td>
+            <td><span class="status-tag status-q2">Fix in Q2 2025</span></td>
+          </tr>
+          <tr>
+            <td>Multi-step job application form doesn't pre-fill repeated information</td>
+            <td>3.3.7 Redundant Entry (WCAG 2.2)</td>
+            <td>Job application flow</td>
+            <td><span class="status-tag status-q2">Fix in Q2 2025</span></td>
+          </tr>
+          <tr>
+            <td>Legacy salary range slider not operable via keyboard in IE11</td>
+            <td>2.1.1 Keyboard</td>
+            <td>Job search filters</td>
+            <td><span class="status-tag status-q3">IE11 EOL — Q3 2025</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>If you encounter any additional issues not listed above, please contact us. We take all reports seriously and aim to respond within 5 business days.</p>
+    </section>
+
+    <section id="a8" aria-labelledby="h-a8">
+      <h2 id="h-a8"><span class="section-num" aria-hidden="true">8</span>Accessibility Roadmap</h2>
+      <table class="roadmap-table" aria-label="Accessibility roadmap">
+        <thead><tr><th>Initiative</th><th>Target</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Full WCAG 2.2 Level AA conformance audit</td><td>Q1 2025</td><td><span class="status-tag status-done">✓ Complete</span></td></tr>
+          <tr><td>Accessible PDF resume viewer replacement</td><td>Q2 2025</td><td><span class="status-tag status-q2">In Progress</span></td></tr>
+          <tr><td>WCAG 2.2 redundant entry fix across all multi-step flows</td><td>Q2 2025</td><td><span class="status-tag status-q2">In Progress</span></td></tr>
+          <tr><td>Enhanced mobile screen reader testing protocol</td><td>Q2 2025</td><td><span class="status-tag status-q2">Planned</span></td></tr>
+          <tr><td>User testing sessions with disability community partners</td><td>Q3 2025</td><td><span class="status-tag status-q3">Planned</span></td></tr>
+          <tr><td>WCAG 3.0 readiness assessment</td><td>Q4 2025</td><td><span class="status-tag status-q4">Planned</span></td></tr>
+          <tr><td>Accessibility training for all new product engineers</td><td>Ongoing</td><td><span class="status-tag status-done">✓ Active</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="a9" aria-labelledby="h-a9">
+      <h2 id="h-a9"><span class="section-num" aria-hidden="true">9</span>Third-Party Content</h2>
+      <p>TaIQ embeds or links to content from third-party providers. While we work with providers who prioritize accessibility, we cannot guarantee full compliance for all third-party content.</p>
+      <ul>
+        <li><strong>Intercom (customer support chat):</strong> Partially accessible — keyboard operable, but some complex interactions may be challenging for screen reader users</li>
+        <li><strong>Embedded LinkedIn profiles:</strong> Subject to LinkedIn's own accessibility standards</li>
+        <li><strong>Employer-uploaded content:</strong> Job descriptions and company materials uploaded by employers may not meet our accessibility standards. We encourage employers to provide accessible formats and are developing tooling to help them do so.</li>
+      </ul>
+    </section>
+
+    <section id="a10" aria-labelledby="h-a10">
+      <h2 id="h-a10"><span class="section-num" aria-hidden="true">10</span>Feedback &amp; Support</h2>
+      <p>We want to hear from you. If you experience any accessibility barriers or have suggestions for improvement, please reach out:</p>
+      <div class="contact-card">
+        <h3>Accessibility Team</h3>
+        <p>📧 Email: <a href="mailto:accessibility@taiq.us">accessibility@taiq.us</a></p>
+        <p>☎️ Phone: +1 (800) 555-0198 (TTY/TDD available)</p>
+        <p>📬 Mail: TaIQ Inc., Attn: Accessibility Team<br>123 Innovation Drive, Suite 400, Philadelphia, PA 19103</p>
+        <p style="margin-top:.75rem;font-size:.82rem;color:rgba(255,255,255,.6)">We aim to respond to all accessibility inquiries within <strong style="color:rgba(255,255,255,.85)">5 business days</strong>. For urgent issues preventing access to job applications, please call us directly.</p>
+      </div>
+
+      <h3 style="margin-top:2rem">Formal Complaint Process</h3>
+      <p>If you have reported an accessibility issue to us and are not satisfied with our response, you may contact:</p>
+      <ul>
+        <li><strong>USA:</strong> <a href="https://www.ada.gov/filing-a-complaint/" target="_blank">U.S. Department of Justice ADA Complaint Portal</a></li>
+        <li><strong>UK:</strong> <a href="https://www.equalityhumanrights.com/en" target="_blank">Equality and Human Rights Commission</a></li>
+        <li><strong>EU:</strong> Your national accessibility enforcement body under the European Accessibility Act</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer class="page-footer" role="contentinfo">
+  <div>© 2025 TaIQ Inc. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="terms-of-service.html">Terms of Service</a>
+    <a href="cookie-policy.html">Cookie Policy</a>
+    <a href="accessibility.html">Accessibility</a>
+  </div>
+</footer>
+
+<script>
+  // Animate score bar on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('scoreBar').style.width = '94%';
+    }, 300);
+  });
+
+  // TOC active state
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

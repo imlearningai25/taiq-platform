@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Email — TaIQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brand:#0052cc; --teal:#00b4d8; --trans:.3s cubic-bezier(.4,0,.2,1);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body {
+      font-family:'DM Sans',sans-serif;
+      background:#050c1f; color:white;
+      min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; overflow:hidden; position:relative;
+    }
+    .bg { position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .bg-orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:.45; }
+    .bg-orb-1 {
+      width:700px; height:700px;
+      background:radial-gradient(circle,rgba(0,82,204,.5) 0%,transparent 70%);
+      top:-200px; right:-150px; animation:float1 10s ease-in-out infinite;
+    }
+    .bg-orb-2 {
+      width:500px; height:500px;
+      background:radial-gradient(circle,rgba(0,180,216,.4) 0%,transparent 70%);
+      bottom:-100px; left:-100px; animation:float2 13s ease-in-out infinite;
+    }
+    .bg-grid {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:60px 60px;
+    }
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-30px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-25px,25px)} }
+
+    .card {
+      position:relative; z-index:1; text-align:center;
+      max-width:520px; width:calc(100% - 3rem);
+      padding:3rem 2.5rem;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:24px; backdrop-filter:blur(20px);
+      animation:slideUp .7s ease both;
+    }
+    @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    .logo {
+      display:inline-flex; align-items:center; gap:.6rem;
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem;
+      color:white; margin-bottom:2rem; text-decoration:none;
+    }
+    .logo-mark {
+      width:38px; height:38px; background:var(--brand);
+      border-radius:10px; display:grid; place-items:center;
+    }
+    .logo-mark svg { width:20px; height:20px; fill:white; }
+
+    .icon-wrap {
+      width:90px; height:90px; border-radius:50%;
+      background:rgba(255,255,255,.07);
+      border:1.5px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.8rem; margin:0 auto 1.75rem;
+    }
+    .icon-wrap.spinning { animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .icon-wrap.success { border-color:rgba(74,222,128,.4); background:rgba(74,222,128,.08); animation:pulse-green 2s ease-in-out infinite; }
+    .icon-wrap.error   { border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.08); }
+    @keyframes pulse-green {
+      0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.3)}
+      50%{box-shadow:0 0 0 18px rgba(74,222,128,0)}
+    }
+
+    h1 { font-family:'Syne',sans-serif; font-size:clamp(1.5rem,4vw,2rem); font-weight:800; margin-bottom:.75rem; }
+    h1 .green { color:#4ade80; }
+    h1 .red   { color:#f87171; }
+
+    .message { font-size:.95rem; color:rgba(255,255,255,.6); line-height:1.7; margin-bottom:2rem; }
+
+    .btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.75rem 2rem; border-radius:9999px;
+      font:inherit; font-size:.92rem; font-weight:600;
+      cursor:pointer; text-decoration:none; transition:all var(--trans);
+      border:none;
+    }
+    .btn-primary { background:var(--brand); color:white; }
+    .btn-primary:hover { background:#0040a0; transform:translateY(-1px); }
+    .btn-ghost {
+      background:rgba(255,255,255,.07); color:rgba(255,255,255,.7);
+      border:1px solid rgba(255,255,255,.15);
+    }
+    .btn-ghost:hover { background:rgba(255,255,255,.12); color:white; }
+
+    .actions { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; }
+
+    footer {
+      position:relative; z-index:1; margin-top:1.5rem;
+      font-size:.75rem; color:rgba(255,255,255,.25); text-align:center;
+    }
+    footer a { color:rgba(255,255,255,.4); text-decoration:none; }
+    footer a:hover { color:rgba(255,255,255,.7); }
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<div class="card">
+  <a href="index.html" class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    TaIQ
+  </a>
+
+  <div class="icon-wrap spinning" id="icon">⏳</div>
+
+  <h1 id="title">Verifying your email…</h1>
+  <p class="message" id="message">Please wait while we confirm your email address.</p>
+
+  <div class="actions" id="actions" style="display:none"></div>
+</div>
+
+<footer>
+  © 2025 TaIQ Inc. ·
+  <a href="privacy-policy.html">Privacy</a> ·
+  <a href="terms-of-service.html">Terms</a>
+</footer>
+
+<script>
+  const API = '/api/v1';
+
+  async function verifyEmail() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    const icon    = document.getElementById('icon');
+    const title   = document.getElementById('title');
+    const message = document.getElementById('message');
+    const actions = document.getElementById('actions');
+
+    if (!token) {
+      icon.classList.remove('spinning');
+      icon.classList.add('error');
+      icon.textContent = '⚠️';
+      title.innerHTML = '<span class="red">Invalid Link</span>';
+      message.textContent = 'No verification token found. Please use the link from your welcome email.';
+      actions.style.display = 'flex';
+      actions.innerHTML = `<a href="index.html" class="btn btn-primary">Go to Homepage</a>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/verify-email?token=${encodeURIComponent(token)}`);
+      icon.classList.remove('spinning');
+
+      if (res.ok) {
+        icon.classList.add('success');
+        icon.textContent = '✅';
+        title.innerHTML = 'Email <span class="green">Verified!</span>';
+        message.textContent = 'Your email address has been confirmed. You can now sign in and access all features of TaIQ.';
+        actions.style.display = 'flex';
+        actions.innerHTML = `<a href="index.html?openLogin=1" class="btn btn-primary">Sign In to Your Account</a>`;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        icon.classList.add('error');
+        icon.textContent = '❌';
+        title.innerHTML = '<span class="red">Verification Failed</span>';
+        message.textContent = data.detail || 'This link is invalid or has expired. Please register again or contact support.';
+        actions.style.display = 'flex';
+        actions.innerHTML = `
+          <a href="index.html" class="btn btn-primary">Go to Homepage</a>
+          <a href="mailto:support@taiq.us" class="btn btn-ghost">Contact Support</a>
+        `;
+      }
+    } catch {
+      icon.classList.remove('spinning');
+      icon.classList.add('error');
+      icon.textContent = '⚠️';
+      title.innerHTML = '<span class="red">Connection Error</span>';
+      message.textContent = 'Could not reach the server. Please check your connection and try again.';
+      actions.style.display = 'flex';
+      actions.innerHTML = `<button class="btn btn-primary" onclick="location.reload()">Try Again</button>`;
+    }
+  }
+
+  verifyEmail();
+</script>
+</body>
+</html>
