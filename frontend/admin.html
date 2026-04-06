@@ -209,6 +209,10 @@
     .mini-act-text{flex:1;color:var(--ink-3)}
     .mini-act-time{color:var(--steel);font-size:.72rem;white-space:nowrap}
 
+    .drawer-actions{display:flex;gap:.65rem;flex-wrap:wrap;margin-bottom:1.25rem}
+    .badge-toggle{cursor:pointer;transition:opacity var(--trans),transform var(--trans)}
+    .badge-toggle:hover{opacity:.75;transform:scale(1.05)}
+
     @media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{display:none}.stats-row{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}}
     @media(max-width:500px){.stats-row{grid-template-columns:1fr}}
   </style>
@@ -450,7 +454,8 @@
       <button class="drawer-close" onclick="closeUserDrawer()">✕</button>
     </div>
     <div class="drawer-body">
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem" id="drawerBadges"></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem" id="drawerBadges"></div>
+      <div class="drawer-actions" id="drawerActions"></div>
       <div class="drawer-field">
         <div class="drawer-field-label">Phone</div>
         <div class="drawer-field-val" id="drawerPhone">—</div>
@@ -783,13 +788,18 @@
       }
 
       tbody.innerHTML = users.map(u => `
-        <tr onclick="openUserDrawer(${u.id})">
+        <tr id="user-row-${u.id}" onclick="openUserDrawer(${u.id})">
           <td>
             <div style="font-weight:600;color:var(--ink);font-size:.87rem">${escHtml(u.full_name || '—')}</div>
             <div style="font-size:.77rem;color:var(--steel)">${escHtml(u.email)}</div>
           </td>
           <td><span class="badge badge-${u.role}">${u.role}</span></td>
-          <td><span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'}">${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span></td>
+          <td>
+            <span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'} badge-toggle"
+              onclick="event.stopPropagation();toggleVerify(${u.id})"
+              title="${u.is_email_verified ? 'Click to unverify' : 'Click to verify'}"
+            >${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span>
+          </td>
           <td style="color:var(--steel);font-size:.8rem">${fmtDate(u.created_at)}</td>
           <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openUserDrawer(${u.id})">View</button></td>
         </tr>
@@ -815,9 +825,10 @@
     document.getElementById('drawerName').textContent = 'Loading…';
     document.getElementById('drawerEmail').textContent = '';
     document.getElementById('drawerBadges').innerHTML = '';
+    document.getElementById('drawerActions').innerHTML = '';
     document.getElementById('drawerPhone').textContent = '—';
     document.getElementById('drawerJoined').textContent = '—';
-    document.getElementById('drawerId').textContent = userId;
+    document.getElementById('drawerId').textContent = `#${userId}`;
     document.getElementById('drawerActFeed').innerHTML = '<span style="color:var(--steel)">Loading…</span>';
 
     try {
@@ -832,9 +843,7 @@
         document.getElementById('drawerPhone').textContent = u.phone || '—';
         document.getElementById('drawerJoined').textContent = fmtDate(u.created_at);
         document.getElementById('drawerId').textContent = `#${u.id}`;
-        document.getElementById('drawerBadges').innerHTML =
-          `<span class="badge badge-${u.role}">${u.role}</span>
-           <span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'}">${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span>`;
+        renderDrawerUser(u);
       }
 
       const acts = actsRes.ok ? await actsRes.json() : [];
@@ -851,6 +860,59 @@
       }
     } catch {
       document.getElementById('drawerActFeed').innerHTML = '<span style="color:var(--danger);font-size:.82rem">Failed to load user data.</span>';
+    }
+  }
+
+  function renderDrawerUser(u) {
+    const loggedInUser = JSON.parse(localStorage.getItem('taiq_user') || '{}');
+    const isSelf = u.id === loggedInUser.id;
+    const verifiedBadge = isSelf
+      ? `<span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'}">${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span>`
+      : `<span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'} badge-toggle"
+           onclick="toggleVerify(${u.id})"
+           title="${u.is_email_verified ? 'Click to unverify' : 'Click to verify'}"
+         >${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span>`;
+    document.getElementById('drawerBadges').innerHTML =
+      `<span class="badge badge-${u.role}">${u.role}</span>${verifiedBadge}`;
+    document.getElementById('drawerActions').innerHTML = '';
+  }
+
+  async function toggleVerify(userId, e) {
+    if (e) e.stopPropagation();
+    try {
+      const r = await fetch(`${API}/admin/users/${userId}/toggle-verify`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const updated = await r.json();
+      _usersCache[userId] = updated;
+
+      // Refresh table row badge
+      const row = document.getElementById(`user-row-${userId}`);
+      if (row) {
+        const cells = row.querySelectorAll('td');
+        cells[2].innerHTML = `
+          <span class="badge ${updated.is_email_verified ? 'badge-verified' : 'badge-unverified'} badge-toggle"
+            onclick="event.stopPropagation();toggleVerify(${userId})"
+            title="${updated.is_email_verified ? 'Click to unverify' : 'Click to verify'}"
+          >${updated.is_email_verified ? '✓ Verified' : 'Unverified'}</span>`;
+      }
+
+      // Refresh drawer if open for this user
+      if (document.getElementById('drawerOverlay').classList.contains('open') &&
+          document.getElementById('drawerId').textContent === `#${userId}`) {
+        renderDrawerUser(updated);
+      }
+
+      showToast(updated.is_email_verified
+        ? `✓ ${updated.full_name || updated.email} verified`
+        : `${updated.full_name || updated.email} unverified`, updated.is_email_verified ? '✅' : '🔓');
+    } catch (err) {
+      showToast('Failed: ' + err.message, '❌');
     }
   }
 

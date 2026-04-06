@@ -1163,7 +1163,7 @@
           <div class="why-check"><div class="check-icon"></div>90-day placement guarantee</div>
           <div class="why-check"><div class="check-icon"></div>ATS integrations with major HR systems</div>
         </div>
-        <button class="btn btn-primary btn-lg" onclick="openModal('register')">Start Hiring Today</button>
+        <button class="btn btn-primary btn-lg" id="startHiringBtn" onclick="handleStartHiring()">Start Hiring Today</button>
       </div>
     </div>
   </div>
@@ -1710,6 +1710,14 @@
     localStorage.removeItem('taiq_token');
     localStorage.removeItem('taiq_user');
     currentUser = null;
+  }
+
+  function handleStartHiring() {
+    if (currentUser && (currentUser.role === 'employer' || currentUser.role === 'admin')) {
+      window.location.href = 'dashboard.html?postJob=1';
+    } else {
+      openModal('register');
+    }
   }
 
   function updateNavForUser() {

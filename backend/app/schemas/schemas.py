@@ -20,6 +20,7 @@ class UserOut(BaseModel):
     id: int
     email: str
     full_name: str | None
+    phone: str | None = None
     role: UserRole
     avatar_url: str | None
     is_active: bool

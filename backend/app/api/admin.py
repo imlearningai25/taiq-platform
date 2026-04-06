@@ -10,7 +10,7 @@ import logging
 
 from app.core.database import get_db
 from app.models.models import SiteSettings, SiteMode, User, UserRole, ActivityLog, Job, Company, Application
-from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser
+from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser, JobOut, EmployerApplicationOut
 from app.api.applications import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -156,6 +156,67 @@ async def get_user_activities(
     )
     logs = (await db.scalars(stmt)).all()
     return [ActivityLogOut.model_validate(l) for l in logs]
+
+
+# ── Admin: all jobs (platform-wide) ──────────────────────────────────────────
+@router.get("/jobs", response_model=list[JobOut])
+async def admin_all_jobs(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(Job)
+        .options(selectinload(Job.company))
+        .order_by(Job.created_at.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
+    jobs = (await db.scalars(stmt)).all()
+    return [JobOut.model_validate(j) for j in jobs]
+
+
+# ── Admin: all applications (platform-wide) ───────────────────────────────────
+@router.get("/applications", response_model=list[EmployerApplicationOut])
+async def admin_all_applications(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(Application)
+        .options(
+            selectinload(Application.job).selectinload(Job.company),
+            selectinload(Application.candidate),
+        )
+        .order_by(Application.applied_at.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
+    apps = (await db.scalars(stmt)).all()
+    return [EmployerApplicationOut.model_validate(a) for a in apps]
+
+
+# ── Admin: toggle user email verification ────────────────────────────────────
+@router.patch("/users/{user_id}/toggle-verify", response_model=UserAdminOut)
+async def toggle_user_verify(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own verification status")
+    user.is_email_verified = not user.is_email_verified
+    await db.flush()
+    await db.refresh(user)
+    action = "verified" if user.is_email_verified else "unverified"
+    logger.info(f"Admin {current_user.email} {action} user {user.email}")
+    return UserAdminOut.model_validate(user)
 
 
 # ── Admin: all activities ─────────────────────────────────────────────────────

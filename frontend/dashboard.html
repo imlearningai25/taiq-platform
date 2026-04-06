@@ -299,7 +299,7 @@
         <div class="welcome-banner-inner">
           <h1 id="welcomeHeading">Welcome back! 👋</h1>
           <p id="welcomeSub">Here's your career activity at a glance.</p>
-          <div class="welcome-banner-actions">
+          <div class="welcome-banner-actions" id="welcomeBannerActions">
             <button class="btn-white" onclick="showPane('jobs')">🔍 Browse Jobs</button>
             <button class="btn-ghost-dark" onclick="showPane('profile')">👤 Update Profile</button>
           </div>
@@ -312,6 +312,14 @@
         <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-val" id="statAppReceived">0</div><div class="stat-card-label">Applications Received</div></div>
         <div class="stat-card"><div class="stat-card-icon">💬</div><div class="stat-card-val" id="statEmpInterviews">0</div><div class="stat-card-label">Interviews Scheduled</div></div>
         <div class="stat-card"><div class="stat-card-icon">🎉</div><div class="stat-card-val" id="statOffers">0</div><div class="stat-card-label">Offers Extended</div></div>
+      </div>
+
+      <!-- Admin Stats -->
+      <div class="stats-row" id="adminStats" style="display:none">
+        <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-val" id="statAdminUsers">—</div><div class="stat-card-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-card-icon">💼</div><div class="stat-card-val" id="statAdminJobs">—</div><div class="stat-card-label">Total Job Listings</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val" id="statAdminApps">—</div><div class="stat-card-label">Total Applications</div></div>
+        <div class="stat-card"><div class="stat-card-icon">🏢</div><div class="stat-card-val" id="statAdminCompanies">—</div><div class="stat-card-label">Companies</div></div>
       </div>
 
       <!-- Candidate Stats -->
@@ -331,7 +339,7 @@
           </div>
           <div id="dashAppList"><div class="empty-state"><div class="empty-state-icon">📭</div><p>No applications yet.</p><button class="btn btn-primary" onclick="showPane('jobs')">Browse Jobs</button></div></div>
         </div>
-        <div class="card">
+        <div class="card" id="profileCompletionCard">
           <div class="card-header">
             <h2 class="card-title">Profile Completion</h2>
             <span class="profile-pct" id="profilePct">0%</span>
@@ -352,14 +360,17 @@
       <!-- Employer Content -->
       <div class="content-grid" id="employerContent" style="display:none">
         <div class="card">
-          <div class="card-header"><h2 class="card-title">Recent Applications</h2></div>
+          <div class="card-header"><h2 class="card-title" id="empAppListTitle">Recent Applications</h2></div>
           <div id="empAppList"><div class="empty-state"><div class="empty-state-icon">📭</div><p>No applications yet.</p></div></div>
         </div>
         <div class="card">
-          <div class="card-header"><h2 class="card-title">My Job Postings</h2></div>
+          <div class="card-header">
+            <h2 class="card-title" id="myJobsListTitle">My Job Postings</h2>
+            <button class="card-link" id="postJobCardBtn" onclick="openPostJobModal()" title="Post new job" style="font-size:1.3rem;line-height:1;padding:0">＋</button>
+          </div>
           <div id="myJobsList"><div class="empty-state"><div class="empty-state-icon">📝</div><p>No jobs posted yet.</p></div></div>
         </div>
-        <div class="card" style="grid-column:1/-1">
+        <div class="card" id="companyCompletionCard" style="grid-column:1/-1">
           <div class="card-header"><h2 class="card-title">Company Profile Completion</h2><span class="profile-pct" id="companyProfilePct">0%</span></div>
           <div class="profile-bar-wrap"><div class="profile-bar-track"><div class="profile-bar-fill" id="companyProfileBarFill" style="width:0%"></div></div></div>
           <ul class="profile-steps" id="companyProfileSteps"></ul>
@@ -591,6 +602,78 @@
   </div>
 </div>
 
+<!-- Post Job Modal -->
+<div class="modal-overlay" id="postJobModal">
+  <div class="modal-box" style="width:min(680px,100%)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin-bottom:0">📝 Post a New Job</div>
+      <button style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--steel);line-height:1" onclick="closePostJobModal()">✕</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">Job Title <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="pjTitle" placeholder="e.g. Senior Software Engineer"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Location <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="pjLocation" placeholder="e.g. New York, NY"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Job Type</label>
+        <select class="form-input" id="pjJobType">
+          <option value="full_time">Full Time</option>
+          <option value="part_time">Part Time</option>
+          <option value="contract">Contract</option>
+          <option value="internship">Internship</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Min Salary ($/yr)</label>
+        <input class="form-input" id="pjSalMin" type="number" min="0" placeholder="e.g. 80000"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Max Salary ($/yr)</label>
+        <input class="form-input" id="pjSalMax" type="number" min="0" placeholder="e.g. 120000"/>
+      </div>
+      <div class="form-field" style="grid-column:1/-1">
+        <label class="form-label">Industry</label>
+        <select class="form-input" id="pjIndustry">
+          <option value="">— Select industry —</option>
+        </select>
+      </div>
+      <div class="form-field" style="grid-column:1/-1;display:flex;align-items:center;gap:.75rem">
+        <input type="checkbox" id="pjRemote" style="width:18px;height:18px;cursor:pointer;accent-color:var(--brand)"/>
+        <label for="pjRemote" style="font-size:.9rem;font-weight:500;color:var(--ink);cursor:pointer">Remote / Hybrid position</label>
+      </div>
+    </div>
+
+    <div class="form-field" style="margin-bottom:1rem">
+      <label class="form-label">Job Description <span style="color:var(--danger)">*</span></label>
+      <textarea class="form-input" id="pjDescription" rows="4" placeholder="Describe the role, responsibilities, and what makes this opportunity exciting…" style="resize:vertical;min-height:100px"></textarea>
+    </div>
+    <div class="form-field" style="margin-bottom:1rem">
+      <label class="form-label">Requirements</label>
+      <textarea class="form-input" id="pjRequirements" rows="3" placeholder="List the key qualifications and must-haves…" style="resize:vertical;min-height:80px"></textarea>
+    </div>
+    <div class="form-field" style="margin-bottom:1rem">
+      <label class="form-label">Benefits</label>
+      <textarea class="form-input" id="pjBenefits" rows="3" placeholder="Health insurance, flexible PTO, equity…" style="resize:vertical;min-height:80px"></textarea>
+    </div>
+    <div class="form-field" style="margin-bottom:1.25rem">
+      <label class="form-label">Required Skills <span style="font-size:.78rem;color:var(--steel)">(press Enter or comma to add)</span></label>
+      <div class="skills-input-wrap" id="pjSkillsWrap" onclick="document.getElementById('pjSkillsInner').focus()">
+        <input id="pjSkillsInner" class="skills-inner-input" placeholder="Add a skill…" onkeydown="handlePjSkillKey(event)"/>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePostJobModal()">Cancel</button>
+      <button class="btn btn-primary" id="pjSubmitBtn" onclick="submitPostJob()">🚀 Post Job</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API = '/api/v1';
 const token = localStorage.getItem('taiq_token');
@@ -652,17 +735,31 @@ function populateStaticUI(user) {
   document.getElementById('sideName').textContent = user.full_name || user.email;
   document.getElementById('sideRole').textContent = roleLabel;
   document.getElementById('welcomeHeading').textContent = `Welcome, ${firstName}! 👋`;
-  document.getElementById('welcomeSub').textContent = user.role === 'employer' ? 'Manage your postings and review candidate applications.' : "Here's your career activity at a glance.";
+  document.getElementById('welcomeSub').textContent = user.role === 'admin' ? 'Platform-wide overview — all jobs, users and applications.' : user.role === 'employer' ? 'Manage your postings and review candidate applications.' : "Here's your career activity at a glance.";
   if (user.role === 'admin') { const a = document.getElementById('adminNavItem'); if(a) a.style.display=''; }
+  // Welcome banner actions — employer/admin get Post Job CTA
+  if (user.role === 'employer' || user.role === 'admin') {
+    document.getElementById('welcomeBannerActions').innerHTML = `
+      <button class="btn-white" onclick="openPostJobModal()">📝 Post a Job</button>
+      <button class="btn-ghost-dark" onclick="showPane('profile')">👤 My Profile</button>`;
+  }
 }
 
 function applyRoleSections(role) {
-  const isEmp = role === 'employer' || role === 'admin';
-  document.getElementById('candidateStats').style.display = isEmp ? 'none' : '';
-  document.getElementById('candidateContent').style.display = isEmp ? 'none' : '';
-  document.getElementById('employerStats').style.display = isEmp ? '' : 'none';
-  document.getElementById('employerContent').style.display = isEmp ? '' : 'none';
+  const isAdmin = role === 'admin';
+  const isEmp   = role === 'employer' || isAdmin;
+  document.getElementById('candidateStats').style.display  = isEmp   ? 'none' : '';
+  document.getElementById('candidateContent').style.display = isEmp  ? 'none' : '';
+  document.getElementById('employerStats').style.display   = (isEmp && !isAdmin) ? '' : 'none';
+  document.getElementById('adminStats').style.display      = isAdmin ? '' : 'none';
+  document.getElementById('employerContent').style.display = isEmp   ? '' : 'none';
   document.querySelectorAll('.candidate-only').forEach(el => el.style.display = isEmp ? 'none' : '');
+  if (isAdmin) {
+    document.getElementById('empAppListTitle').textContent  = 'Recent Applications (All Users)';
+    document.getElementById('myJobsListTitle').textContent  = 'All Job Postings';
+    document.getElementById('companyCompletionCard').style.display = 'none';
+    document.getElementById('postJobCardBtn').style.display = 'none';
+  }
 }
 
 // ── Status helpers ────────────────────────────────────────────────────────────
@@ -719,6 +816,13 @@ function loadProfileCompletion(user, profile) {
     { done: !!(profile?.skills?.length > 0), label: 'Add skills' },
   ];
   const pct = Math.round(steps.filter(s=>s.done).length / steps.length * 100);
+
+  const card = document.getElementById('profileCompletionCard');
+  if (pct === 100) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
   document.getElementById('profilePct').textContent = `${pct}%`;
   setTimeout(()=>{ document.getElementById('profileBarFill').style.width=`${pct}%`; }, 400);
   document.getElementById('profileSteps').innerHTML = steps.map((s,i)=>`
@@ -726,33 +830,223 @@ function loadProfileCompletion(user, profile) {
 }
 
 async function loadRecommendedJobs() {
+  const container = document.getElementById('recJobs');
   try {
-    const r = await fetch(`${API}/jobs?limit=4`);
+    const r = await fetch(`${API}/jobs?limit=40`);
     if (!r.ok) throw new Error();
     const data = await r.json();
-    const container = document.getElementById('recJobs');
-    if (!data.jobs?.length) { container.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔍</div><p>No jobs found yet.</p></div>'; return; }
-    const userSkills = (profileData?.skills||[]).map(s=>s.toLowerCase());
-    container.innerHTML = data.jobs.map(j=>{
-      const js = (j.skills_required||[]).map(s=>s.toLowerCase());
-      let match = 70;
-      if (userSkills.length && js.length) {
-        const ov = userSkills.filter(s=>js.some(x=>x.includes(s)||s.includes(x))).length;
-        match = Math.min(99, 60+Math.round((ov/Math.max(js.length,1))*39));
+    if (!data.jobs?.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>No jobs found yet.</p></div>';
+      return;
+    }
+
+    const userSkills  = (profileData?.skills || []).map(s => s.toLowerCase().trim());
+    const userLoc     = (profileData?.location || '').toLowerCase().trim();
+    const wantsRemote = profileData?.open_to_remote ?? true;
+    const userExp     = profileData?.experience_years || 0;
+    const salMin      = profileData?.desired_salary_min || 0;
+    const salMax      = profileData?.desired_salary_max || Infinity;
+
+    const scored = data.jobs.map(j => {
+      let score = 0;
+
+      // ── Skills match (0–50 pts) ─────────────────────────────────────
+      const jSkills = (j.skills_required || []).map(s => s.toLowerCase().trim());
+      if (userSkills.length && jSkills.length) {
+        const matches = userSkills.filter(us =>
+          jSkills.some(js => js.includes(us) || us.includes(js))
+        ).length;
+        score += Math.round((matches / Math.max(jSkills.length, userSkills.length)) * 50);
+      } else if (!jSkills.length) {
+        score += 20; // no skill filter — open to all
       }
-      return `<div class="job-rec" onclick="showPane('jobs')">
+
+      // ── Remote preference (0–15 pts) ────────────────────────────────
+      if (j.remote && wantsRemote) score += 15;
+      else if (!j.remote && !wantsRemote) score += 8;
+
+      // ── Location match (0–15 pts) ────────────────────────────────────
+      if (userLoc && j.location) {
+        const jLoc = j.location.toLowerCase();
+        if (jLoc.includes(userLoc) || userLoc.includes(jLoc)) score += 15;
+        else {
+          // partial city/country match
+          const uParts = userLoc.split(/[,\s]+/);
+          const jParts = jLoc.split(/[,\s]+/);
+          if (uParts.some(p => p.length > 2 && jParts.includes(p))) score += 7;
+        }
+      }
+
+      // ── Salary fit (0–10 pts) ────────────────────────────────────────
+      const jSalMin = j.salary_min || 0;
+      const jSalMax = j.salary_max || Infinity;
+      if (jSalMax >= salMin && jSalMin <= salMax) score += 10; // ranges overlap
+
+      // ── Experience fit (0–10 pts) ────────────────────────────────────
+      // Penalise if job looks senior (title keywords) and user is junior, or vice-versa
+      const seniorKeywords = /senior|lead|principal|staff|director|head|vp|manager/i;
+      const juniorKeywords = /junior|entry|intern|graduate|trainee/i;
+      const isSenior = seniorKeywords.test(j.title);
+      const isJunior = juniorKeywords.test(j.title);
+      if (isSenior && userExp >= 4) score += 10;
+      else if (isJunior && userExp <= 2) score += 10;
+      else if (!isSenior && !isJunior) score += 7; // mid-level, neutral
+      else score += 2; // mismatch — small score
+
+      // ── Recency bonus (0–5 pts) ──────────────────────────────────────
+      const daysOld = (Date.now() - new Date(j.created_at)) / 86400000;
+      if (daysOld <= 3) score += 5;
+      else if (daysOld <= 7) score += 3;
+      else if (daysOld <= 14) score += 1;
+
+      // Convert score to a display percentage (max possible ~105, cap at 99)
+      const maxScore = 105;
+      const matchPct = Math.min(99, Math.max(40, Math.round((score / maxScore) * 100)));
+
+      return { job: j, score, matchPct };
+    });
+
+    // Sort by score desc, take top 4
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, 4);
+
+    const matchColor = pct => pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#6b7899';
+
+    container.innerHTML = top.map(({ job: j, matchPct }) => `
+      <div class="job-rec" onclick="showPane('jobs')" title="${(j.skills_required||[]).join(', ') || 'No specific skills required'}">
         <div class="job-rec-logo">🏢</div>
         <div class="job-rec-info">
           <div class="job-rec-title">${j.title}</div>
-          <div class="job-rec-meta">${j.company?.name||'Company'} · ${j.location}${j.remote?' · Remote':''}</div>
+          <div class="job-rec-meta">${j.company?.name || 'Company'} · ${j.location}${j.remote ? ' · Remote' : ''}</div>
         </div>
-        <span class="job-rec-match">${match}% match</span>
-      </div>`;
-    }).join('');
+        <span class="job-rec-match" style="background:${matchColor(matchPct)}22;color:${matchColor(matchPct)}">${matchPct}% match</span>
+      </div>`).join('');
   } catch {
-    document.getElementById('recJobs').innerHTML='<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Could not load recommendations.</p></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Could not load recommendations.</p></div>';
   }
 }
+
+// ── Post Job Modal ────────────────────────────────────────────────────────────
+let pjSkills = [];
+
+async function openPostJobModal() {
+  // Reset form
+  ['pjTitle','pjLocation','pjDescription','pjRequirements','pjBenefits','pjSalMin','pjSalMax'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('pjJobType').value = 'full_time';
+  document.getElementById('pjRemote').checked = false;
+  document.getElementById('pjIndustry').value = '';
+  pjSkills = [];
+  renderPjSkills();
+
+  // Load industries if not already loaded
+  const sel = document.getElementById('pjIndustry');
+  if (sel.options.length <= 1) {
+    try {
+      const r = await fetch(`${API}/public/industries`);
+      if (r.ok) {
+        const industries = await r.json();
+        industries.forEach(ind => {
+          const opt = document.createElement('option');
+          opt.value = ind.id;
+          opt.textContent = ind.name;
+          sel.appendChild(opt);
+        });
+      }
+    } catch {}
+  }
+
+  document.getElementById('postJobModal').classList.add('open');
+}
+
+function closePostJobModal() {
+  document.getElementById('postJobModal').classList.remove('open');
+}
+
+function renderPjSkills() {
+  const wrap = document.getElementById('pjSkillsWrap');
+  const input = document.getElementById('pjSkillsInner');
+  // Remove existing tags
+  wrap.querySelectorAll('.skill-tag').forEach(t => t.remove());
+  pjSkills.forEach((s, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'skill-tag';
+    tag.innerHTML = `${s} <span class="skill-remove" onclick="removePjSkill(${i})">×</span>`;
+    wrap.insertBefore(tag, input);
+  });
+}
+
+function removePjSkill(i) {
+  pjSkills.splice(i, 1);
+  renderPjSkills();
+}
+
+function handlePjSkillKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val && !pjSkills.includes(val)) {
+      pjSkills.push(val);
+      renderPjSkills();
+    }
+    e.target.value = '';
+  }
+}
+
+async function submitPostJob() {
+  const title       = document.getElementById('pjTitle').value.trim();
+  const location    = document.getElementById('pjLocation').value.trim();
+  const description = document.getElementById('pjDescription').value.trim();
+  if (!title || !location || !description) {
+    showToast('Please fill in Title, Location and Description', '⚠️'); return;
+  }
+
+  // Add any skill still typed but not confirmed
+  const skillInput = document.getElementById('pjSkillsInner').value.trim();
+  if (skillInput && !pjSkills.includes(skillInput)) { pjSkills.push(skillInput); }
+
+  const btn = document.getElementById('pjSubmitBtn');
+  btn.textContent = 'Posting…'; btn.disabled = true;
+
+  const payload = {
+    title,
+    location,
+    description,
+    requirements: document.getElementById('pjRequirements').value.trim() || null,
+    benefits:     document.getElementById('pjBenefits').value.trim() || null,
+    remote:       document.getElementById('pjRemote').checked,
+    job_type:     document.getElementById('pjJobType').value,
+    salary_min:   parseFloat(document.getElementById('pjSalMin').value) || null,
+    salary_max:   parseFloat(document.getElementById('pjSalMax').value) || null,
+    skills_required: pjSkills,
+    industry_id:  parseInt(document.getElementById('pjIndustry').value) || null,
+  };
+
+  try {
+    const r = await fetch(`${API}/employer/jobs`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || `Error ${r.status}`);
+    }
+    closePostJobModal();
+    showToast(`"${title}" posted successfully! 🎉`, '✅');
+    // Refresh job postings list
+    await loadDashboardEmployer(null);
+  } catch (e) {
+    showToast(e.message || 'Failed to post job', '❌');
+  } finally {
+    btn.textContent = '🚀 Post Job'; btn.disabled = false;
+  }
+}
+
+document.getElementById('postJobModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePostJobModal();
+});
 
 // ── Dashboard: employer data ──────────────────────────────────────────────────
 async function loadDashboardEmployer(company) {
@@ -1342,6 +1636,61 @@ async function changePassword() {
   } catch { showToast('Network error','⚠️'); }
 }
 
+// ── Dashboard: admin data ─────────────────────────────────────────────────────
+async function loadDashboardAdmin() {
+  // Platform overview stats
+  try {
+    const r = await fetch(`${API}/admin/overview`, { headers: authHeaders() });
+    if (r.ok) {
+      const d = await r.json();
+      document.getElementById('statAdminUsers').textContent     = d.total_users.toLocaleString();
+      document.getElementById('statAdminJobs').textContent      = d.total_jobs.toLocaleString();
+      document.getElementById('statAdminApps').textContent      = d.total_applications.toLocaleString();
+      document.getElementById('statAdminCompanies').textContent = d.total_companies.toLocaleString();
+    }
+  } catch {}
+
+  // All job postings
+  try {
+    const r = await fetch(`${API}/admin/jobs?limit=20`, { headers: authHeaders() });
+    if (r.ok) {
+      const jobs = await r.json();
+      const el = document.getElementById('myJobsList');
+      el.innerHTML = jobs.length
+        ? `<div class="app-list">${jobs.map(j => `
+            <div class="app-item">
+              <div class="app-logo">💼</div>
+              <div class="app-info">
+                <div class="app-title">${j.title}</div>
+                <div class="app-company">${j.company?.name || '—'} · ${j.location}${j.remote ? ' · Remote' : ''}</div>
+              </div>
+              <span class="app-status status-applied">${j.job_type.replace('_', ' ')}</span>
+            </div>`).join('')}</div>`
+        : `<div class="empty-state"><div class="empty-state-icon">📝</div><p>No jobs posted yet.</p></div>`;
+    }
+  } catch {}
+
+  // All recent applications
+  try {
+    const r = await fetch(`${API}/admin/applications?limit=20`, { headers: authHeaders() });
+    if (r.ok) {
+      const apps = await r.json();
+      const el = document.getElementById('empAppList');
+      el.innerHTML = apps.length
+        ? `<div class="app-list">${apps.map(a => `
+            <div class="app-item">
+              <div class="app-logo">👤</div>
+              <div class="app-info">
+                <div class="app-title">${a.candidate?.full_name || a.candidate?.email || 'Candidate'}</div>
+                <div class="app-company">${a.job?.title || '—'}${a.job?.company?.name ? ' · ' + a.job.company.name : ''}</div>
+              </div>
+              ${statusBadge(a.status)}
+            </div>`).join('')}</div>`
+        : `<div class="empty-state"><div class="empty-state-icon">📭</div><p>No applications yet.</p></div>`;
+    }
+  } catch {}
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   populateStaticUI(currentUser);
@@ -1355,14 +1704,25 @@ async function init() {
       localStorage.setItem('taiq_user', JSON.stringify(currentUser));
       populateStaticUI(currentUser);
       applyRoleSections(currentUser.role);
-      const isEmp = currentUser.role==='employer'||currentUser.role==='admin';
-      if (isEmp) { await loadDashboardEmployer(data.company); }
-      else { loadProfileCompletion(currentUser, profileData); await Promise.all([loadDashboardCandidate(), loadRecommendedJobs()]); }
+      if (currentUser.role === 'admin') {
+        await loadDashboardAdmin();
+      } else if (currentUser.role === 'employer') {
+        await loadDashboardEmployer(data.company);
+      } else {
+        loadProfileCompletion(currentUser, profileData);
+        await Promise.all([loadDashboardCandidate(), loadRecommendedJobs()]);
+      }
+      // Auto-open Post Job modal if redirected from landing page
+      if (new URLSearchParams(location.search).get('postJob') === '1' &&
+          (currentUser.role === 'employer' || currentUser.role === 'admin')) {
+        openPostJobModal();
+        history.replaceState({}, '', 'dashboard.html');
+      }
     }
   } catch {
     applyRoleSections(currentUser.role);
-    const isEmp = currentUser.role==='employer'||currentUser.role==='admin';
-    if (isEmp) await loadDashboardEmployer(null);
+    if (currentUser.role === 'admin') await loadDashboardAdmin();
+    else if (currentUser.role === 'employer') await loadDashboardEmployer(null);
     else { loadProfileCompletion(currentUser, null); await loadDashboardCandidate(); }
   }
 }
