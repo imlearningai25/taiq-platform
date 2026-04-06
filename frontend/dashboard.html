@@ -1013,8 +1013,11 @@ async function submitApplication() {
 
     if (r.ok) {
       closeApplyModal();
-      showToast('Application submitted! 🎉', '✅');
+      showToast('Application submitted! 🎉 View it in My Applications', '✅');
       loadJobsPane(jobsPage);
+      // Refresh stats counter
+      const statEl = document.getElementById('statApps');
+      if (statEl) statEl.textContent = (parseInt(statEl.textContent) || 0) + 1;
     } else {
       const e = await r.json();
       showToast(e.detail || 'Failed to apply', '❌');

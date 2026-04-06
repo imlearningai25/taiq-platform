@@ -146,10 +146,16 @@ class BlogPostOut(BaseModel):
     slug: str
     excerpt: str | None
     cover_image: str | None
+    cover_emoji: str | None = None
     category: str | None
     tags: list[Any]
+    reading_time_minutes: int | None = None
     published_at: datetime | None
     model_config = {"from_attributes": True}
+
+class BlogPostDetail(BlogPostOut):
+    content: str | None
+    author_name: str | None = None
 
 
 # ── Misc ──────────────────────────────────────────────────────────────────────

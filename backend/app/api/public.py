@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.core.database import get_db
 from app.models.models import Industry, Testimonial, Job, Company, User, Application
-from app.schemas.schemas import IndustryOut, TestimonialOut, StatsOut, BlogPostOut
+from app.schemas.schemas import IndustryOut, TestimonialOut, StatsOut, BlogPostOut, BlogPostDetail
 from app.models.models import BlogPost
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -37,7 +38,42 @@ async def get_testimonials(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/blog", response_model=list[BlogPostOut])
-async def get_blog_posts(db: AsyncSession = Depends(get_db)):
-    stmt = select(BlogPost).where(BlogPost.is_published == True).order_by(BlogPost.published_at.desc()).limit(3)
+async def get_blog_posts(
+    page: int = Query(1, ge=1),
+    limit: int = Query(9, ge=1, le=50),
+    category: str | None = Query(None),
+    featured: bool | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(BlogPost).where(BlogPost.is_published == True)
+    if category:
+        stmt = stmt.where(BlogPost.category == category)
+    stmt = stmt.order_by(BlogPost.published_at.desc()).offset((page - 1) * limit).limit(limit)
     posts = (await db.scalars(stmt)).all()
     return [BlogPostOut.model_validate(p) for p in posts]
+
+
+@router.get("/blog/count")
+async def count_blog_posts(
+    category: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(func.count(BlogPost.id)).where(BlogPost.is_published == True)
+    if category:
+        stmt = stmt.where(BlogPost.category == category)
+    total = await db.scalar(stmt) or 0
+    return {"total": total}
+
+
+@router.get("/blog/{slug}", response_model=BlogPostDetail)
+async def get_blog_post(slug: str, db: AsyncSession = Depends(get_db)):
+    post = await db.scalar(
+        select(BlogPost)
+        .options(selectinload(BlogPost.author))
+        .where(BlogPost.slug == slug, BlogPost.is_published == True)
+    )
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    out = BlogPostDetail.model_validate(post)
+    out.author_name = post.author.full_name if post.author else "TaIQ Editorial"
+    return out

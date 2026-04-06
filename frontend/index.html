@@ -685,9 +685,12 @@
     .jd-apply-btn {
       padding: .8rem 2rem; background: var(--brand); color: white;
       border-radius: var(--r2); font-weight: 600; font-size: .95rem;
-      transition: all var(--trans); border: none; cursor: pointer;
+      transition: all var(--trans); border: 1.5px solid transparent; cursor: pointer;
     }
     .jd-apply-btn:hover { background: var(--brand-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .jd-save-btn { border-color: var(--mist) !important; }
+    .jd-save-btn:hover { border-color: var(--brand) !important; color: var(--brand) !important; background: rgba(0,82,204,.05) !important; box-shadow: none !important; }
+    .jd-save-btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
 
     /* ─── Application Modal ──────────────────────────────────────────────────── */
     .apply-overlay {
@@ -730,6 +733,21 @@
     .file-upload-text { font-size: .85rem; color: var(--steel); }
     .file-upload-text strong { color: var(--brand); }
     .file-upload-name { font-size: .85rem; font-weight: 600; color: var(--success); margin-top: .3rem; }
+    /* Resume choice cards inside apply modal */
+    .resume-choice-group { display: flex; flex-direction: column; gap: .45rem; }
+    .resume-choice { display: flex; align-items: center; gap: .75rem; padding: .7rem .9rem; border: 1.5px solid var(--mist); border-radius: var(--r1); cursor: pointer; transition: all var(--trans); background: white; }
+    .resume-choice:hover { border-color: var(--brand); }
+    .resume-choice.selected { border-color: var(--brand); background: rgba(0,82,204,.04); }
+    .resume-choice input[type=radio] { accent-color: var(--brand); flex-shrink: 0; width: 15px; height: 15px; }
+    .resume-choice-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .resume-choice-label { font-size: .85rem; font-weight: 500; color: var(--ink); }
+    .resume-choice-sub { font-size: .74rem; color: var(--steel); }
+    .resume-new-drop { margin-top: .45rem; padding: .6rem .9rem; border: 1.5px dashed var(--mist); border-radius: var(--r1); display: flex; align-items: center; gap: .55rem; cursor: pointer; font-size: .83rem; color: var(--steel); transition: all var(--trans); background: var(--paper); }
+    .resume-new-drop:hover { border-color: var(--brand); color: var(--brand); }
+    .resume-new-drop.has-file { border-style: solid; border-color: var(--success); color: #15803d; background: rgba(34,197,94,.05); }
+    /* Referral email slide-in */
+    .referral-email-wrap { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .3s ease, opacity .25s ease; margin-top: 0; }
+    .referral-email-wrap.open { max-height: 70px; opacity: 1; margin-top: .5rem; }
     .apply-success {
       text-align: center; padding: 2rem 0;
     }
@@ -1172,43 +1190,12 @@
       <h2>Resources to Elevate Your Career</h2>
       <p>Expert advice, industry trends, and hiring guides from our team of career specialists</p>
     </div>
-    <div class="blog-grid fade-in">
-      <div class="blog-card">
-        <div class="blog-img blog-img-1">💼</div>
-        <div class="blog-body">
-          <span class="blog-cat">Career Advice</span>
-          <h3 class="blog-title">10 Resume Mistakes That Are Costing You Interviews</h3>
-          <p class="blog-excerpt">Discover the most common resume pitfalls and how to fix them to land more callbacks from top employers.</p>
-          <div class="blog-footer">
-            <span class="blog-date">March 28, 2025</span>
-            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
-          </div>
-        </div>
-      </div>
-      <div class="blog-card">
-        <div class="blog-img blog-img-2">📈</div>
-        <div class="blog-body">
-          <span class="blog-cat">Industry Trends</span>
-          <h3 class="blog-title">The 15 Fastest-Growing Jobs in Tech for 2025</h3>
-          <p class="blog-excerpt">AI, cybersecurity, and cloud computing are reshaping the workforce. Here's where the opportunities lie.</p>
-          <div class="blog-footer">
-            <span class="blog-date">March 15, 2025</span>
-            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
-          </div>
-        </div>
-      </div>
-      <div class="blog-card">
-        <div class="blog-img blog-img-3">🤝</div>
-        <div class="blog-body">
-          <span class="blog-cat">Hiring Guide</span>
-          <h3 class="blog-title">How to Build a Winning Employer Brand in 2025</h3>
-          <p class="blog-excerpt">Top candidates have options. Learn how leading companies attract elite talent in a competitive market.</p>
-          <div class="blog-footer">
-            <span class="blog-date">March 5, 2025</span>
-            <a href="#" class="blog-read" onclick="showToast('Opening article…','📖')">Read More →</a>
-          </div>
-        </div>
-      </div>
+    <div class="blog-grid fade-in" id="homeBlogGrid">
+      <!-- loaded from API -->
+      <div class="blog-card" style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--steel)">Loading articles…</div>
+    </div>
+    <div style="text-align:center;margin-top:2rem" class="fade-in">
+      <a href="blog.html" class="btn btn-outline" style="font-size:.95rem;padding:.7rem 2rem">View All Insights →</a>
     </div>
   </div>
 </section>
@@ -1254,7 +1241,7 @@
           <li><a href="#">Careers</a></li>
           <li><a href="#">Press</a></li>
           <li><a href="#">Contact</a></li>
-          <li><a href="#">Blog</a></li>
+          <li><a href="blog.html">Blog</a></li>
         </ul>
       </div>
     </div>
@@ -1396,12 +1383,10 @@
 
       <div class="form-group">
         <label class="form-label">Resume / CV *</label>
-        <div class="file-upload-zone" id="resumeZone" onclick="document.getElementById('resumeInput').click()">
-          <div class="file-upload-icon">📄</div>
-          <div class="file-upload-text">Click to upload or drag and drop<br><strong>PDF, DOC, DOCX</strong> (max 5MB)</div>
-          <div class="file-upload-name" id="resumeFileName"></div>
+        <div class="resume-choice-group" id="applyResumeChoiceGroup">
+          <!-- populated by openApplyModal -->
         </div>
-        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" style="display:none" />
+        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" style="display:none" onchange="onIndexResumeFilePicked(event)" />
       </div>
 
       <div class="form-group">
@@ -1411,15 +1396,19 @@
 
       <div class="form-group">
         <label class="form-label">How did you hear about this position?</label>
-        <select class="form-input" id="applySource">
+        <select class="form-input" id="applySource" onchange="onIndexReferralSourceChange()">
           <option value="">Select one</option>
           <option value="taiq">TaIQ Platform</option>
           <option value="linkedin">LinkedIn</option>
-          <option value="referral">Employee Referral</option>
+          <option value="employee_referral">Employee Referral</option>
           <option value="job_board">Job Board</option>
-          <option value="social">Social Media</option>
+          <option value="friend_family">Friend / Family</option>
+          <option value="recruiter">Recruiter</option>
           <option value="other">Other</option>
         </select>
+        <div class="referral-email-wrap" id="indexReferralEmailWrap">
+          <input type="email" class="form-input" id="indexReferralEmail" placeholder="Referrer's email address" style="margin-top:.5rem" />
+        </div>
       </div>
 
       <div class="form-check">
@@ -1523,17 +1512,52 @@
 
   async function loadFromAPI() {
     try {
-      const [stats, industries, testimonials, jobs] = await Promise.allSettled([
+      const [stats, industries, testimonials, jobs, blog] = await Promise.allSettled([
         fetch(`${API}/public/stats`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/public/industries`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/public/testimonials`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/jobs?limit=6`).then(r => r.ok ? r.json() : null),
+        fetch(`${API}/public/blog?limit=3`).then(r => r.ok ? r.json() : null),
       ]);
       if (industries.value) renderIndustries(industries.value);
       if (testimonials.value) renderTestimonials(testimonials.value);
       if (jobs.value?.jobs?.length) { allJobs = jobs.value.jobs; renderJobs(allJobs); }
       if (stats.value) updateStats(stats.value);
+      if (blog.value?.length) renderHomeBlog(blog.value);
     } catch { /* use static data */ }
+  }
+
+  const BLOG_GRADIENTS = [
+    'linear-gradient(135deg,#e0f2fe,#bae6fd)',
+    'linear-gradient(135deg,#f0fdf4,#bbf7d0)',
+    'linear-gradient(135deg,#fef9c3,#fde68a)',
+    'linear-gradient(135deg,#fce7f3,#fbcfe8)',
+    'linear-gradient(135deg,#ede9fe,#ddd6fe)',
+    'linear-gradient(135deg,#ffedd5,#fed7aa)',
+  ];
+
+  function renderHomeBlog(posts) {
+    const grid = document.getElementById('homeBlogGrid');
+    if (!grid) return;
+    grid.innerHTML = posts.map((p, i) => {
+      const date = p.published_at ? new Date(p.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+      const emoji = p.cover_emoji || '📝';
+      const grad = BLOG_GRADIENTS[i % BLOG_GRADIENTS.length];
+      const mins = p.reading_time_minutes ? `${p.reading_time_minutes} min read` : '';
+      return `
+        <a href="blog-post.html?slug=${encodeURIComponent(p.slug)}" class="blog-card" style="text-decoration:none;color:inherit">
+          <div class="blog-img" style="background:${grad}">${emoji}</div>
+          <div class="blog-body">
+            <span class="blog-cat">${p.category || 'Article'}</span>
+            <h3 class="blog-title">${p.title}</h3>
+            <p class="blog-excerpt">${p.excerpt || ''}</p>
+            <div class="blog-footer">
+              <span class="blog-date">${date}${mins ? ' · ' + mins : ''}</span>
+              <span class="blog-read">Read More →</span>
+            </div>
+          </div>
+        </a>`;
+    }).join('');
   }
 
   function updateStats(s) {
@@ -1662,7 +1686,24 @@
 
   function loadSession() {
     const u = localStorage.getItem('taiq_user');
-    if (u) { currentUser = JSON.parse(u); updateNavForUser(); }
+    if (u) {
+      currentUser = JSON.parse(u);
+      updateNavForUser();
+      prefetchSavedJobs();
+      fetchUserProfile();
+    }
+  }
+
+  async function prefetchSavedJobs() {
+    const token = localStorage.getItem('taiq_token');
+    if (!token) return;
+    try {
+      const r = await fetch(`${API}/me/saved`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) {
+        const saved = await r.json();
+        saved.forEach(s => { if (s.job?.id) _savedJobIds.add(s.job.id); });
+      }
+    } catch { /* non-critical */ }
   }
 
   function clearSession() {
@@ -1926,8 +1967,9 @@
       </div>
       <div class="jd-footer">
         <div class="jd-footer-info">Job ID: TQ-${String(j.id).padStart(5,'0')}</div>
-        <div style="display:flex;gap:.75rem">
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
           <button class="jd-apply-btn" style="background:var(--paper);color:var(--ink)" onclick="shareJob(${j.id})">Share</button>
+          ${currentUser ? `<button class="jd-apply-btn jd-save-btn" id="jdSaveBtn-${j.id}" onclick="toggleSaveJobDetail(${j.id},this)" style="background:var(--paper);color:var(--ink)">🔖 Save Job</button>` : ''}
           <button class="jd-apply-btn" onclick="openApplyModal(${j.id})">Apply Now</button>
         </div>
       </div>
@@ -1935,6 +1977,16 @@
 
     document.getElementById('jobDetailOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    // Restore saved state if already saved
+    if (currentUser && _savedJobIds.has(j.id)) {
+      const saveBtn = document.getElementById(`jdSaveBtn-${j.id}`);
+      if (saveBtn) {
+        saveBtn.textContent = '✅ Saved';
+        saveBtn.style.background = 'rgba(34,197,94,.1)';
+        saveBtn.style.color = '#15803d';
+      }
+    }
   }
 
   function closeJobDetail() {
@@ -1953,7 +2005,54 @@
     }
   }
 
-  // Close job detail on overlay click / Escape
+  // ── Save job (from job detail popup) ─────────────────────────────────────────
+  const _savedJobIds = new Set();
+
+  async function toggleSaveJobDetail(jobId, btn) {
+    const token = localStorage.getItem('taiq_token');
+    if (!token) return;
+
+    const isSaved = _savedJobIds.has(jobId);
+    btn.disabled = true;
+
+    try {
+      if (isSaved) {
+        const r = await fetch(`${API}/me/saved/${jobId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok || r.status === 204) {
+          _savedJobIds.delete(jobId);
+          btn.textContent = '🔖 Save Job';
+          btn.style.background = 'var(--paper)';
+          btn.style.color = 'var(--ink)';
+          showToast('Removed from saved jobs', '✅');
+        }
+      } else {
+        const r = await fetch(`${API}/me/saved/${jobId}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok || r.status === 201) {
+          _savedJobIds.add(jobId);
+          btn.textContent = '✅ Saved';
+          btn.style.background = 'rgba(34,197,94,.1)';
+          btn.style.color = '#15803d';
+          btn.style.borderColor = 'rgba(34,197,94,.3)';
+          showToast('Job saved! View it in your Dashboard → Saved Jobs', '🔖');
+        } else {
+          const err = await r.json().catch(() => ({}));
+          showToast(err.detail || 'Could not save job', '❌');
+        }
+      }
+    } catch {
+      showToast('Network error', '⚠️');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Close job detail on overlay click
   document.getElementById('jobDetailOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeJobDetail();
   });
@@ -1961,11 +2060,30 @@
   // ── Application Modal ────────────────────────────────────────────────────
   let applyJobId = null;
   let resumeFile = null;
+  let indexResumeChoice = 'new'; // 'saved' | 'new'
+  let indexNewResumeFile = null;
+  let _userProfile = null; // cached profile data (resume_url etc.)
+
+  async function fetchUserProfile() {
+    const token = localStorage.getItem('taiq_token');
+    if (!token || _userProfile) return;
+    try {
+      const r = await fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) { const d = await r.json(); _userProfile = d.profile; }
+    } catch { /* non-critical */ }
+  }
 
   function openApplyModal(id) {
+    if (!currentUser) {
+      closeJobDetail();
+      openModal('login');
+      return;
+    }
+
     const j = findJob(id);
     if (!j) return;
     applyJobId = id;
+    indexNewResumeFile = null;
 
     // Close job detail if open
     closeJobDetail();
@@ -1973,22 +2091,19 @@
     // Reset form
     document.getElementById('applyFormView').style.display = '';
     document.getElementById('applySuccessView').style.display = 'none';
-    document.getElementById('applyName').value = '';
-    document.getElementById('applyEmail').value = '';
+    document.getElementById('applyName').value = currentUser.full_name || '';
+    document.getElementById('applyEmail').value = currentUser.email || '';
     document.getElementById('applyPhone').value = '';
     document.getElementById('applyLinkedin').value = '';
     document.getElementById('applyCoverLetter').value = '';
     document.getElementById('applySource').value = '';
     document.getElementById('applyConsent').checked = false;
-    document.getElementById('resumeFileName').textContent = '';
-    document.getElementById('resumeZone').classList.remove('has-file');
-    resumeFile = null;
+    document.getElementById('resumeInput').value = '';
+    document.getElementById('indexReferralEmailWrap').classList.remove('open');
+    document.getElementById('indexReferralEmail').value = '';
 
-    // Pre-fill if user is logged in
-    if (currentUser) {
-      document.getElementById('applyName').value = currentUser.full_name || '';
-      document.getElementById('applyEmail').value = currentUser.email || '';
-    }
+    // Render resume widget
+    _renderIndexResumeWidget();
 
     // Set job banner
     document.getElementById('applyJobBanner').innerHTML = `
@@ -2002,7 +2117,65 @@
 
     document.getElementById('applyOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('applyName').focus(), 150);
+  }
+
+  function _renderIndexResumeWidget() {
+    const group = document.getElementById('applyResumeChoiceGroup');
+    const savedUrl = _userProfile?.resume_url || null;
+    const savedName = savedUrl ? savedUrl.split('/').pop() : null;
+
+    if (savedUrl) {
+      indexResumeChoice = 'saved';
+      group.innerHTML = `
+        <label class="resume-choice selected" id="idxRcSaved" onclick="selectIndexResumeChoice('saved')">
+          <input type="radio" name="idxResumeChoice" checked/>
+          <span class="resume-choice-icon">📄</span>
+          <div><div class="resume-choice-label">Use my uploaded resume</div><div class="resume-choice-sub">${savedName}</div></div>
+        </label>
+        <label class="resume-choice" id="idxRcNew" onclick="selectIndexResumeChoice('new')">
+          <input type="radio" name="idxResumeChoice"/>
+          <span class="resume-choice-icon">📎</span>
+          <div><div class="resume-choice-label">Upload a different resume</div><div class="resume-choice-sub">PDF, DOC, DOCX · max 10 MB</div></div>
+        </label>
+        <div id="idxNewFileDrop" style="display:none">
+          <div class="resume-new-drop" id="idxNewFileLabel" onclick="document.getElementById('resumeInput').click()">
+            <span>📎</span><span id="idxNewFileText">Click to choose file…</span>
+          </div>
+        </div>`;
+    } else {
+      indexResumeChoice = 'new';
+      group.innerHTML = `
+        <div class="resume-new-drop" id="idxNewFileLabel" onclick="document.getElementById('resumeInput').click()">
+          <span>📎</span><span id="idxNewFileText">Click to upload resume (PDF, DOC, DOCX · max 10 MB)</span>
+        </div>`;
+    }
+  }
+
+  function selectIndexResumeChoice(choice) {
+    indexResumeChoice = choice;
+    const rcSaved = document.getElementById('idxRcSaved');
+    const rcNew = document.getElementById('idxRcNew');
+    const dropWrap = document.getElementById('idxNewFileDrop');
+    if (rcSaved) rcSaved.classList.toggle('selected', choice === 'saved');
+    if (rcNew) rcNew.classList.toggle('selected', choice === 'new');
+    if (dropWrap) dropWrap.style.display = choice === 'new' ? '' : 'none';
+    if (choice === 'saved') indexNewResumeFile = null;
+  }
+
+  function onIndexResumeFilePicked(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { showToast('File too large — max 10 MB', '⚠️'); return; }
+    indexNewResumeFile = file;
+    const label = document.getElementById('idxNewFileLabel');
+    const text = document.getElementById('idxNewFileText');
+    if (label) label.classList.add('has-file');
+    if (text) text.textContent = file.name;
+  }
+
+  function onIndexReferralSourceChange() {
+    const val = document.getElementById('applySource').value;
+    document.getElementById('indexReferralEmailWrap').classList.toggle('open', val === 'employee_referral');
   }
 
   function closeApplyModal() {
@@ -2010,103 +2183,93 @@
     document.body.style.overflow = '';
     applyJobId = null;
     resumeFile = null;
+    indexNewResumeFile = null;
   }
 
-  // File upload handling
-  document.getElementById('resumeInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('File too large. Max 5MB allowed.', '⚠️');
-      return;
-    }
-    resumeFile = file;
-    document.getElementById('resumeFileName').textContent = file.name;
-    document.getElementById('resumeZone').classList.add('has-file');
-  });
-
-  // Drag and drop
-  const resumeZone = document.getElementById('resumeZone');
-  resumeZone.addEventListener('dragover', e => { e.preventDefault(); resumeZone.style.borderColor = 'var(--brand)'; });
-  resumeZone.addEventListener('dragleave', () => { resumeZone.style.borderColor = ''; });
-  resumeZone.addEventListener('drop', e => {
-    e.preventDefault();
-    resumeZone.style.borderColor = '';
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      if (file.size > 5*1024*1024) { showToast('File too large. Max 5MB.','⚠️'); return; }
-      resumeFile = file;
-      document.getElementById('resumeInput').files = e.dataTransfer.files;
-      document.getElementById('resumeFileName').textContent = file.name;
-      resumeZone.classList.add('has-file');
-    }
-  });
-
-  function submitApplication() {
+  async function submitApplication() {
     const name = document.getElementById('applyName').value.trim();
     const email = document.getElementById('applyEmail').value.trim();
     const consent = document.getElementById('applyConsent').checked;
 
-    if (!name || !email) {
-      showToast('Please fill in your name and email.', '⚠️');
-      return;
+    if (!name || !email) { showToast('Please fill in your name and email.', '⚠️'); return; }
+    if (!email.includes('@')) { showToast('Please enter a valid email address.', '⚠️'); return; }
+    if (indexResumeChoice === 'new' && !indexNewResumeFile) {
+      showToast('Please upload your resume.', '⚠️'); return;
     }
-    if (!email.includes('@') || !email.includes('.')) {
-      showToast('Please enter a valid email address.', '⚠️');
-      return;
-    }
-    if (!resumeFile) {
-      showToast('Please upload your resume.', '⚠️');
-      return;
-    }
-    if (!consent) {
-      showToast('Please confirm your consent to proceed.', '⚠️');
-      return;
-    }
+    if (!consent) { showToast('Please confirm your consent to proceed.', '⚠️'); return; }
 
     const btn = document.getElementById('applySubmitBtn');
-    btn.textContent = 'Submitting…';
     btn.disabled = true;
+    const token = localStorage.getItem('taiq_token');
 
-    // Simulate API call
-    setTimeout(() => {
-      const j = findJob(applyJobId);
-      document.getElementById('applySuccessMsg').textContent =
-        `Your application for ${j?.title || 'this position'} at ${j?.company?.name || 'the company'} has been submitted successfully. You will receive a confirmation email at ${email} shortly.`;
+    try {
+      let resumeUrl = null;
 
-      document.getElementById('applyFormView').style.display = 'none';
-      document.getElementById('applySuccessView').style.display = '';
+      if (indexResumeChoice === 'saved') {
+        resumeUrl = _userProfile?.resume_url || null;
+      } else if (indexNewResumeFile) {
+        btn.textContent = 'Uploading resume…';
+        const fd = new FormData();
+        fd.append('file', indexNewResumeFile);
+        const upRes = await fetch(`${API}/me/resume`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        if (!upRes.ok) {
+          const err = await upRes.json().catch(() => ({}));
+          throw new Error(err.detail || 'Resume upload failed');
+        }
+        const upData = await upRes.json();
+        resumeUrl = upData.resume_url;
+        if (_userProfile) _userProfile.resume_url = resumeUrl;
+      }
 
+      btn.textContent = 'Submitting…';
+      const referralSource = document.getElementById('applySource').value || null;
+      const referralEmail = referralSource === 'employee_referral'
+        ? (document.getElementById('indexReferralEmail').value.trim() || null)
+        : null;
+
+      const r = await fetch(`${API}/applications`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job_id: applyJobId,
+          cover_letter: document.getElementById('applyCoverLetter').value || null,
+          resume_url: resumeUrl,
+          referral_source: referralSource,
+          referral_email: referralEmail,
+        }),
+      });
+
+      if (r.ok || r.status === 201) {
+        const j = findJob(applyJobId);
+        document.getElementById('applySuccessMsg').textContent =
+          `Your application for ${j?.title || 'this position'} at ${j?.company?.name || 'the company'} has been submitted. Track it in your Dashboard → My Applications.`;
+        document.getElementById('applyFormView').style.display = 'none';
+        document.getElementById('applySuccessView').style.display = '';
+        showToast('Application submitted! 🎉', '✅');
+      } else {
+        const err = await r.json().catch(() => ({}));
+        showToast(err.detail || 'Failed to submit application', '❌');
+      }
+    } catch (e) {
+      showToast(e.message || 'Network error. Try again.', '⚠️');
+    } finally {
       btn.textContent = 'Submit Application';
       btn.disabled = false;
-
-      showToast('Application submitted successfully!', '🎉');
-    }, 1500);
+    }
   }
 
-  // Close apply modal on overlay click / Escape
+  // Close apply modal on overlay click
   document.getElementById('applyOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeApplyModal();
   });
 
-  // Unified Escape key handler
-  document.removeEventListener('keydown', handleEscapeKey);
-  function handleEscapeKey(e) {
-    if (e.key === 'Escape') {
-      if (document.getElementById('applyOverlay').classList.contains('open')) { closeApplyModal(); return; }
-      if (document.getElementById('jobDetailOverlay').classList.contains('open')) { closeJobDetail(); return; }
-      closeModal();
-    }
-  }
-  document.addEventListener('keydown', handleEscapeKey);
-
-  // ── Modal close: backdrop click + Escape key ──────────────────────────────────
+  // ── Modal close: backdrop click ───────────────────────────────────────────────
   document.getElementById('authModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
-  });
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
   });
 
   // ── Confirm password live validation ─────────────────────────────────────────

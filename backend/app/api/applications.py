@@ -62,9 +62,17 @@ async def apply_to_job(
     )
     db.add(app)
     await db.flush()
+
+    # Reload with eager relationships to avoid MissingGreenlet on job.company
+    loaded_app = await db.scalar(
+        select(Application)
+        .options(selectinload(Application.job).selectinload(Job.company))
+        .where(Application.id == app.id)
+    )
+
     ref_note = f" (via {payload.referral_source})" if payload.referral_source else ""
     await track(db, current_user, "job_applied", f"Applied to job: {job.title}{ref_note}")
-    return ApplicationOut.model_validate(app)
+    return ApplicationOut.model_validate(loaded_app)
 
 
 @router.get("/my", response_model=list[ApplicationOut])
