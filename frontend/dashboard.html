@@ -199,12 +199,56 @@
   /* Apply modal */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.5);z-index:200;align-items:center;justify-content:center;padding:1rem}
   .modal-overlay.open{display:flex}
-  .modal-box{background:var(--white);border-radius:var(--r3);padding:2rem;width:min(520px,100%);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)}
+  .modal-box{background:var(--white);border-radius:var(--r3);padding:2rem;width:min(560px,100%);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)}
   .modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink);margin-bottom:1.25rem}
   .modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem}
+  /* Resume choice cards */
+  .resume-choice-group{display:flex;flex-direction:column;gap:.5rem}
+  .resume-choice{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--mist);border-radius:var(--r1);cursor:pointer;transition:all var(--trans);background:var(--white)}
+  .resume-choice:hover{border-color:var(--brand)}
+  .resume-choice.selected{border-color:var(--brand);background:rgba(0,82,204,.04)}
+  .resume-choice input[type=radio]{accent-color:var(--brand);flex-shrink:0;width:16px;height:16px}
+  .resume-choice-icon{font-size:1.2rem;flex-shrink:0}
+  .resume-choice-label{font-size:.86rem;font-weight:500;color:var(--ink)}
+  .resume-choice-sub{font-size:.75rem;color:var(--steel)}
+  .resume-new-drop{margin-top:.5rem;padding:.6rem .9rem;border:1.5px dashed var(--mist);border-radius:var(--r1);display:flex;align-items:center;gap:.6rem;cursor:pointer;font-size:.84rem;color:var(--steel);transition:all var(--trans);background:var(--paper)}
+  .resume-new-drop:hover{border-color:var(--brand);color:var(--brand)}
+  .resume-new-drop.has-file{border-style:solid;border-color:var(--success);color:#15803d;background:rgba(34,197,94,.05)}
+  /* Referral email slide-down */
+  .referral-email-wrap{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .25s ease;margin-top:0}
+  .referral-email-wrap.open{max-height:80px;opacity:1;margin-top:.6rem}
+  .form-select{width:100%;padding:.6rem .9rem;border:1.5px solid var(--mist);border-radius:var(--r1);font:inherit;font-size:.88rem;color:var(--ink);outline:none;transition:border-color var(--trans);background:var(--white);cursor:pointer}
+  .form-select:focus{border-color:var(--brand)}
+
+  /* Activity timeline */
+  .activity-list{display:flex;flex-direction:column}
+  .activity-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--paper)}
+  .activity-item:last-child{border-bottom:none}
+  .activity-icon-wrap{width:36px;height:36px;border-radius:50%;background:rgba(0,82,204,.08);border:1.5px solid rgba(0,82,204,.15);display:grid;place-items:center;font-size:1rem;flex-shrink:0;margin-top:.1rem}
+  .activity-body{flex:1}
+  .activity-desc{font-size:.88rem;color:var(--ink);font-weight:500;line-height:1.4}
+  .activity-time{font-size:.75rem;color:var(--steel);margin-top:.2rem}
 
   @media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{position:static}.stats-row{grid-template-columns:1fr 1fr}.content-grid{grid-template-columns:1fr}.jobs-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
   @media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}}
+
+  /* Resume upload widget */
+  .resume-upload-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border:1.5px dashed var(--mist);border-radius:var(--r1);background:var(--paper);color:var(--steel);font-size:.85rem;font-weight:500;cursor:pointer;transition:all var(--trans);font-family:inherit;width:100%;justify-content:center}
+  .resume-upload-btn:hover{border-color:var(--brand);color:var(--brand);background:rgba(0,82,204,.04)}
+  .resume-file-card{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;border:1.5px solid var(--mist);border-radius:var(--r1);background:var(--white);position:relative;overflow:hidden;transition:border-color var(--trans)}
+  .resume-file-card:hover{border-color:var(--brand)}
+  .resume-file-icon{font-size:1.4rem;flex-shrink:0}
+  .resume-file-info{flex:1;min-width:0}
+  .resume-file-name{font-size:.85rem;font-weight:600;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .resume-file-meta{font-size:.73rem;color:var(--steel);margin-top:.1rem}
+  .resume-actions{display:flex;gap:.35rem;align-items:center;opacity:0;transition:opacity var(--trans);flex-shrink:0}
+  .resume-file-card:hover .resume-actions{opacity:1}
+  .resume-action-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--mist);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all var(--trans)}
+  .resume-action-btn:hover{border-color:var(--brand);background:rgba(0,82,204,.07)}
+  .resume-action-btn.danger:hover{border-color:var(--danger);background:rgba(239,68,68,.07)}
+  .resume-uploading{display:flex;align-items:center;gap:.65rem;padding:.65rem 1rem;border:1.5px solid var(--mist);border-radius:var(--r1);background:var(--paper);font-size:.84rem;color:var(--steel)}
+  .resume-spinner{width:16px;height:16px;border:2px solid var(--mist);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -241,6 +285,7 @@
       <li><a onclick="showPane('profile')" id="nav-profile"><span class="nav-icon">👤</span>My Profile</a></li>
       <li><a onclick="showPane('notifications')" id="nav-notifications"><span class="nav-icon">🔔</span>Notifications</a></li>
       <li><a onclick="showPane('settings')" id="nav-settings"><span class="nav-icon">⚙️</span>Settings</a></li>
+      <li><a onclick="showPane('activities')" id="nav-activities"><span class="nav-icon">📊</span>Activities</a></li>
       <li id="adminNavItem" style="display:none"><a href="admin.html" style="color:#ef4444"><span class="nav-icon">🔧</span>Admin Panel</a></li>
     </ul>
   </aside>
@@ -414,8 +459,11 @@
             <input id="pfLinkedin" class="form-input" placeholder="https://linkedin.com/in/username"/>
           </div>
           <div class="form-field">
-            <label class="form-label">Resume URL</label>
-            <input id="pfResume" class="form-input" placeholder="https://… link to your resume"/>
+            <label class="form-label">Resume</label>
+            <div id="resumeWidget">
+              <!-- populated by renderResumeWidget() -->
+            </div>
+            <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx" style="display:none" onchange="handleResumeUpload(event)"/>
           </div>
         </div>
 
@@ -485,6 +533,14 @@
         <p style="font-size:.85rem;color:var(--steel);margin-bottom:1rem">Sign out from all devices by logging out.</p>
         <button class="btn btn-danger" onclick="doLogout()">Sign Out</button>
       </div>
+    <!-- ══ PANE: Activities ══════════════════════════════════════════════════ -->
+    <div id="pane-activities" class="pane" style="display:none">
+      <h2 class="pane-title">My Activities</h2>
+      <div class="card" id="activitiesContainer">
+        <div style="text-align:center;padding:2rem;color:var(--steel)">Loading activities…</div>
+      </div>
+    </div>
+
     </div>
 
   </main>
@@ -494,10 +550,40 @@
 <div class="modal-overlay" id="applyModal">
   <div class="modal-box">
     <div class="modal-title" id="applyModalTitle">Apply to Job</div>
+
+    <!-- Resume section -->
+    <div class="form-field" style="margin-bottom:1rem">
+      <label class="form-label">Resume</label>
+      <div class="resume-choice-group" id="resumeChoiceGroup">
+        <!-- populated by openApplyModal -->
+      </div>
+      <input type="file" id="applyResumeFile" accept=".pdf,.doc,.docx" style="display:none" onchange="onApplyResumeFilePicked(event)"/>
+    </div>
+
+    <!-- Cover letter -->
     <div class="form-field" style="margin-bottom:1rem">
       <label class="form-label">Cover Letter <span class="form-hint">(optional)</span></label>
-      <textarea id="applyCoverLetter" class="form-textarea" style="min-height:120px" placeholder="Tell them why you're a great fit…"></textarea>
+      <textarea id="applyCoverLetter" class="form-textarea" style="min-height:110px" placeholder="Tell them why you're a great fit…"></textarea>
     </div>
+
+    <!-- How did you hear -->
+    <div class="form-field" style="margin-bottom:.25rem">
+      <label class="form-label">How did you hear about this role? <span class="form-hint">(optional)</span></label>
+      <select class="form-select" id="applyReferralSource" onchange="onReferralSourceChange()">
+        <option value="">— Select —</option>
+        <option value="job_board">Job Board</option>
+        <option value="linkedin">LinkedIn</option>
+        <option value="company_website">Company Website</option>
+        <option value="employee_referral">Employee Referral</option>
+        <option value="friend_family">Friend / Family</option>
+        <option value="recruiter">Recruiter</option>
+        <option value="other">Other</option>
+      </select>
+      <div class="referral-email-wrap" id="referralEmailWrap">
+        <input id="applyReferralEmail" class="form-input" type="email" placeholder="Referrer's email address"/>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeApplyModal()">Cancel</button>
       <button class="btn btn-primary" onclick="submitApplication()" id="applySubmitBtn">Submit Application</button>
@@ -552,6 +638,7 @@ function showPane(name) {
   if (name === 'saved') loadSavedPane();
   if (name === 'profile') loadProfilePane();
   if (name === 'settings') loadSettingsPane();
+  if (name === 'activities') loadActivitiesPane();
 }
 
 // ── Populate nav/avatar ───────────────────────────────────────────────────────
@@ -787,29 +874,158 @@ function renderPagination(page, pages) {
 }
 
 // ── Apply modal ───────────────────────────────────────────────────────────────
+let applyResumeChoice = 'saved';   // 'saved' | 'new'
+let applyNewResumeFile = null;     // File object when user picks a new file
+
 function openApplyModal(jobId, title) {
   applyJobId = jobId;
+  applyNewResumeFile = null;
   document.getElementById('applyModalTitle').textContent = `Apply — ${title}`;
   document.getElementById('applyCoverLetter').value = '';
+  document.getElementById('applyReferralSource').value = '';
+  document.getElementById('applyReferralEmail').value = '';
+  document.getElementById('referralEmailWrap').classList.remove('open');
+  document.getElementById('applyResumeFile').value = '';
+  _renderApplyResumeSection();
   document.getElementById('applyModal').classList.add('open');
 }
-function closeApplyModal() { document.getElementById('applyModal').classList.remove('open'); applyJobId=null; }
+
+function _renderApplyResumeSection() {
+  const group = document.getElementById('resumeChoiceGroup');
+  const savedUrl = profileData?.resume_url || null;
+  const savedName = savedUrl ? savedUrl.split('/').pop() : null;
+
+  if (savedUrl) {
+    // Two options: use saved or upload new
+    applyResumeChoice = 'saved';
+    group.innerHTML = `
+      <label class="resume-choice selected" id="rcSaved" onclick="selectResumeChoice('saved')">
+        <input type="radio" name="resumeChoice" value="saved" checked/>
+        <span class="resume-choice-icon">📄</span>
+        <div>
+          <div class="resume-choice-label">Use my uploaded resume</div>
+          <div class="resume-choice-sub">${savedName}</div>
+        </div>
+      </label>
+      <label class="resume-choice" id="rcNew" onclick="selectResumeChoice('new')">
+        <input type="radio" name="resumeChoice" value="new"/>
+        <span class="resume-choice-icon">📎</span>
+        <div>
+          <div class="resume-choice-label">Upload a different resume</div>
+          <div class="resume-choice-sub">PDF, DOC, DOCX · max 10 MB</div>
+        </div>
+      </label>
+      <div id="applyNewFileDrop" style="display:none">
+        <div class="resume-new-drop" id="applyNewFileLabel" onclick="document.getElementById('applyResumeFile').click()">
+          <span>📎</span> <span id="applyNewFileText">Click to choose file…</span>
+        </div>
+      </div>`;
+  } else {
+    // No saved resume — only upload option
+    applyResumeChoice = 'new';
+    group.innerHTML = `
+      <div class="resume-new-drop" id="applyNewFileLabel" onclick="document.getElementById('applyResumeFile').click()">
+        <span>📎</span> <span id="applyNewFileText">Click to upload resume (PDF, DOC, DOCX)</span>
+      </div>`;
+  }
+}
+
+function selectResumeChoice(choice) {
+  applyResumeChoice = choice;
+  const rcSaved = document.getElementById('rcSaved');
+  const rcNew = document.getElementById('rcNew');
+  const dropWrap = document.getElementById('applyNewFileDrop');
+  if (rcSaved) rcSaved.classList.toggle('selected', choice === 'saved');
+  if (rcNew) rcNew.classList.toggle('selected', choice === 'new');
+  if (dropWrap) dropWrap.style.display = choice === 'new' ? '' : 'none';
+  if (choice === 'saved') { applyNewResumeFile = null; }
+}
+
+function onApplyResumeFilePicked(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  applyNewResumeFile = file;
+  const label = document.getElementById('applyNewFileLabel');
+  const text = document.getElementById('applyNewFileText');
+  if (label) label.classList.add('has-file');
+  if (text) text.textContent = file.name;
+}
+
+function onReferralSourceChange() {
+  const val = document.getElementById('applyReferralSource').value;
+  document.getElementById('referralEmailWrap').classList.toggle('open', val === 'employee_referral');
+}
+
+function closeApplyModal() {
+  document.getElementById('applyModal').classList.remove('open');
+  applyJobId = null;
+  applyNewResumeFile = null;
+}
 
 async function submitApplication() {
   if (!applyJobId) return;
   const btn = document.getElementById('applySubmitBtn');
-  btn.textContent='Submitting…'; btn.disabled=true;
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
   try {
+    let resumeUrl = null;
+
+    if (applyResumeChoice === 'saved') {
+      resumeUrl = profileData?.resume_url || null;
+    } else if (applyNewResumeFile) {
+      // Upload the new file first
+      btn.textContent = 'Uploading resume…';
+      const fd = new FormData();
+      fd.append('file', applyNewResumeFile);
+      const upRes = await fetch(`${API}/me/resume`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('taiq_token')}` },
+        body: fd,
+      });
+      if (!upRes.ok) {
+        const err = await upRes.json().catch(() => ({}));
+        throw new Error(err.detail || 'Resume upload failed');
+      }
+      const upData = await upRes.json();
+      resumeUrl = upData.resume_url;
+      // Update profileData so the profile pane reflects the new resume
+      profileData = { ...profileData, resume_url: resumeUrl };
+      renderResumeWidget(resumeUrl);
+    }
+
+    const referralSource = document.getElementById('applyReferralSource').value || null;
+    const referralEmail = referralSource === 'employee_referral'
+      ? (document.getElementById('applyReferralEmail').value.trim() || null)
+      : null;
+
+    btn.textContent = 'Submitting…';
     const r = await fetch(`${API}/applications`, {
-      method:'POST', headers: authHeaders(),
-      body: JSON.stringify({ job_id:applyJobId, cover_letter: document.getElementById('applyCoverLetter').value||null })
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        job_id: applyJobId,
+        cover_letter: document.getElementById('applyCoverLetter').value || null,
+        resume_url: resumeUrl,
+        referral_source: referralSource,
+        referral_email: referralEmail,
+      }),
     });
-    if (r.ok) { closeApplyModal(); showToast('Application submitted! 🎉','✅'); loadJobsPane(jobsPage); }
-    else { const e=await r.json(); showToast(e.detail||'Failed to apply','❌'); }
-  } catch { showToast('Network error. Try again.','⚠️'); }
-  finally { btn.textContent='Submit Application'; btn.disabled=false; }
+
+    if (r.ok) {
+      closeApplyModal();
+      showToast('Application submitted! 🎉', '✅');
+      loadJobsPane(jobsPage);
+    } else {
+      const e = await r.json();
+      showToast(e.detail || 'Failed to apply', '❌');
+    }
+  } catch (e) {
+    showToast(e.message || 'Network error. Try again.', '⚠️');
+  } finally {
+    btn.textContent = 'Submit Application'; btn.disabled = false;
+  }
 }
-document.getElementById('applyModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeApplyModal(); });
+document.getElementById('applyModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeApplyModal(); });
 
 // ── Save / unsave job ─────────────────────────────────────────────────────────
 async function toggleSaveJob(jobId, btn) {
@@ -934,12 +1150,14 @@ function loadProfilePane() {
     document.getElementById('pfLocation').value = profileData.location||'';
     document.getElementById('pfExpYears').value = profileData.experience_years||'';
     document.getElementById('pfLinkedin').value = profileData.linkedin_url||'';
-    document.getElementById('pfResume').value = profileData.resume_url||'';
     document.getElementById('pfSalMin').value = profileData.desired_salary_min||'';
     document.getElementById('pfSalMax').value = profileData.desired_salary_max||'';
     document.getElementById('pfRemote').checked = profileData.open_to_remote!==false;
     currentSkills = [...(profileData.skills||[])];
     renderSkills();
+    renderResumeWidget(profileData.resume_url||null);
+  } else {
+    renderResumeWidget(null);
   }
 }
 
@@ -994,18 +1212,107 @@ async function saveProfessionalInfo() {
     desired_salary_min: parseFloat(document.getElementById('pfSalMin').value)||null,
     desired_salary_max: parseFloat(document.getElementById('pfSalMax').value)||null,
   };
-  // Also save resume_url in profile
-  const resumeUrl = document.getElementById('pfResume').value.trim();
-  if (resumeUrl) payload.resume_url = resumeUrl;
 
   try {
     const r = await fetch(`${API}/me/profile`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
     if (r.ok) {
-      profileData = { ...profileData, ...payload, resume_url: resumeUrl };
+      profileData = { ...profileData, ...payload };
       loadProfileCompletion(currentUser, profileData);
       showToast('Professional info saved!','✅');
     } else { const e=await r.json(); showToast(e.detail||'Save failed','❌'); }
   } catch { showToast('Network error','⚠️'); }
+}
+
+// ── Resume upload widget ──────────────────────────────────────────────────────
+function renderResumeWidget(resumeUrl) {
+  const widget = document.getElementById('resumeWidget');
+  if (!widget) return;
+
+  if (!resumeUrl) {
+    widget.innerHTML = `
+      <button type="button" class="resume-upload-btn" onclick="document.getElementById('resumeFileInput').click()">
+        <span>📎</span> Upload Resume <span style="font-size:.75rem;color:var(--steel)">(PDF, DOC, DOCX · max 10 MB)</span>
+      </button>`;
+    return;
+  }
+
+  const filename = resumeUrl.split('/').pop();
+  const ext = filename.split('.').pop().toUpperCase();
+  const icon = ext === 'PDF' ? '📄' : '📝';
+
+  widget.innerHTML = `
+    <div class="resume-file-card">
+      <span class="resume-file-icon">${icon}</span>
+      <div class="resume-file-info">
+        <a class="resume-file-name" href="${resumeUrl}" target="_blank" rel="noopener" title="Open resume">${filename}</a>
+        <div class="resume-file-meta">${ext} file · Click to view</div>
+      </div>
+      <div class="resume-actions">
+        <button type="button" class="resume-action-btn" title="Replace resume" onclick="document.getElementById('resumeFileInput').click()">✏️</button>
+        <button type="button" class="resume-action-btn danger" title="Delete resume" onclick="deleteResume()">🗑️</button>
+      </div>
+    </div>`;
+}
+
+async function handleResumeUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = ''; // reset so same file can be re-selected
+
+  const widget = document.getElementById('resumeWidget');
+  widget.innerHTML = `
+    <div class="resume-uploading">
+      <div class="resume-spinner"></div>
+      Uploading <strong>${file.name}</strong>…
+    </div>`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const r = await fetch(`${API}/me/resume`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${localStorage.getItem('taiq_token')}` },
+      body: formData,
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || `Upload failed (${r.status})`);
+    }
+    const data = await r.json();
+    profileData = { ...profileData, resume_url: data.resume_url };
+    renderResumeWidget(data.resume_url);
+    loadProfileCompletion(currentUser, profileData);
+    showToast('Resume uploaded!', '📄');
+  } catch (e) {
+    renderResumeWidget(profileData?.resume_url || null);
+    showToast(e.message || 'Upload failed', '❌');
+  }
+}
+
+async function deleteResume() {
+  if (!confirm('Remove your uploaded resume?')) return;
+
+  const widget = document.getElementById('resumeWidget');
+  widget.innerHTML = `<div class="resume-uploading"><div class="resume-spinner"></div> Removing…</div>`;
+
+  try {
+    const r = await fetch(`${API}/me/resume`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${localStorage.getItem('taiq_token')}` },
+    });
+    if (!r.ok && r.status !== 204) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || 'Delete failed');
+    }
+    profileData = { ...profileData, resume_url: null };
+    renderResumeWidget(null);
+    loadProfileCompletion(currentUser, profileData);
+    showToast('Resume removed', '✅');
+  } catch (e) {
+    renderResumeWidget(profileData?.resume_url || null);
+    showToast(e.message || 'Delete failed', '❌');
+  }
 }
 
 // ── Settings pane ─────────────────────────────────────────────────────────────
@@ -1054,6 +1361,45 @@ async function init() {
     const isEmp = currentUser.role==='employer'||currentUser.role==='admin';
     if (isEmp) await loadDashboardEmployer(null);
     else { loadProfileCompletion(currentUser, null); await loadDashboardCandidate(); }
+  }
+}
+
+// ── Activities pane ───────────────────────────────────────────────────────────
+const ACTION_ICONS_MAP = {
+  registered:'🎉', email_verified:'✅', login:'🔐',
+  profile_basic_updated:'👤', profile_professional_updated:'📝',
+  password_changed:'🔒', job_applied:'📋', application_withdrawn:'↩️',
+  job_saved:'❤️', job_unsaved:'💔', company_created:'🏢',
+  job_posted:'💼', job_deleted:'🗑️',
+};
+
+function fmtDateTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) +
+    ' at ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+
+async function loadActivitiesPane() {
+  const el = document.getElementById('activitiesContainer');
+  el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>';
+  try {
+    const r = await fetch(`${API}/me/activities`, { headers: authHeaders() });
+    if (!r.ok) throw new Error();
+    const logs = await r.json();
+    if (!logs.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No activities recorded yet. Start browsing jobs!</p></div>';
+      return;
+    }
+    el.innerHTML = `<div class="activity-list">${logs.map(l => `
+      <div class="activity-item">
+        <div class="activity-icon-wrap">${ACTION_ICONS_MAP[l.action] || 'ℹ️'}</div>
+        <div class="activity-body">
+          <div class="activity-desc">${l.description}</div>
+          <div class="activity-time">${fmtDateTime(l.created_at)}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  } catch {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Could not load activities.</p></div>';
   }
 }
 

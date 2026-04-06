@@ -36,6 +36,7 @@ class UserAdminOut(BaseModel):
     id: int
     email: str
     full_name: str | None
+    phone: str | None = None
     role: UserRole
     is_active: bool
     is_email_verified: bool = False
@@ -126,6 +127,8 @@ class ApplicationCreate(BaseModel):
     job_id: int
     cover_letter: str | None = None
     resume_url: str | None = None
+    referral_source: str | None = None
+    referral_email: str | None = None
 
 class ApplicationOut(BaseModel):
     id: int

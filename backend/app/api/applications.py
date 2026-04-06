@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.security import decode_access_token
+from app.core.activity import track
 from app.models.models import Application, Job, User
 from app.schemas.schemas import ApplicationCreate, ApplicationOut
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -46,14 +47,23 @@ async def apply_to_job(
     if existing:
         raise HTTPException(status_code=409, detail="Already applied to this job")
 
+    # Resolve resume: explicit upload > profile resume
+    resume_url = payload.resume_url
+    if not resume_url and hasattr(current_user, 'profile') and current_user.profile:
+        resume_url = current_user.profile.resume_url
+
     app = Application(
         job_id=payload.job_id,
         candidate_id=current_user.id,
         cover_letter=payload.cover_letter,
-        resume_url=payload.resume_url or current_user.profile.resume_url if current_user.profile else None,
+        resume_url=resume_url,
+        referral_source=payload.referral_source,
+        referral_email=payload.referral_email if payload.referral_source == "employee_referral" else None,
     )
     db.add(app)
     await db.flush()
+    ref_note = f" (via {payload.referral_source})" if payload.referral_source else ""
+    await track(db, current_user, "job_applied", f"Applied to job: {job.title}{ref_note}")
     return ApplicationOut.model_validate(app)
 
 
@@ -82,3 +92,4 @@ async def withdraw_application(
     if not app or app.candidate_id != current_user.id:
         raise HTTPException(status_code=404, detail="Application not found")
     await db.delete(app)
+    await track(db, current_user, "application_withdrawn", "Withdrew a job application")

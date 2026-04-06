@@ -30,6 +30,7 @@ async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
     )
     db.add(user)
     await db.flush()
+    await track(db, user, "registered", f"Account created as {payload.role.value}")
 
     # Send welcome + verification email (non-blocking — failure won't break registration)
     try:
@@ -65,6 +66,7 @@ async def verify_email(token: str, db: AsyncSession = Depends(get_db)):
 
     if not user.is_email_verified:
         user.is_email_verified = True
+        await track(db, user, "email_verified", "Email address verified")
         await db.commit()
 
     return {"message": "Email verified successfully"}
@@ -107,6 +109,7 @@ async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
     if not user.is_email_verified:
         raise HTTPException(status_code=403, detail="Please verify your email before logging in. Check your inbox for the verification link.")
 
+    await track(db, user, "login", "Signed in to account")
     token = create_access_token({"sub": str(user.id), "role": user.role.value})
     user_out = UserOut.model_validate(user)
     return Token(access_token=token, user=user_out)

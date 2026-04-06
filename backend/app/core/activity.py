@@ -18,6 +18,8 @@ NOTIFY_ACTIONS = {
     "job_applied",
     "application_withdrawn",
     "job_saved",
+    "resume_uploaded",
+    "resume_deleted",
 }
 
 ACTION_ICONS = {
@@ -31,6 +33,8 @@ ACTION_ICONS = {
     "application_withdrawn": "↩️",
     "job_saved": "❤️",
     "job_unsaved": "💔",
+    "resume_uploaded": "📄",
+    "resume_deleted": "🗑️",
     "company_created": "🏢",
     "job_posted": "💼",
     "job_deleted": "🗑️",

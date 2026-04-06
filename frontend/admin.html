@@ -151,6 +151,64 @@
     .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
     .log-time{color:var(--steel);font-size:.75rem;margin-left:auto;white-space:nowrap;flex-shrink:0}
 
+    /* Users table */
+    .search-bar{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center}
+    .search-bar .form-input{max-width:280px;flex:1;min-width:180px}
+    .select-input{padding:.65rem .9rem;border:1.5px solid var(--mist);border-radius:var(--r2);font:inherit;font-size:.875rem;color:var(--ink);outline:none;background:var(--white);transition:border-color var(--trans);cursor:pointer}
+    .select-input:focus{border-color:var(--brand)}
+    .data-table{width:100%;border-collapse:collapse;font-size:.84rem}
+    .data-table th{text-align:left;padding:.65rem 1rem;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--steel);border-bottom:2px solid var(--mist)}
+    .data-table td{padding:.75rem 1rem;border-bottom:1px solid var(--paper);vertical-align:middle}
+    .data-table tbody tr:hover{background:rgba(0,82,204,.03);cursor:pointer}
+    .data-table tbody tr:last-child td{border-bottom:none}
+    .table-wrap{overflow-x:auto}
+    .badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:var(--r-full);font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:capitalize}
+    .badge-candidate{background:rgba(0,82,204,.1);color:var(--brand)}
+    .badge-employer{background:rgba(245,166,35,.12);color:#92400e}
+    .badge-admin{background:rgba(239,68,68,.1);color:#dc2626}
+    .badge-verified{background:rgba(34,197,94,.1);color:#15803d}
+    .badge-unverified{background:rgba(107,120,153,.1);color:var(--steel)}
+    .pagination{display:flex;align-items:center;gap:.5rem;margin-top:1.25rem;justify-content:flex-end}
+    .pagination button{padding:.4rem .85rem;border:1.5px solid var(--mist);border-radius:var(--r1);background:var(--white);cursor:pointer;font:inherit;font-size:.82rem;color:var(--ink-3);transition:all var(--trans)}
+    .pagination button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+    .pagination button:disabled{opacity:.4;cursor:not-allowed}
+    .pagination .page-info{font-size:.82rem;color:var(--steel);margin:0 .25rem}
+    .empty-state{text-align:center;padding:3rem 1rem;color:var(--steel)}
+    .empty-state-icon{font-size:2.5rem;margin-bottom:.75rem}
+    .empty-state p{font-size:.9rem}
+
+    /* Activity feed */
+    .act-feed{display:flex;flex-direction:column;gap:0}
+    .act-item{display:grid;grid-template-columns:36px 1fr auto;gap:.75rem;align-items:flex-start;padding:.9rem 0;border-bottom:1px solid var(--paper)}
+    .act-item:last-child{border-bottom:none}
+    .act-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:1rem;flex-shrink:0;background:rgba(0,82,204,.08)}
+    .act-body{}
+    .act-action{font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.15rem}
+    .act-desc{font-size:.8rem;color:var(--ink-3);margin-bottom:.2rem}
+    .act-user{font-size:.75rem;color:var(--steel)}
+    .act-time{font-size:.75rem;color:var(--steel);white-space:nowrap;padding-top:.2rem}
+    .load-more-wrap{text-align:center;margin-top:1.25rem}
+
+    /* User drawer */
+    .drawer-overlay{position:fixed;inset:0;z-index:300;background:rgba(10,15,30,.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity var(--trans)}
+    .drawer-overlay.open{opacity:1;pointer-events:all}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--white);box-shadow:-8px 0 40px rgba(10,15,30,.15);z-index:301;transform:translateX(100%);transition:transform var(--trans);overflow-y:auto;display:flex;flex-direction:column}
+    .drawer-overlay.open .drawer{transform:translateX(0)}
+    .drawer-header{padding:1.5rem;border-bottom:1px solid var(--mist);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-shrink:0}
+    .drawer-close{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--steel);line-height:1;padding:.2rem}
+    .drawer-close:hover{color:var(--ink)}
+    .drawer-body{padding:1.5rem;flex:1}
+    .drawer-field{margin-bottom:1rem}
+    .drawer-field-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);margin-bottom:.3rem}
+    .drawer-field-val{font-size:.9rem;color:var(--ink)}
+    .drawer-activities{margin-top:1.5rem}
+    .drawer-activities-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:1rem}
+    .mini-act{display:flex;gap:.65rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--paper);font-size:.8rem}
+    .mini-act:last-child{border-bottom:none}
+    .mini-act-icon{flex-shrink:0;font-size:.95rem}
+    .mini-act-text{flex:1;color:var(--ink-3)}
+    .mini-act-time{color:var(--steel);font-size:.72rem;white-space:nowrap}
+
     @media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{display:none}.stats-row{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}}
     @media(max-width:500px){.stats-row{grid-template-columns:1fr}}
   </style>
@@ -187,7 +245,8 @@
       <ul class="sidebar-nav">
         <li><a href="index.html#jobs"><span class="nav-icon">💼</span>Job Listings</a></li>
         <li><a href="#"><span class="nav-icon">🏢</span>Companies</a></li>
-        <li><a href="#"><span class="nav-icon">👥</span>Users</a></li>
+        <li><button onclick="showSection('users')"><span class="nav-icon">👥</span>Users</button></li>
+        <li><button onclick="showSection('activities')"><span class="nav-icon">📊</span>All Activities</button></li>
       </ul>
     </div>
     <div class="sidebar-section">
@@ -320,7 +379,97 @@
       </div>
     </div>
 
+    <!-- ── SECTION: Users ───────────────────────────────────────── -->
+    <div id="section-users" style="display:none">
+      <h1 class="page-title">Users</h1>
+      <p class="page-subtitle">Browse and inspect all registered platform users</p>
+
+      <div class="panel">
+        <div class="search-bar">
+          <input type="text" class="form-input" id="userSearchQ" placeholder="Search by name or email…" oninput="debounceUserSearch()" />
+          <select class="select-input" id="userRoleFilter" onchange="loadAdminUsers(1)">
+            <option value="">All roles</option>
+            <option value="candidate">Candidate</option>
+            <option value="employer">Employer</option>
+            <option value="admin">Admin</option>
+          </select>
+          <span id="userCountLabel" style="font-size:.82rem;color:var(--steel);margin-left:auto"></span>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name / Email</th>
+                <th>Role</th>
+                <th>Verified</th>
+                <th>Joined</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button id="usersPrevBtn" onclick="usersPage > 1 && loadAdminUsers(usersPage - 1)" disabled>← Prev</button>
+          <span class="page-info" id="usersPageInfo">Page 1</span>
+          <button id="usersNextBtn" onclick="loadAdminUsers(usersPage + 1)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: All Activities ──────────────────────────────── -->
+    <div id="section-activities" style="display:none">
+      <h1 class="page-title">All Activities</h1>
+      <p class="page-subtitle">Platform-wide audit feed — every tracked user action</p>
+
+      <div class="panel">
+        <div class="act-feed" id="actFeed">
+          <div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>
+        </div>
+        <div class="load-more-wrap">
+          <button class="btn btn-outline" id="loadMoreActBtn" onclick="loadMoreActivities()" style="display:none">Load More</button>
+        </div>
+      </div>
+    </div>
+
   </main>
+</div>
+
+<!-- User drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="if(event.target===this)closeUserDrawer()">
+  <div class="drawer" id="userDrawer">
+    <div class="drawer-header">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem" id="drawerName">User Details</div>
+        <div style="font-size:.8rem;color:var(--steel)" id="drawerEmail"></div>
+      </div>
+      <button class="drawer-close" onclick="closeUserDrawer()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem" id="drawerBadges"></div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">Phone</div>
+        <div class="drawer-field-val" id="drawerPhone">—</div>
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">Joined</div>
+        <div class="drawer-field-val" id="drawerJoined">—</div>
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">User ID</div>
+        <div class="drawer-field-val" id="drawerId">—</div>
+      </div>
+
+      <div class="drawer-activities">
+        <div class="drawer-activities-title">Recent Activities</div>
+        <div id="drawerActFeed" style="color:var(--steel);font-size:.85rem">Loading…</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Confirm modal -->
@@ -362,6 +511,24 @@
     document.getElementById('navAdminName').textContent = user.full_name || user.email;
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  const ACTION_ICONS = {
+    registered: '🆕', email_verified: '✅', login: '🔑',
+    profile_basic_updated: '✏️', profile_professional_updated: '📝',
+    password_changed: '🔒', job_applied: '📋', application_withdrawn: '↩️',
+    job_saved: '🔖', job_unsaved: '🗑️',
+  };
+  function actionIcon(action) { return ACTION_ICONS[action] || '📌'; }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+
   // ── Section routing ───────────────────────────────────────────────────────────
   function showSection(name) {
     document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
@@ -369,6 +536,8 @@
     document.querySelectorAll('.sidebar-nav button, .sidebar-nav a').forEach(el => el.classList.remove('active'));
     event.currentTarget && event.currentTarget.classList.add('active');
     if (name === 'overview') loadOverview();
+    if (name === 'users') loadAdminUsers(1);
+    if (name === 'activities') loadAdminActivities(true);
   }
 
   // ── Load settings ─────────────────────────────────────────────────────────────
@@ -551,7 +720,7 @@
   document.getElementById('confirmOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeConfirm();
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirm(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeConfirm(); closeUserDrawer(); } });
 
   // ── Toast ─────────────────────────────────────────────────────────────────────
   let toastTimer;
@@ -570,6 +739,186 @@
     localStorage.removeItem('taiq_user');
     window.location.href = 'index.html';
   }
+
+  // ── Users ─────────────────────────────────────────────────────────────────────
+  let usersPage = 1;
+  let usersSearchTimer = null;
+  const _usersCache = {}; // id → user object
+
+  function debounceUserSearch() {
+    clearTimeout(usersSearchTimer);
+    usersSearchTimer = setTimeout(() => loadAdminUsers(1), 350);
+  }
+
+  async function loadAdminUsers(page = 1) {
+    usersPage = page;
+    const q = document.getElementById('userSearchQ').value.trim();
+    const role = document.getElementById('userRoleFilter').value;
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>';
+
+    const params = new URLSearchParams({ page, limit: 20 });
+    if (q) params.set('q', q);
+    if (role) params.set('role', role);
+
+    try {
+      const [usersRes, countRes] = await Promise.all([
+        fetch(`${API}/admin/users?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/admin/users/count`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      if (!usersRes.ok) throw new Error();
+      const users = await usersRes.json();
+      users.forEach(u => { _usersCache[u.id] = u; });
+      const count = countRes.ok ? await countRes.json() : null;
+
+      if (count) {
+        document.getElementById('userCountLabel').textContent =
+          `${count.total} users · ${count.verified} verified`;
+      }
+
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">👥</div><p>No users found</p></div></td></tr>';
+        document.getElementById('usersPrevBtn').disabled = true;
+        document.getElementById('usersNextBtn').disabled = true;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => `
+        <tr onclick="openUserDrawer(${u.id})">
+          <td>
+            <div style="font-weight:600;color:var(--ink);font-size:.87rem">${escHtml(u.full_name || '—')}</div>
+            <div style="font-size:.77rem;color:var(--steel)">${escHtml(u.email)}</div>
+          </td>
+          <td><span class="badge badge-${u.role}">${u.role}</span></td>
+          <td><span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'}">${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span></td>
+          <td style="color:var(--steel);font-size:.8rem">${fmtDate(u.created_at)}</td>
+          <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openUserDrawer(${u.id})">View</button></td>
+        </tr>
+      `).join('');
+
+      const prevBtn = document.getElementById('usersPrevBtn');
+      const nextBtn = document.getElementById('usersNextBtn');
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = users.length < 20;
+      document.getElementById('usersPageInfo').textContent = `Page ${page}`;
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger)">Failed to load users</td></tr>';
+    }
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── User drawer ───────────────────────────────────────────────────────────────
+  async function openUserDrawer(userId) {
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawerName').textContent = 'Loading…';
+    document.getElementById('drawerEmail').textContent = '';
+    document.getElementById('drawerBadges').innerHTML = '';
+    document.getElementById('drawerPhone').textContent = '—';
+    document.getElementById('drawerJoined').textContent = '—';
+    document.getElementById('drawerId').textContent = userId;
+    document.getElementById('drawerActFeed').innerHTML = '<span style="color:var(--steel)">Loading…</span>';
+
+    try {
+      const actsRes = await fetch(`${API}/admin/users/${userId}/activities`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const u = _usersCache[userId] || null;
+
+      if (u) {
+        document.getElementById('drawerName').textContent = u.full_name || u.email;
+        document.getElementById('drawerEmail').textContent = u.email;
+        document.getElementById('drawerPhone').textContent = u.phone || '—';
+        document.getElementById('drawerJoined').textContent = fmtDate(u.created_at);
+        document.getElementById('drawerId').textContent = `#${u.id}`;
+        document.getElementById('drawerBadges').innerHTML =
+          `<span class="badge badge-${u.role}">${u.role}</span>
+           <span class="badge ${u.is_email_verified ? 'badge-verified' : 'badge-unverified'}">${u.is_email_verified ? '✓ Verified' : 'Unverified'}</span>`;
+      }
+
+      const acts = actsRes.ok ? await actsRes.json() : [];
+      if (!acts.length) {
+        document.getElementById('drawerActFeed').innerHTML = '<span style="color:var(--steel);font-size:.82rem">No activities recorded yet.</span>';
+      } else {
+        document.getElementById('drawerActFeed').innerHTML = acts.map(a => `
+          <div class="mini-act">
+            <span class="mini-act-icon">${actionIcon(a.action)}</span>
+            <div class="mini-act-text">${escHtml(a.description)}</div>
+            <span class="mini-act-time">${fmtDateTime(a.created_at)}</span>
+          </div>
+        `).join('');
+      }
+    } catch {
+      document.getElementById('drawerActFeed').innerHTML = '<span style="color:var(--danger);font-size:.82rem">Failed to load user data.</span>';
+    }
+  }
+
+  function closeUserDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+  }
+
+  // ── All Activities ────────────────────────────────────────────────────────────
+  let activitiesPage = 1;
+  let activitiesLoading = false;
+
+  async function loadAdminActivities(reset = false) {
+    if (activitiesLoading) return;
+    activitiesLoading = true;
+
+    if (reset) {
+      activitiesPage = 1;
+      document.getElementById('actFeed').innerHTML = '<div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>';
+      document.getElementById('loadMoreActBtn').style.display = 'none';
+    }
+
+    try {
+      const r = await fetch(`${API}/admin/activities?page=${activitiesPage}&limit=30`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error();
+      const acts = await r.json();
+      const feed = document.getElementById('actFeed');
+
+      if (reset) feed.innerHTML = '';
+
+      if (!acts.length && reset) {
+        feed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No activities yet</p></div>';
+        document.getElementById('loadMoreActBtn').style.display = 'none';
+        return;
+      }
+
+      acts.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'act-item';
+        const userName = a.user ? (a.user.full_name || a.user.email) : 'Unknown';
+        const userRole = a.user ? a.user.role : '';
+        div.innerHTML = `
+          <div class="act-icon">${actionIcon(a.action)}</div>
+          <div class="act-body">
+            <div class="act-action">${escHtml(a.action.replace(/_/g, ' '))}</div>
+            <div class="act-desc">${escHtml(a.description)}</div>
+            <div class="act-user">${escHtml(userName)}${userRole ? ` · <span class="badge badge-${userRole}" style="font-size:.68rem">${userRole}</span>` : ''}</div>
+          </div>
+          <div class="act-time">${fmtDateTime(a.created_at)}</div>
+        `;
+        feed.appendChild(div);
+      });
+
+      const loadMoreBtn = document.getElementById('loadMoreActBtn');
+      loadMoreBtn.style.display = acts.length < 30 ? 'none' : '';
+      activitiesPage++;
+    } catch {
+      if (reset) {
+        document.getElementById('actFeed').innerHTML = '<div style="text-align:center;padding:2rem;color:var(--danger)">Failed to load activities</div>';
+      }
+    } finally {
+      activitiesLoading = false;
+    }
+  }
+
+  function loadMoreActivities() { loadAdminActivities(false); }
 
   // ── Boot ──────────────────────────────────────────────────────────────────────
   loadSettings();

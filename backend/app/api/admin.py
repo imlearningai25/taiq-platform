@@ -1,15 +1,16 @@
 """
-Admin API — site settings, mode toggle, and future admin operations.
+Admin API — site settings, mode toggle, user management, and activity audit log.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text
+from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 import logging
 
 from app.core.database import get_db
-from app.models.models import SiteSettings, SiteMode, User, UserRole
-from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate
+from app.models.models import SiteSettings, SiteMode, User, UserRole, ActivityLog, Job, Company, Application
+from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser
 from app.api.applications import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,6 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 
 async def get_or_create_settings(db: AsyncSession) -> SiteSettings:
-    """Return the single SiteSettings row, creating it with defaults if absent."""
     try:
         s = await db.scalar(select(SiteSettings).where(SiteSettings.id == 1))
         if not s:
@@ -45,7 +45,7 @@ async def get_or_create_settings(db: AsyncSession) -> SiteSettings:
         raise
 
 
-# ── Public: read current mode (called by every page on load) ──────────────────
+# ── Public: read current mode ─────────────────────────────────────────────────
 @router.get("/site-settings", response_model=SiteSettingsOut)
 async def get_site_settings(db: AsyncSession = Depends(get_db)):
     s = await get_or_create_settings(db)
@@ -59,33 +59,23 @@ async def update_site_settings(
     current_user: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    # Validate mode value explicitly so we return a clean 400, not a 500
     if payload.mode not in ("live", "construction"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid mode '{payload.mode}'. Must be 'live' or 'construction'."
-        )
-
+        raise HTTPException(status_code=400, detail=f"Invalid mode '{payload.mode}'.")
     try:
         s = await get_or_create_settings(db)
-
-        # Apply all fields
         s.mode = SiteMode(payload.mode)
         s.updated_by = current_user.id
-        s.updated_at = datetime.now(timezone.utc)   # set explicitly — don't rely on onupdate
-
+        s.updated_at = datetime.now(timezone.utc)
         if payload.construction_title is not None:
             s.construction_title = payload.construction_title
         if payload.construction_message is not None:
             s.construction_message = payload.construction_message
         if payload.construction_eta is not None:
             s.construction_eta = payload.construction_eta
-
         await db.flush()
-        await db.refresh(s)   # re-read from DB to get fresh values
+        await db.refresh(s)
         logger.info(f"Site mode set to '{s.mode.value}' by admin {current_user.email}")
         return SiteSettingsOut.model_validate(s)
-
     except HTTPException:
         raise
     except Exception as e:
@@ -99,16 +89,12 @@ async def admin_overview(
     current_user: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    from sqlalchemy import func
-    from app.models.models import Job, Company, Application
-
     try:
         total_users        = await db.scalar(select(func.count(User.id))) or 0
         total_jobs         = await db.scalar(select(func.count(Job.id))) or 0
         total_companies    = await db.scalar(select(func.count(Company.id))) or 0
         total_applications = await db.scalar(select(func.count(Application.id))) or 0
         site               = await get_or_create_settings(db)
-
         return {
             "total_users": total_users,
             "total_jobs": total_jobs,
@@ -119,3 +105,84 @@ async def admin_overview(
     except Exception as e:
         logger.error(f"admin_overview error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Admin: list users ─────────────────────────────────────────────────────────
+@router.get("/users", response_model=list[UserAdminOut])
+async def list_users(
+    q: str | None = Query(None),
+    role: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(User).order_by(User.created_at.desc())
+    if q:
+        stmt = stmt.where(or_(User.email.ilike(f"%{q}%"), User.full_name.ilike(f"%{q}%")))
+    if role:
+        try:
+            stmt = stmt.where(User.role == UserRole(role))
+        except ValueError:
+            pass
+    stmt = stmt.offset((page - 1) * limit).limit(limit)
+    users = (await db.scalars(stmt)).all()
+    return [UserAdminOut.model_validate(u) for u in users]
+
+
+# ── Admin: user count ─────────────────────────────────────────────────────────
+@router.get("/users/count")
+async def count_users(
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    total    = await db.scalar(select(func.count(User.id))) or 0
+    verified = await db.scalar(select(func.count(User.id)).where(User.is_email_verified == True)) or 0
+    return {"total": total, "verified": verified}
+
+
+# ── Admin: single user's activities ──────────────────────────────────────────
+@router.get("/users/{user_id}/activities", response_model=list[ActivityLogOut])
+async def get_user_activities(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(ActivityLog)
+        .where(ActivityLog.user_id == user_id)
+        .order_by(ActivityLog.created_at.desc())
+        .limit(50)
+    )
+    logs = (await db.scalars(stmt)).all()
+    return [ActivityLogOut.model_validate(l) for l in logs]
+
+
+# ── Admin: all activities ─────────────────────────────────────────────────────
+@router.get("/activities", response_model=list[ActivityLogWithUser])
+async def get_all_activities(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(ActivityLog)
+        .options(selectinload(ActivityLog.user))
+        .order_by(ActivityLog.created_at.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
+    logs = (await db.scalars(stmt)).all()
+    result = []
+    for l in logs:
+        user_out = UserAdminOut.model_validate(l.user) if l.user else None
+        result.append(ActivityLogWithUser(
+            id=l.id,
+            action=l.action,
+            description=l.description,
+            extra=l.extra or {},
+            created_at=l.created_at,
+            user=user_out,
+        ))
+    return result

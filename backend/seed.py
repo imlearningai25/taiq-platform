@@ -56,9 +56,12 @@ async def seed():
                 hashed_password=get_password_hash("Admin@1234!"),
                 full_name="Admin User",
                 role=UserRole.admin,
+                is_email_verified=True,
             )
             db.add(admin)
             await db.flush()
+        else:
+            admin.is_email_verified = True
         print("✅ Admin user created (admin@taiq.us / Admin@1234!)")
 
         # ── Employer users + companies ────────────────────────────────────────
@@ -78,9 +81,12 @@ async def seed():
                     hashed_password=get_password_hash("Employer@1234!"),
                     full_name=f"{co_name} HR",
                     role=UserRole.employer,
+                    is_email_verified=True,
                 )
                 db.add(emp)
                 await db.flush()
+            else:
+                emp.is_email_verified = True
 
             co = await db.scalar(select(Company).where(Company.owner_id == emp.id))
             if not co:
@@ -107,6 +113,7 @@ async def seed():
                 hashed_password=get_password_hash("Candidate@1234!"),
                 full_name="Jane Demo",
                 role=UserRole.candidate,
+                is_email_verified=True,
             )
             db.add(cand)
             await db.flush()
@@ -120,6 +127,8 @@ async def seed():
                 open_to_remote=True,
             )
             db.add(profile)
+        else:
+            cand.is_email_verified = True
         print("✅ Candidate user seeded (candidate@demo.com / Candidate@1234!)")
 
         # ── Jobs ──────────────────────────────────────────────────────────────

@@ -146,6 +146,8 @@ class Application(Base):
     cover_letter = Column(Text)
     resume_url = Column(String(500))
     notes = Column(Text)
+    referral_source = Column(String(100))
+    referral_email = Column(String(255))
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
