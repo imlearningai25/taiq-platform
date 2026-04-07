@@ -1,418 +1,1181 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<script>
-  // ── Site Mode Guard — injected on all public pages ────────────────────────
-  (async function checkSiteMode() {
-    // Admins always bypass the construction gate
-    try {
-      const u = localStorage.getItem('taiq_user');
-      if (u && JSON.parse(u).role === 'admin') return;
-    } catch {}
-    // Skip the check if we're already on the construction page
-    if (window.location.pathname.includes('under-construction')) return;
-    // Skip admin panel
-    if (window.location.pathname.includes('admin.html')) return;
-    try {
-      const r = await fetch('/api/v1/admin/site-settings');
-      if (r.ok) {
-        const s = await r.json();
-        if (s.mode === 'construction') {
-          window.location.replace('under-construction.html');
-        }
-      }
-    } catch {}
-  })();
-</script>
+    <head>
+        <script>
+            // ── Site Mode Guard — injected on all public pages ────────────────────────
+            (async function checkSiteMode() {
+                // Admins always bypass the construction gate
+                try {
+                    const u = localStorage.getItem('taiq_user');
+                    if (u && JSON.parse(u).role === 'admin') return;
+                } catch {}
+                // Skip the check if we're already on the construction page
+                if (window.location.pathname.includes('under-construction'))
+                    return;
+                // Skip admin panel
+                if (window.location.pathname.includes('admin.html')) return;
+                try {
+                    const r = await fetch('/api/v1/admin/site-settings');
+                    if (r.ok) {
+                        const s = await r.json();
+                        if (s.mode === 'construction') {
+                            window.location.replace('under-construction.html');
+                        }
+                    }
+                } catch {}
+            })();
+        </script>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — TaIQ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --ink: #0a0f1e; --ink-2: #1c2338; --ink-3: #384060;
-      --steel: #6b7899; --mist: #c8d0e4; --paper: #f4f6fb;
-      --white: #ffffff; --brand: #0052cc; --brand-2: #0040a0;
-      --accent: #ff5c35; --success: #22c55e;
-      --r1:.5rem;--r2:1rem;--r3:1.5rem;--r-full:9999px;
-      --shadow-sm:0 1px 4px rgba(10,15,30,.08);
-      --shadow-md:0 4px 20px rgba(10,15,30,.12);
-      --trans:.25s cubic-bezier(.4,0,.2,1);
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);line-height:1.7}
-    a{color:var(--brand);text-decoration:none}
-    a:hover{text-decoration:underline}
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Privacy Policy — TaIQ</title>
+        <meta
+            name="description"
+            content="Read TaIQ's privacy policy to understand how we collect, use, and protect your personal information."
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://taiq.us/privacy-policy.html" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --ink: #0a0f1e;
+                --ink-2: #1c2338;
+                --ink-3: #384060;
+                --steel: #6b7899;
+                --mist: #c8d0e4;
+                --paper: #f4f6fb;
+                --white: #ffffff;
+                --brand: #0052cc;
+                --brand-2: #0040a0;
+                --accent: #ff5c35;
+                --success: #22c55e;
+                --r1: 0.5rem;
+                --r2: 1rem;
+                --r3: 1.5rem;
+                --r-full: 9999px;
+                --shadow-sm: 0 1px 4px rgba(10, 15, 30, 0.08);
+                --shadow-md: 0 4px 20px rgba(10, 15, 30, 0.12);
+                --trans: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                font-family: 'DM Sans', sans-serif;
+                color: var(--ink);
+                background: var(--white);
+                line-height: 1.7;
+            }
+            a {
+                color: var(--brand);
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
 
-    /* Nav */
-    .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--mist);padding:.9rem 0}
-    .nav-inner{display:flex;align-items:center;justify-content:space-between;width:min(1200px,100% - 3rem);margin:auto}
-    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--ink);display:flex;align-items:center;gap:.5rem}
-    .logo-mark{width:32px;height:32px;background:var(--brand);border-radius:8px;display:grid;place-items:center}
-    .logo-mark svg{width:18px;height:18px;fill:white}
-    .nav-back{font-size:.85rem;font-weight:500;color:var(--steel);display:flex;align-items:center;gap:.3rem;transition:color var(--trans)}
-    .nav-back:hover{color:var(--brand);text-decoration:none}
+            /* Nav */
+            .nav {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--mist);
+                padding: 0.9rem 0;
+            }
+            .nav-inner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: min(1200px, 100% - 3rem);
+                margin: auto;
+            }
+            .nav-logo {
+                font-family: 'Syne', sans-serif;
+                font-weight: 800;
+                font-size: 1.25rem;
+                color: var(--ink);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .logo-mark {
+                width: 32px;
+                height: 32px;
+                background: var(--brand);
+                border-radius: 8px;
+                display: grid;
+                place-items: center;
+            }
+            .logo-mark svg {
+                width: 18px;
+                height: 18px;
+                fill: white;
+            }
+            .nav-back {
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: var(--steel);
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                transition: color var(--trans);
+            }
+            .nav-back:hover {
+                color: var(--brand);
+                text-decoration: none;
+            }
 
-    /* Hero */
-    .page-hero{background:linear-gradient(135deg,#050c1f 0%,#0d2654 60%,#1a3a7a 100%);padding:4rem 0 3rem;color:white;position:relative;overflow:hidden}
-    .page-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:50px 50px}
-    .page-hero-inner{position:relative;width:min(900px,100% - 3rem);margin:auto}
-    .page-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-full);padding:.35rem .9rem;font-size:.75rem;font-weight:600;color:#90c4ff;margin-bottom:1.2rem;letter-spacing:.05em;text-transform:uppercase}
-    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:.75rem}
-    .page-hero p{color:rgba(255,255,255,.7);font-size:1.05rem;max-width:560px}
-    .page-meta{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
-    .page-meta-item{font-size:.82rem;color:rgba(255,255,255,.55)}
-    .page-meta-item strong{color:rgba(255,255,255,.85);font-weight:500}
+            /* Hero */
+            .page-hero {
+                background: linear-gradient(
+                    135deg,
+                    #050c1f 0%,
+                    #0d2654 60%,
+                    #1a3a7a 100%
+                );
+                padding: 4rem 0 3rem;
+                color: white;
+                position: relative;
+                overflow: hidden;
+            }
+            .page-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(
+                        rgba(255, 255, 255, 0.03) 1px,
+                        transparent 1px
+                    ),
+                    linear-gradient(
+                        90deg,
+                        rgba(255, 255, 255, 0.03) 1px,
+                        transparent 1px
+                    );
+                background-size: 50px 50px;
+            }
+            .page-hero-inner {
+                position: relative;
+                width: min(900px, 100% - 3rem);
+                margin: auto;
+            }
+            .page-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: var(--r-full);
+                padding: 0.35rem 0.9rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #90c4ff;
+                margin-bottom: 1.2rem;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .page-hero h1 {
+                font-family: 'Syne', sans-serif;
+                font-size: clamp(2rem, 4vw, 3rem);
+                font-weight: 800;
+                margin-bottom: 0.75rem;
+            }
+            .page-hero p {
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 1.05rem;
+                max-width: 560px;
+            }
+            .page-meta {
+                display: flex;
+                gap: 2rem;
+                margin-top: 1.5rem;
+                flex-wrap: wrap;
+            }
+            .page-meta-item {
+                font-size: 0.82rem;
+                color: rgba(255, 255, 255, 0.55);
+            }
+            .page-meta-item strong {
+                color: rgba(255, 255, 255, 0.85);
+                font-weight: 500;
+            }
 
-    /* Layout */
-    .layout{display:grid;grid-template-columns:260px 1fr;gap:3rem;align-items:start;width:min(1200px,100% - 3rem);margin:3rem auto 5rem}
+            /* Layout */
+            .layout {
+                display: grid;
+                grid-template-columns: 260px 1fr;
+                gap: 3rem;
+                align-items: start;
+                width: min(1200px, 100% - 3rem);
+                margin: 3rem auto 5rem;
+            }
 
-    /* Sidebar TOC */
-    .toc{position:sticky;top:80px}
-    .toc-title{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-bottom:1rem}
-    .toc-list{list-style:none}
-    .toc-list li{margin-bottom:.1rem}
-    .toc-list a{display:block;padding:.45rem .75rem;border-radius:var(--r1);font-size:.83rem;color:var(--steel);transition:all var(--trans);border-left:2px solid transparent}
-    .toc-list a:hover,.toc-list a.active{color:var(--brand);background:rgba(0,82,204,.06);border-left-color:var(--brand);text-decoration:none}
-    .toc-highlight{margin-top:1.5rem;background:rgba(0,82,204,.06);border:1px solid rgba(0,82,204,.15);border-radius:var(--r2);padding:1rem}
-    .toc-highlight p{font-size:.8rem;color:var(--ink-3);line-height:1.6}
-    .toc-highlight a{font-size:.8rem;font-weight:600}
+            /* Sidebar TOC */
+            .toc {
+                position: sticky;
+                top: 80px;
+            }
+            .toc-title {
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--steel);
+                margin-bottom: 1rem;
+            }
+            .toc-list {
+                list-style: none;
+            }
+            .toc-list li {
+                margin-bottom: 0.1rem;
+            }
+            .toc-list a {
+                display: block;
+                padding: 0.45rem 0.75rem;
+                border-radius: var(--r1);
+                font-size: 0.83rem;
+                color: var(--steel);
+                transition: all var(--trans);
+                border-left: 2px solid transparent;
+            }
+            .toc-list a:hover,
+            .toc-list a.active {
+                color: var(--brand);
+                background: rgba(0, 82, 204, 0.06);
+                border-left-color: var(--brand);
+                text-decoration: none;
+            }
+            .toc-highlight {
+                margin-top: 1.5rem;
+                background: rgba(0, 82, 204, 0.06);
+                border: 1px solid rgba(0, 82, 204, 0.15);
+                border-radius: var(--r2);
+                padding: 1rem;
+            }
+            .toc-highlight p {
+                font-size: 0.8rem;
+                color: var(--ink-3);
+                line-height: 1.6;
+            }
+            .toc-highlight a {
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
 
-    /* Content */
-    .content section{margin-bottom:3rem;scroll-margin-top:90px}
-    .section-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--brand);color:white;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.6rem;flex-shrink:0;font-family:'Syne',sans-serif}
-    .content h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin-bottom:1rem;display:flex;align-items:center;padding-bottom:.75rem;border-bottom:2px solid var(--paper)}
-    .content h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink-2);margin:1.5rem 0 .6rem}
-    .content p{color:var(--ink-3);margin-bottom:.9rem;font-size:.95rem}
-    .content ul{margin:.5rem 0 1rem 1.5rem;color:var(--ink-3);font-size:.95rem}
-    .content ul li{margin-bottom:.4rem}
-    .content strong{color:var(--ink);font-weight:600}
+            /* Content */
+            .content section {
+                margin-bottom: 3rem;
+                scroll-margin-top: 90px;
+            }
+            .section-num {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                background: var(--brand);
+                color: white;
+                border-radius: 6px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                margin-right: 0.6rem;
+                flex-shrink: 0;
+                font-family: 'Syne', sans-serif;
+            }
+            .content h2 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: var(--ink);
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                padding-bottom: 0.75rem;
+                border-bottom: 2px solid var(--paper);
+            }
+            .content h3 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: var(--ink-2);
+                margin: 1.5rem 0 0.6rem;
+            }
+            .content p {
+                color: var(--ink-3);
+                margin-bottom: 0.9rem;
+                font-size: 0.95rem;
+            }
+            .content ul {
+                margin: 0.5rem 0 1rem 1.5rem;
+                color: var(--ink-3);
+                font-size: 0.95rem;
+            }
+            .content ul li {
+                margin-bottom: 0.4rem;
+            }
+            .content strong {
+                color: var(--ink);
+                font-weight: 600;
+            }
 
-    /* Info boxes */
-    .info-box{border-radius:var(--r2);padding:1.25rem 1.5rem;margin:1.25rem 0;font-size:.9rem;display:flex;gap:1rem;align-items:flex-start}
-    .info-box-icon{font-size:1.3rem;flex-shrink:0;line-height:1}
-    .info-box-body{flex:1}
-    .info-box-body strong{display:block;margin-bottom:.25rem;font-size:.88rem}
-    .info-box-body p{margin:0;font-size:.85rem;color:inherit}
-    .info-blue{background:rgba(0,82,204,.06);border:1px solid rgba(0,82,204,.15);color:var(--ink-3)}
-    .info-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:#166534}
-    .info-amber{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);color:#92400e}
+            /* Info boxes */
+            .info-box {
+                border-radius: var(--r2);
+                padding: 1.25rem 1.5rem;
+                margin: 1.25rem 0;
+                font-size: 0.9rem;
+                display: flex;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            .info-box-icon {
+                font-size: 1.3rem;
+                flex-shrink: 0;
+                line-height: 1;
+            }
+            .info-box-body {
+                flex: 1;
+            }
+            .info-box-body strong {
+                display: block;
+                margin-bottom: 0.25rem;
+                font-size: 0.88rem;
+            }
+            .info-box-body p {
+                margin: 0;
+                font-size: 0.85rem;
+                color: inherit;
+            }
+            .info-blue {
+                background: rgba(0, 82, 204, 0.06);
+                border: 1px solid rgba(0, 82, 204, 0.15);
+                color: var(--ink-3);
+            }
+            .info-green {
+                background: rgba(34, 197, 94, 0.06);
+                border: 1px solid rgba(34, 197, 94, 0.2);
+                color: #166534;
+            }
+            .info-amber {
+                background: rgba(245, 166, 35, 0.08);
+                border: 1px solid rgba(245, 166, 35, 0.25);
+                color: #92400e;
+            }
 
-    /* Rights grid */
-    .rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0}
-    .right-card{background:var(--paper);border:1.5px solid var(--mist);border-radius:var(--r2);padding:1.1rem;transition:border-color var(--trans)}
-    .right-card:hover{border-color:var(--brand)}
-    .right-card-icon{font-size:1.4rem;margin-bottom:.5rem}
-    .right-card h4{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:.3rem;color:var(--ink)}
-    .right-card p{font-size:.8rem;color:var(--steel);margin:0}
+            /* Rights grid */
+            .rights-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+                margin: 1.25rem 0;
+            }
+            .right-card {
+                background: var(--paper);
+                border: 1.5px solid var(--mist);
+                border-radius: var(--r2);
+                padding: 1.1rem;
+                transition: border-color var(--trans);
+            }
+            .right-card:hover {
+                border-color: var(--brand);
+            }
+            .right-card-icon {
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
+            }
+            .right-card h4 {
+                font-family: 'Syne', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                margin-bottom: 0.3rem;
+                color: var(--ink);
+            }
+            .right-card p {
+                font-size: 0.8rem;
+                color: var(--steel);
+                margin: 0;
+            }
 
-    /* Data table */
-    .data-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
-    .data-table th{background:var(--ink);color:white;font-family:'Syne',sans-serif;font-weight:600;padding:.7rem 1rem;text-align:left;font-size:.8rem}
-    .data-table td{padding:.7rem 1rem;border-bottom:1px solid var(--mist);color:var(--ink-3);vertical-align:top}
-    .data-table tr:last-child td{border-bottom:none}
-    .data-table tr:nth-child(even) td{background:var(--paper)}
+            /* Data table */
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1rem 0;
+                font-size: 0.85rem;
+            }
+            .data-table th {
+                background: var(--ink);
+                color: white;
+                font-family: 'Syne', sans-serif;
+                font-weight: 600;
+                padding: 0.7rem 1rem;
+                text-align: left;
+                font-size: 0.8rem;
+            }
+            .data-table td {
+                padding: 0.7rem 1rem;
+                border-bottom: 1px solid var(--mist);
+                color: var(--ink-3);
+                vertical-align: top;
+            }
+            .data-table tr:last-child td {
+                border-bottom: none;
+            }
+            .data-table tr:nth-child(even) td {
+                background: var(--paper);
+            }
 
-    /* Contact card */
-    .contact-card{background:linear-gradient(135deg,#050c1f,#0d2654);color:white;border-radius:var(--r3);padding:2rem;margin-top:1.5rem}
-    .contact-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:.75rem;color:white}
-    .contact-card p{font-size:.88rem;color:rgba(255,255,255,.7);margin-bottom:.5rem}
-    .contact-card a{color:#90c4ff}
+            /* Contact card */
+            .contact-card {
+                background: linear-gradient(135deg, #050c1f, #0d2654);
+                color: white;
+                border-radius: var(--r3);
+                padding: 2rem;
+                margin-top: 1.5rem;
+            }
+            .contact-card h3 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+                color: white;
+            }
+            .contact-card p {
+                font-size: 0.88rem;
+                color: rgba(255, 255, 255, 0.7);
+                margin-bottom: 0.5rem;
+            }
+            .contact-card a {
+                color: #90c4ff;
+            }
 
-    /* Footer */
-    .page-footer{background:var(--ink);color:rgba(255,255,255,.5);padding:2rem 0;font-size:.82rem;text-align:center}
-    .page-footer a{color:rgba(255,255,255,.65)}
-    .page-footer .footer-links{display:flex;justify-content:center;gap:1.5rem;margin-top:.5rem;flex-wrap:wrap}
+            /* Footer */
+            .page-footer {
+                background: var(--ink);
+                color: rgba(255, 255, 255, 0.5);
+                padding: 2rem 0;
+                font-size: 0.82rem;
+                text-align: center;
+            }
+            .page-footer a {
+                color: rgba(255, 255, 255, 0.65);
+            }
+            .page-footer .footer-links {
+                display: flex;
+                justify-content: center;
+                gap: 1.5rem;
+                margin-top: 0.5rem;
+                flex-wrap: wrap;
+            }
 
-    @media(max-width:768px){
-      .layout{grid-template-columns:1fr}.toc{display:none}
-      .rights-grid{grid-template-columns:1fr}
-    }
-  </style>
-</head>
-<body>
+            @media (max-width: 768px) {
+                .layout {
+                    grid-template-columns: 1fr;
+                }
+                .toc {
+                    display: none;
+                }
+                .rights-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="nav">
+            <div class="nav-inner">
+                <a href="index.html" class="nav-logo">
+                    <div class="logo-mark">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                            />
+                        </svg>
+                    </div>
+                    TaIQ
+                </a>
+                <a href="index.html" class="nav-back">← Back to Home</a>
+            </div>
+        </nav>
 
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
-      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-      TaIQ
-    </a>
-    <a href="index.html" class="nav-back">← Back to Home</a>
-  </div>
-</nav>
-
-<div class="page-hero">
-  <div class="page-hero-inner">
-    <div class="page-badge">🔒 Legal</div>
-    <h1>Privacy Policy</h1>
-    <p>We are committed to protecting your personal data and being transparent about how we collect, use, and share it.</p>
-    <div class="page-meta">
-      <div class="page-meta-item"><strong>Effective Date:</strong> April 5, 2025</div>
-      <div class="page-meta-item"><strong>Last Updated:</strong> April 5, 2025</div>
-      <div class="page-meta-item"><strong>Version:</strong> 3.0</div>
-    </div>
-  </div>
-</div>
-
-<div class="layout">
-  <!-- Sidebar TOC -->
-  <aside class="toc">
-    <div class="toc-title">Contents</div>
-    <ul class="toc-list">
-      <li><a href="#s1">1. Who We Are</a></li>
-      <li><a href="#s2">2. Data We Collect</a></li>
-      <li><a href="#s3">3. How We Use Data</a></li>
-      <li><a href="#s4">4. Legal Basis (GDPR)</a></li>
-      <li><a href="#s5">5. Data Sharing</a></li>
-      <li><a href="#s6">6. International Transfers</a></li>
-      <li><a href="#s7">7. Data Retention</a></li>
-      <li><a href="#s8">8. Your Rights</a></li>
-      <li><a href="#s9">9. Children's Privacy</a></li>
-      <li><a href="#s10">10. AI & Automated Decisions</a></li>
-      <li><a href="#s11">11. Security</a></li>
-      <li><a href="#s12">12. California Privacy (CCPA)</a></li>
-      <li><a href="#s13">13. Changes to Policy</a></li>
-      <li><a href="#s14">14. Contact Us</a></li>
-    </ul>
-    <div class="toc-highlight">
-      <p>Questions about your data?</p>
-      <a href="mailto:privacy@taiq.us">privacy@taiq.us</a>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="content">
-
-    <div class="info-box info-blue">
-      <div class="info-box-icon">ℹ️</div>
-      <div class="info-box-body">
-        <strong>Plain-Language Summary</strong>
-        <p>We collect information you give us (like your name, resume, and job preferences) and information about how you use our platform. We use it to match you with jobs, improve our service, and communicate with you. We never sell your personal data. You can delete your account and data at any time.</p>
-      </div>
-    </div>
-
-    <section id="s1">
-      <h2><span class="section-num">1</span>Who We Are</h2>
-      <p>TaIQ Inc. ("TaIQ," "we," "us," or "our") operates the TaIQ recruitment platform, accessible at <a href="https://www.taiq.us">www.taiq.us</a> and through our mobile applications. We act as a <strong>data controller</strong> for the personal data you provide to us.</p>
-      <p>Our registered address is: <strong>123 Innovation Drive, Suite 400, Philadelphia, PA 19103, United States.</strong></p>
-      <p>We have appointed a Data Protection Officer (DPO) who can be reached at <a href="mailto:dpo@taiq.us">dpo@taiq.us</a>.</p>
-    </section>
-
-    <section id="s2">
-      <h2><span class="section-num">2</span>Data We Collect</h2>
-      <h3>Information You Provide Directly</h3>
-      <ul>
-        <li><strong>Account data:</strong> name, email address, password (hashed), phone number, profile photo</li>
-        <li><strong>Candidate profile:</strong> resume/CV, work history, education, skills, certifications, salary expectations, job preferences, LinkedIn URL</li>
-        <li><strong>Employer profile:</strong> company name, size, industry, job postings, billing information</li>
-        <li><strong>Applications:</strong> cover letters, responses to screening questions, interview availability</li>
-        <li><strong>Communications:</strong> messages sent through our platform, support tickets, survey responses</li>
-      </ul>
-
-      <h3>Information Collected Automatically</h3>
-      <ul>
-        <li><strong>Usage data:</strong> pages visited, job searches, applications submitted, time on site, features used</li>
-        <li><strong>Device data:</strong> IP address, browser type and version, operating system, screen resolution</li>
-        <li><strong>Location data:</strong> city/region level, derived from IP address (we do not collect precise GPS location)</li>
-        <li><strong>Cookies and tracking:</strong> see our <a href="cookie-policy.html">Cookie Policy</a> for full details</li>
-      </ul>
-
-      <h3>Information from Third Parties</h3>
-      <ul>
-        <li>LinkedIn profile data (when you connect your account or apply via LinkedIn)</li>
-        <li>Background check results (only when you explicitly authorize a check)</li>
-        <li>Identity verification data from our verification partners</li>
-        <li>Public professional profiles and contact details from data enrichment providers</li>
-      </ul>
-    </section>
-
-    <section id="s3">
-      <h2><span class="section-num">3</span>How We Use Your Data</h2>
-      <table class="data-table">
-        <thead><tr><th>Purpose</th><th>Data Used</th><th>Legal Basis</th></tr></thead>
-        <tbody>
-          <tr><td>Create and manage your account</td><td>Account data</td><td>Contract performance</td></tr>
-          <tr><td>Match candidates with relevant jobs</td><td>Profile, skills, preferences</td><td>Contract / Legitimate interest</td></tr>
-          <tr><td>Enable employers to search candidates</td><td>Profile (you control visibility)</td><td>Contract performance</td></tr>
-          <tr><td>Send application status updates</td><td>Email, application data</td><td>Contract performance</td></tr>
-          <tr><td>Improve platform features with AI/ML</td><td>Anonymized usage data</td><td>Legitimate interest</td></tr>
-          <tr><td>Send marketing emails (optional)</td><td>Email, job preferences</td><td>Consent</td></tr>
-          <tr><td>Prevent fraud and abuse</td><td>Usage data, IP address</td><td>Legitimate interest / Legal obligation</td></tr>
-          <tr><td>Comply with legal requirements</td><td>As required</td><td>Legal obligation</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="s4">
-      <h2><span class="section-num">4</span>Legal Basis for Processing (GDPR)</h2>
-      <p>If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, we process your personal data under the following legal bases:</p>
-      <ul>
-        <li><strong>Contract performance:</strong> Processing necessary to provide you with the services you have requested.</li>
-        <li><strong>Legitimate interests:</strong> Processing that is in our legitimate business interests, such as preventing fraud, improving our services, and conducting analytics — balanced against your privacy rights.</li>
-        <li><strong>Legal obligation:</strong> Processing required to comply with applicable laws and regulations.</li>
-        <li><strong>Consent:</strong> Where you have given explicit consent (e.g., marketing emails, non-essential cookies). You may withdraw consent at any time without affecting prior processing.</li>
-      </ul>
-    </section>
-
-    <section id="s5">
-      <h2><span class="section-num">5</span>Data Sharing</h2>
-      <div class="info-box info-green">
-        <div class="info-box-icon">✅</div>
-        <div class="info-box-body">
-          <strong>We never sell your personal data.</strong>
-          <p>We do not sell, rent, or trade your personal information to third parties for their marketing purposes.</p>
+        <div class="page-hero">
+            <div class="page-hero-inner">
+                <div class="page-badge">🔒 Legal</div>
+                <h1>Privacy Policy</h1>
+                <p>
+                    We are committed to protecting your personal data and being
+                    transparent about how we collect, use, and share it.
+                </p>
+                <div class="page-meta">
+                    <div class="page-meta-item">
+                        <strong>Effective Date:</strong> April 5, 2025
+                    </div>
+                    <div class="page-meta-item">
+                        <strong>Last Updated:</strong> April 5, 2025
+                    </div>
+                    <div class="page-meta-item">
+                        <strong>Version:</strong> 3.0
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <p>We share data only in the following circumstances:</p>
-      <ul>
-        <li><strong>With employers:</strong> When you apply to a job, your profile and application materials are shared with that employer. You control which profile elements are public.</li>
-        <li><strong>Service providers:</strong> AWS (hosting), SendGrid (email delivery), Stripe (payments), Cloudflare (security/CDN) — all bound by data processing agreements.</li>
-        <li><strong>Background check partners:</strong> Only when you explicitly initiate a background check.</li>
-        <li><strong>Analytics providers:</strong> Aggregated, de-identified data only — no personally identifiable information.</li>
-        <li><strong>Legal requirements:</strong> When required by law, court order, or to protect the safety of our users.</li>
-        <li><strong>Business transfers:</strong> In the event of a merger or acquisition, personal data may be transferred. We will notify you before your data is subject to a different Privacy Policy.</li>
-      </ul>
-    </section>
 
-    <section id="s6">
-      <h2><span class="section-num">6</span>International Data Transfers</h2>
-      <p>TaIQ is headquartered in the United States. If you are located outside the US, your data will be transferred to and processed in the United States and other countries. We ensure appropriate safeguards are in place:</p>
-      <ul>
-        <li>For transfers from the EEA/UK: We use <strong>Standard Contractual Clauses (SCCs)</strong> approved by the European Commission</li>
-        <li>We maintain <strong>EU-US Data Privacy Framework</strong> certification</li>
-        <li>All third-party processors are vetted for adequate protection standards</li>
-      </ul>
-    </section>
+        <div class="layout">
+            <!-- Sidebar TOC -->
+            <aside class="toc">
+                <div class="toc-title">Contents</div>
+                <ul class="toc-list">
+                    <li><a href="#s1">1. Who We Are</a></li>
+                    <li><a href="#s2">2. Data We Collect</a></li>
+                    <li><a href="#s3">3. How We Use Data</a></li>
+                    <li><a href="#s4">4. Legal Basis (GDPR)</a></li>
+                    <li><a href="#s5">5. Data Sharing</a></li>
+                    <li><a href="#s6">6. International Transfers</a></li>
+                    <li><a href="#s7">7. Data Retention</a></li>
+                    <li><a href="#s8">8. Your Rights</a></li>
+                    <li><a href="#s9">9. Children's Privacy</a></li>
+                    <li><a href="#s10">10. AI & Automated Decisions</a></li>
+                    <li><a href="#s11">11. Security</a></li>
+                    <li><a href="#s12">12. California Privacy (CCPA)</a></li>
+                    <li><a href="#s13">13. Changes to Policy</a></li>
+                    <li><a href="#s14">14. Contact Us</a></li>
+                </ul>
+                <div class="toc-highlight">
+                    <p>Questions about your data?</p>
+                    <a href="mailto:privacy@taiq.us">privacy@taiq.us</a>
+                </div>
+            </aside>
 
-    <section id="s7">
-      <h2><span class="section-num">7</span>Data Retention</h2>
-      <table class="data-table">
-        <thead><tr><th>Data Type</th><th>Retention Period</th></tr></thead>
-        <tbody>
-          <tr><td>Active account data</td><td>Duration of account + 30 days after deletion request</td></tr>
-          <tr><td>Application records</td><td>2 years from application date</td></tr>
-          <tr><td>Usage / analytics logs</td><td>13 months (rolling)</td></tr>
-          <tr><td>Financial / billing records</td><td>7 years (legal requirement)</td></tr>
-          <tr><td>Support tickets</td><td>3 years</td></tr>
-          <tr><td>Fraud prevention data</td><td>5 years</td></tr>
-          <tr><td>Marketing consent records</td><td>Until withdrawn + 3 years</td></tr>
-        </tbody>
-      </table>
-    </section>
+            <!-- Main Content -->
+            <main class="content">
+                <div class="info-box info-blue">
+                    <div class="info-box-icon">ℹ️</div>
+                    <div class="info-box-body">
+                        <strong>Plain-Language Summary</strong>
+                        <p>
+                            We collect information you give us (like your name,
+                            resume, and job preferences) and information about
+                            how you use our platform. We use it to match you
+                            with jobs, improve our service, and communicate with
+                            you. We never sell your personal data. You can
+                            delete your account and data at any time.
+                        </p>
+                    </div>
+                </div>
 
-    <section id="s8">
-      <h2><span class="section-num">8</span>Your Privacy Rights</h2>
-      <div class="rights-grid">
-        <div class="right-card"><div class="right-card-icon">👁️</div><h4>Right to Access</h4><p>Request a copy of all personal data we hold about you.</p></div>
-        <div class="right-card"><div class="right-card-icon">✏️</div><h4>Right to Rectification</h4><p>Correct inaccurate or incomplete personal data.</p></div>
-        <div class="right-card"><div class="right-card-icon">🗑️</div><h4>Right to Erasure</h4><p>Request deletion of your data ("right to be forgotten").</p></div>
-        <div class="right-card"><div class="right-card-icon">⏸️</div><h4>Right to Restriction</h4><p>Restrict how we process your data in certain circumstances.</p></div>
-        <div class="right-card"><div class="right-card-icon">📦</div><h4>Data Portability</h4><p>Receive your data in a structured, machine-readable format.</p></div>
-        <div class="right-card"><div class="right-card-icon">🚫</div><h4>Right to Object</h4><p>Object to processing based on legitimate interests or for direct marketing.</p></div>
-      </div>
-      <p>To exercise any of these rights, email <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> or visit your account settings. We will respond within <strong>30 days</strong> (or 45 days for complex requests, with notice). We may need to verify your identity before fulfilling a request.</p>
-      <p>EEA/UK residents may also lodge a complaint with their local supervisory authority (e.g., the ICO in the UK, or your national DPA in the EU).</p>
-    </section>
+                <section id="s1">
+                    <h2><span class="section-num">1</span>Who We Are</h2>
+                    <p>
+                        TaIQ Inc. ("TaIQ," "we," "us," or "our") operates the
+                        TaIQ recruitment platform, accessible at
+                        <a href="https://www.taiq.us">www.taiq.us</a> and
+                        through our mobile applications. We act as a
+                        <strong>data controller</strong> for the personal data
+                        you provide to us.
+                    </p>
+                    <p>
+                        Our registered address is:
+                        <strong
+                            >123 Innovation Drive, Suite 400, Philadelphia, PA
+                            19103, United States.</strong
+                        >
+                    </p>
+                    <p>
+                        We have appointed a Data Protection Officer (DPO) who
+                        can be reached at
+                        <a href="mailto:dpo@taiq.us">dpo@taiq.us</a>.
+                    </p>
+                </section>
 
-    <section id="s9">
-      <h2><span class="section-num">9</span>Children's Privacy</h2>
-      <p>TaIQ is not directed at individuals under the age of <strong>16</strong> (or the applicable minimum age in your jurisdiction). We do not knowingly collect personal data from children. If you believe a child has provided us with personal information, please contact us immediately at <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> and we will delete it promptly.</p>
-    </section>
+                <section id="s2">
+                    <h2><span class="section-num">2</span>Data We Collect</h2>
+                    <h3>Information You Provide Directly</h3>
+                    <ul>
+                        <li>
+                            <strong>Account data:</strong> name, email address,
+                            password (hashed), phone number, profile photo
+                        </li>
+                        <li>
+                            <strong>Candidate profile:</strong> resume/CV, work
+                            history, education, skills, certifications, salary
+                            expectations, job preferences, LinkedIn URL
+                        </li>
+                        <li>
+                            <strong>Employer profile:</strong> company name,
+                            size, industry, job postings, billing information
+                        </li>
+                        <li>
+                            <strong>Applications:</strong> cover letters,
+                            responses to screening questions, interview
+                            availability
+                        </li>
+                        <li>
+                            <strong>Communications:</strong> messages sent
+                            through our platform, support tickets, survey
+                            responses
+                        </li>
+                    </ul>
 
-    <section id="s10">
-      <h2><span class="section-num">10</span>AI &amp; Automated Decision-Making</h2>
-      <div class="info-box info-amber">
-        <div class="info-box-icon">🤖</div>
-        <div class="info-box-body">
-          <strong>How We Use AI on TaIQ</strong>
-          <p>We use machine learning to power our job-matching algorithm. Automated decisions that <em>significantly affect you</em> (such as account suspension) are always reviewed by a human. You can request human review of any automated decision by contacting us.</p>
+                    <h3>Information Collected Automatically</h3>
+                    <ul>
+                        <li>
+                            <strong>Usage data:</strong> pages visited, job
+                            searches, applications submitted, time on site,
+                            features used
+                        </li>
+                        <li>
+                            <strong>Device data:</strong> IP address, browser
+                            type and version, operating system, screen
+                            resolution
+                        </li>
+                        <li>
+                            <strong>Location data:</strong> city/region level,
+                            derived from IP address (we do not collect precise
+                            GPS location)
+                        </li>
+                        <li>
+                            <strong>Cookies and tracking:</strong> see our
+                            <a href="cookie-policy.html">Cookie Policy</a> for
+                            full details
+                        </li>
+                    </ul>
+
+                    <h3>Information from Third Parties</h3>
+                    <ul>
+                        <li>
+                            LinkedIn profile data (when you connect your account
+                            or apply via LinkedIn)
+                        </li>
+                        <li>
+                            Background check results (only when you explicitly
+                            authorize a check)
+                        </li>
+                        <li>
+                            Identity verification data from our verification
+                            partners
+                        </li>
+                        <li>
+                            Public professional profiles and contact details
+                            from data enrichment providers
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="s3">
+                    <h2>
+                        <span class="section-num">3</span>How We Use Your Data
+                    </h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Purpose</th>
+                                <th>Data Used</th>
+                                <th>Legal Basis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Create and manage your account</td>
+                                <td>Account data</td>
+                                <td>Contract performance</td>
+                            </tr>
+                            <tr>
+                                <td>Match candidates with relevant jobs</td>
+                                <td>Profile, skills, preferences</td>
+                                <td>Contract / Legitimate interest</td>
+                            </tr>
+                            <tr>
+                                <td>Enable employers to search candidates</td>
+                                <td>Profile (you control visibility)</td>
+                                <td>Contract performance</td>
+                            </tr>
+                            <tr>
+                                <td>Send application status updates</td>
+                                <td>Email, application data</td>
+                                <td>Contract performance</td>
+                            </tr>
+                            <tr>
+                                <td>Improve platform features with AI/ML</td>
+                                <td>Anonymized usage data</td>
+                                <td>Legitimate interest</td>
+                            </tr>
+                            <tr>
+                                <td>Send marketing emails (optional)</td>
+                                <td>Email, job preferences</td>
+                                <td>Consent</td>
+                            </tr>
+                            <tr>
+                                <td>Prevent fraud and abuse</td>
+                                <td>Usage data, IP address</td>
+                                <td>Legitimate interest / Legal obligation</td>
+                            </tr>
+                            <tr>
+                                <td>Comply with legal requirements</td>
+                                <td>As required</td>
+                                <td>Legal obligation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="s4">
+                    <h2>
+                        <span class="section-num">4</span>Legal Basis for
+                        Processing (GDPR)
+                    </h2>
+                    <p>
+                        If you are located in the European Economic Area (EEA),
+                        United Kingdom, or Switzerland, we process your personal
+                        data under the following legal bases:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Contract performance:</strong> Processing
+                            necessary to provide you with the services you have
+                            requested.
+                        </li>
+                        <li>
+                            <strong>Legitimate interests:</strong> Processing
+                            that is in our legitimate business interests, such
+                            as preventing fraud, improving our services, and
+                            conducting analytics — balanced against your privacy
+                            rights.
+                        </li>
+                        <li>
+                            <strong>Legal obligation:</strong> Processing
+                            required to comply with applicable laws and
+                            regulations.
+                        </li>
+                        <li>
+                            <strong>Consent:</strong> Where you have given
+                            explicit consent (e.g., marketing emails,
+                            non-essential cookies). You may withdraw consent at
+                            any time without affecting prior processing.
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="s5">
+                    <h2><span class="section-num">5</span>Data Sharing</h2>
+                    <div class="info-box info-green">
+                        <div class="info-box-icon">✅</div>
+                        <div class="info-box-body">
+                            <strong>We never sell your personal data.</strong>
+                            <p>
+                                We do not sell, rent, or trade your personal
+                                information to third parties for their marketing
+                                purposes.
+                            </p>
+                        </div>
+                    </div>
+                    <p>We share data only in the following circumstances:</p>
+                    <ul>
+                        <li>
+                            <strong>With employers:</strong> When you apply to a
+                            job, your profile and application materials are
+                            shared with that employer. You control which profile
+                            elements are public.
+                        </li>
+                        <li>
+                            <strong>Service providers:</strong> AWS (hosting),
+                            SendGrid (email delivery), Stripe (payments),
+                            Cloudflare (security/CDN) — all bound by data
+                            processing agreements.
+                        </li>
+                        <li>
+                            <strong>Background check partners:</strong> Only
+                            when you explicitly initiate a background check.
+                        </li>
+                        <li>
+                            <strong>Analytics providers:</strong> Aggregated,
+                            de-identified data only — no personally identifiable
+                            information.
+                        </li>
+                        <li>
+                            <strong>Legal requirements:</strong> When required
+                            by law, court order, or to protect the safety of our
+                            users.
+                        </li>
+                        <li>
+                            <strong>Business transfers:</strong> In the event of
+                            a merger or acquisition, personal data may be
+                            transferred. We will notify you before your data is
+                            subject to a different Privacy Policy.
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="s6">
+                    <h2>
+                        <span class="section-num">6</span>International Data
+                        Transfers
+                    </h2>
+                    <p>
+                        TaIQ is headquartered in the United States. If you are
+                        located outside the US, your data will be transferred to
+                        and processed in the United States and other countries.
+                        We ensure appropriate safeguards are in place:
+                    </p>
+                    <ul>
+                        <li>
+                            For transfers from the EEA/UK: We use
+                            <strong>Standard Contractual Clauses (SCCs)</strong>
+                            approved by the European Commission
+                        </li>
+                        <li>
+                            We maintain
+                            <strong>EU-US Data Privacy Framework</strong>
+                            certification
+                        </li>
+                        <li>
+                            All third-party processors are vetted for adequate
+                            protection standards
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="s7">
+                    <h2><span class="section-num">7</span>Data Retention</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data Type</th>
+                                <th>Retention Period</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Active account data</td>
+                                <td>
+                                    Duration of account + 30 days after deletion
+                                    request
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Application records</td>
+                                <td>2 years from application date</td>
+                            </tr>
+                            <tr>
+                                <td>Usage / analytics logs</td>
+                                <td>13 months (rolling)</td>
+                            </tr>
+                            <tr>
+                                <td>Financial / billing records</td>
+                                <td>7 years (legal requirement)</td>
+                            </tr>
+                            <tr>
+                                <td>Support tickets</td>
+                                <td>3 years</td>
+                            </tr>
+                            <tr>
+                                <td>Fraud prevention data</td>
+                                <td>5 years</td>
+                            </tr>
+                            <tr>
+                                <td>Marketing consent records</td>
+                                <td>Until withdrawn + 3 years</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="s8">
+                    <h2>
+                        <span class="section-num">8</span>Your Privacy Rights
+                    </h2>
+                    <div class="rights-grid">
+                        <div class="right-card">
+                            <div class="right-card-icon">👁️</div>
+                            <h4>Right to Access</h4>
+                            <p>
+                                Request a copy of all personal data we hold
+                                about you.
+                            </p>
+                        </div>
+                        <div class="right-card">
+                            <div class="right-card-icon">✏️</div>
+                            <h4>Right to Rectification</h4>
+                            <p>
+                                Correct inaccurate or incomplete personal data.
+                            </p>
+                        </div>
+                        <div class="right-card">
+                            <div class="right-card-icon">🗑️</div>
+                            <h4>Right to Erasure</h4>
+                            <p>
+                                Request deletion of your data ("right to be
+                                forgotten").
+                            </p>
+                        </div>
+                        <div class="right-card">
+                            <div class="right-card-icon">⏸️</div>
+                            <h4>Right to Restriction</h4>
+                            <p>
+                                Restrict how we process your data in certain
+                                circumstances.
+                            </p>
+                        </div>
+                        <div class="right-card">
+                            <div class="right-card-icon">📦</div>
+                            <h4>Data Portability</h4>
+                            <p>
+                                Receive your data in a structured,
+                                machine-readable format.
+                            </p>
+                        </div>
+                        <div class="right-card">
+                            <div class="right-card-icon">🚫</div>
+                            <h4>Right to Object</h4>
+                            <p>
+                                Object to processing based on legitimate
+                                interests or for direct marketing.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        To exercise any of these rights, email
+                        <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> or
+                        visit your account settings. We will respond within
+                        <strong>30 days</strong> (or 45 days for complex
+                        requests, with notice). We may need to verify your
+                        identity before fulfilling a request.
+                    </p>
+                    <p>
+                        EEA/UK residents may also lodge a complaint with their
+                        local supervisory authority (e.g., the ICO in the UK, or
+                        your national DPA in the EU).
+                    </p>
+                </section>
+
+                <section id="s9">
+                    <h2>
+                        <span class="section-num">9</span>Children's Privacy
+                    </h2>
+                    <p>
+                        TaIQ is not directed at individuals under the age of
+                        <strong>16</strong> (or the applicable minimum age in
+                        your jurisdiction). We do not knowingly collect personal
+                        data from children. If you believe a child has provided
+                        us with personal information, please contact us
+                        immediately at
+                        <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> and
+                        we will delete it promptly.
+                    </p>
+                </section>
+
+                <section id="s10">
+                    <h2>
+                        <span class="section-num">10</span>AI &amp; Automated
+                        Decision-Making
+                    </h2>
+                    <div class="info-box info-amber">
+                        <div class="info-box-icon">🤖</div>
+                        <div class="info-box-body">
+                            <strong>How We Use AI on TaIQ</strong>
+                            <p>
+                                We use machine learning to power our
+                                job-matching algorithm. Automated decisions that
+                                <em>significantly affect you</em> (such as
+                                account suspension) are always reviewed by a
+                                human. You can request human review of any
+                                automated decision by contacting us.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Our AI systems analyze profile data, skills, search
+                        behavior, and application history to rank job
+                        recommendations. This profiling is conducted on the
+                        basis of <strong>legitimate interest</strong> and you
+                        may opt out at any time by adjusting your preferences in
+                        account settings. Opting out will not remove you from
+                        the platform but will result in less personalized
+                        recommendations.
+                    </p>
+                </section>
+
+                <section id="s11">
+                    <h2><span class="section-num">11</span>Security</h2>
+                    <p>
+                        We implement industry-standard security measures
+                        including:
+                    </p>
+                    <ul>
+                        <li>TLS 1.3 encryption for all data in transit</li>
+                        <li>AES-256 encryption for sensitive data at rest</li>
+                        <li>
+                            Bcrypt password hashing (never stored in plain text)
+                        </li>
+                        <li>
+                            Annual third-party penetration testing and SOC 2
+                            Type II audit
+                        </li>
+                        <li>
+                            Multi-factor authentication available for all
+                            accounts
+                        </li>
+                        <li>
+                            Strict employee access controls and security
+                            training
+                        </li>
+                    </ul>
+                    <p>
+                        In the event of a data breach that is likely to result
+                        in a high risk to your rights and freedoms, we will
+                        notify affected users within
+                        <strong>72 hours</strong> of becoming aware of the
+                        breach, as required by GDPR.
+                    </p>
+                </section>
+
+                <section id="s12">
+                    <h2>
+                        <span class="section-num">12</span>California Privacy
+                        Rights (CCPA/CPRA)
+                    </h2>
+                    <p>
+                        If you are a California resident, you have additional
+                        rights under the California Consumer Privacy Act (CCPA)
+                        and California Privacy Rights Act (CPRA):
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Right to Know:</strong> The categories of
+                            personal information we collect and how it is used
+                        </li>
+                        <li>
+                            <strong>Right to Delete:</strong> Request deletion
+                            of personal information we have collected
+                        </li>
+                        <li>
+                            <strong>Right to Opt-Out:</strong> We do not sell
+                            personal information. For targeted advertising
+                            opt-outs, see our
+                            <a href="cookie-policy.html">Cookie Policy</a>
+                        </li>
+                        <li>
+                            <strong>Right to Correct:</strong> Correct
+                            inaccurate personal information
+                        </li>
+                        <li>
+                            <strong>Right to Limit:</strong> Limit use of
+                            sensitive personal information
+                        </li>
+                        <li>
+                            <strong>Non-Discrimination:</strong> We will not
+                            discriminate against you for exercising your privacy
+                            rights
+                        </li>
+                    </ul>
+                    <p>
+                        To submit a CCPA request, email
+                        <a href="mailto:privacy@taiq.us">privacy@taiq.us</a>
+                        with subject line "California Privacy Request." We will
+                        verify your identity and respond within 45 days.
+                    </p>
+                </section>
+
+                <section id="s13">
+                    <h2>
+                        <span class="section-num">13</span>Changes to This
+                        Policy
+                    </h2>
+                    <p>
+                        We may update this Privacy Policy from time to time.
+                        When we make material changes, we will:
+                    </p>
+                    <ul>
+                        <li>
+                            Send you an email notification at least 30 days
+                            before changes take effect
+                        </li>
+                        <li>Display a prominent notice on our platform</li>
+                        <li>
+                            Update the "Last Updated" date at the top of this
+                            page
+                        </li>
+                        <li>
+                            Archive previous versions, accessible by contacting
+                            us
+                        </li>
+                    </ul>
+                    <p>
+                        Your continued use of TaIQ after the effective date
+                        constitutes acceptance of the updated policy.
+                    </p>
+                </section>
+
+                <section id="s14">
+                    <h2><span class="section-num">14</span>Contact Us</h2>
+                    <div class="contact-card">
+                        <h3>Data Protection & Privacy Team</h3>
+                        <p>
+                            📧 Email:
+                            <a href="mailto:privacy@taiq.us">privacy@taiq.us</a>
+                        </p>
+                        <p>
+                            📧 DPO: <a href="mailto:dpo@taiq.us">dpo@taiq.us</a>
+                        </p>
+                        <p>
+                            📬 Mail: TaIQ Inc., Attn: Privacy Team<br />123
+                            Innovation Drive, Suite 400<br />Philadelphia, PA
+                            19103, USA
+                        </p>
+                        <p
+                            style="
+                                margin-top: 0.75rem;
+                                font-size: 0.8rem;
+                                color: rgba(255, 255, 255, 0.5);
+                            "
+                        >
+                            Response time: within 30 days of receipt
+                        </p>
+                    </div>
+                </section>
+            </main>
         </div>
-      </div>
-      <p>Our AI systems analyze profile data, skills, search behavior, and application history to rank job recommendations. This profiling is conducted on the basis of <strong>legitimate interest</strong> and you may opt out at any time by adjusting your preferences in account settings. Opting out will not remove you from the platform but will result in less personalized recommendations.</p>
-    </section>
 
-    <section id="s11">
-      <h2><span class="section-num">11</span>Security</h2>
-      <p>We implement industry-standard security measures including:</p>
-      <ul>
-        <li>TLS 1.3 encryption for all data in transit</li>
-        <li>AES-256 encryption for sensitive data at rest</li>
-        <li>Bcrypt password hashing (never stored in plain text)</li>
-        <li>Annual third-party penetration testing and SOC 2 Type II audit</li>
-        <li>Multi-factor authentication available for all accounts</li>
-        <li>Strict employee access controls and security training</li>
-      </ul>
-      <p>In the event of a data breach that is likely to result in a high risk to your rights and freedoms, we will notify affected users within <strong>72 hours</strong> of becoming aware of the breach, as required by GDPR.</p>
-    </section>
+        <footer class="page-footer">
+            <div>© 2025 TaIQ Inc. All rights reserved.</div>
+            <div class="footer-links">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+                <a href="cookie-policy.html">Cookie Policy</a>
+                <a href="accessibility.html">Accessibility</a>
+            </div>
+        </footer>
 
-    <section id="s12">
-      <h2><span class="section-num">12</span>California Privacy Rights (CCPA/CPRA)</h2>
-      <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA):</p>
-      <ul>
-        <li><strong>Right to Know:</strong> The categories of personal information we collect and how it is used</li>
-        <li><strong>Right to Delete:</strong> Request deletion of personal information we have collected</li>
-        <li><strong>Right to Opt-Out:</strong> We do not sell personal information. For targeted advertising opt-outs, see our <a href="cookie-policy.html">Cookie Policy</a></li>
-        <li><strong>Right to Correct:</strong> Correct inaccurate personal information</li>
-        <li><strong>Right to Limit:</strong> Limit use of sensitive personal information</li>
-        <li><strong>Non-Discrimination:</strong> We will not discriminate against you for exercising your privacy rights</li>
-      </ul>
-      <p>To submit a CCPA request, email <a href="mailto:privacy@taiq.us">privacy@taiq.us</a> with subject line "California Privacy Request." We will verify your identity and respond within 45 days.</p>
-    </section>
-
-    <section id="s13">
-      <h2><span class="section-num">13</span>Changes to This Policy</h2>
-      <p>We may update this Privacy Policy from time to time. When we make material changes, we will:</p>
-      <ul>
-        <li>Send you an email notification at least 30 days before changes take effect</li>
-        <li>Display a prominent notice on our platform</li>
-        <li>Update the "Last Updated" date at the top of this page</li>
-        <li>Archive previous versions, accessible by contacting us</li>
-      </ul>
-      <p>Your continued use of TaIQ after the effective date constitutes acceptance of the updated policy.</p>
-    </section>
-
-    <section id="s14">
-      <h2><span class="section-num">14</span>Contact Us</h2>
-      <div class="contact-card">
-        <h3>Data Protection & Privacy Team</h3>
-        <p>📧 Email: <a href="mailto:privacy@taiq.us">privacy@taiq.us</a></p>
-        <p>📧 DPO: <a href="mailto:dpo@taiq.us">dpo@taiq.us</a></p>
-        <p>📬 Mail: TaIQ Inc., Attn: Privacy Team<br>123 Innovation Drive, Suite 400<br>Philadelphia, PA 19103, USA</p>
-        <p style="margin-top:.75rem;font-size:.8rem;color:rgba(255,255,255,.5)">Response time: within 30 days of receipt</p>
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<footer class="page-footer">
-  <div>© 2025 TaIQ Inc. All rights reserved.</div>
-  <div class="footer-links">
-    <a href="privacy-policy.html">Privacy Policy</a>
-    <a href="terms-of-service.html">Terms of Service</a>
-    <a href="cookie-policy.html">Cookie Policy</a>
-    <a href="accessibility.html">Accessibility</a>
-  </div>
-</footer>
-
-<script>
-  // Highlight active TOC item on scroll
-  const sections = document.querySelectorAll('section[id]');
-  const links = document.querySelectorAll('.toc-list a');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        links.forEach(l => l.classList.remove('active'));
-        const a = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
-        if (a) a.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-20% 0px -70% 0px' });
-  sections.forEach(s => obs.observe(s));
-</script>
-</body>
+        <script>
+            // Highlight active TOC item on scroll
+            const sections = document.querySelectorAll('section[id]');
+            const links = document.querySelectorAll('.toc-list a');
+            const obs = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((e) => {
+                        if (e.isIntersecting) {
+                            links.forEach((l) => l.classList.remove('active'));
+                            const a = document.querySelector(
+                                `.toc-list a[href="#${e.target.id}"]`,
+                            );
+                            if (a) a.classList.add('active');
+                        }
+                    });
+                },
+                {rootMargin: '-20% 0px -70% 0px'},
+            );
+            sections.forEach((s) => obs.observe(s));
+        </script>
+    </body>
 </html>

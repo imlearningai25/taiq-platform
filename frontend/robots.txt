@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /under-construction.html
+Disallow: /verify.html
+Disallow: /api/
+
+# Crawl-delay for polite bots
+Crawl-delay: 2
+
+Sitemap: https://taiq.us/sitemap.xml
