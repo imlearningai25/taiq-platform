@@ -1028,7 +1028,7 @@
       <!-- populated by JS -->
     </div>
     <div class="jobs-cta fade-in">
-      <a href="#" class="btn btn-primary btn-lg" onclick="event.preventDefault();showToast('Showing all available positions…','🔍')">
+      <a href="dashboard.html" class="btn btn-primary btn-lg" onclick="if(currentUser){event.preventDefault();window.location.href='dashboard.html#jobs';}">
         View All Jobs &nbsp;→
       </a>
       <p class="job-count" style="margin-top:.75rem" id="jobCount"></p>
@@ -1442,38 +1442,7 @@
   const API = '/api/v1';
 
   // ── Static data fallback (used when API not available) ──────────────────────
-  const STATIC_JOBS = [
-    { id:1, title:'Senior Software Engineer', company:{name:'Acme Technologies',logo_url:null,headquarters:'New York, NY',is_verified:true}, location:'New York, NY', remote:true, job_type:'full_time', salary_min:130000, salary_max:170000, skills_required:['Python','AWS','React'], is_featured:true, views:842, created_at:new Date(Date.now()-2*86400000).toISOString(),
-      description:'We are looking for a Senior Software Engineer to join our platform team and help build scalable, high-performance systems that power millions of users. You will work closely with product and design teams to deliver features end-to-end, mentor junior engineers, and contribute to architectural decisions.',
-      requirements:['5+ years of professional software engineering experience','Strong proficiency in Python and at least one modern JS framework (React preferred)','Experience with AWS services (EC2, Lambda, S3, RDS)','Solid understanding of distributed systems and microservices architecture','Excellent communication skills and experience mentoring junior developers','BS/MS in Computer Science or equivalent practical experience'],
-      benefits:['Competitive salary + equity package','Unlimited PTO policy','$5,000 annual learning & development budget','401(k) with 4% company match','Comprehensive health, dental, and vision insurance','Flexible remote / hybrid schedule','Home office stipend ($1,500)']
-    },
-    { id:2, title:'Data Scientist – ML Platform', company:{name:'DataFlow Inc.',logo_url:null,headquarters:'San Francisco, CA',is_verified:true}, location:'San Francisco, CA', remote:true, job_type:'full_time', salary_min:120000, salary_max:160000, skills_required:['Python','TensorFlow','SQL'], is_featured:true, views:612, created_at:new Date(Date.now()-1*86400000).toISOString(),
-      description:'DataFlow Inc. is seeking a talented Data Scientist to join our ML Platform team. You will design and implement machine learning models that drive key product decisions, work with terabyte-scale datasets, and deploy production-grade ML pipelines that serve real-time predictions to millions of users.',
-      requirements:['3+ years of experience in data science or machine learning engineering','Expert-level Python skills with experience in TensorFlow or PyTorch','Strong SQL skills and experience with large-scale data processing (Spark, BigQuery)','Understanding of statistical modeling, A/B testing, and experimentation design','Published research or portfolio of ML projects is a plus','MS or PhD in Computer Science, Statistics, or related quantitative field preferred'],
-      benefits:['Base salary + annual performance bonus (15-25%)','RSU equity grants with 4-year vesting','Catered meals 3x per week','$3,000 annual conference and education budget','Premium health, dental, vision, and mental health coverage','12 weeks paid parental leave','Monthly wellness stipend ($200)']
-    },
-    { id:3, title:'Registered Nurse – ICU', company:{name:'MetroHealth System',logo_url:null,headquarters:'Cleveland, OH',is_verified:false}, location:'Cleveland, OH', remote:false, job_type:'full_time', salary_min:72000, salary_max:95000, skills_required:['Critical Care','BLS','ACLS'], is_featured:false, views:389, created_at:new Date(Date.now()-3*86400000).toISOString(),
-      description:'MetroHealth System is seeking dedicated ICU Registered Nurses to join our award-winning critical care unit. You will provide compassionate, evidence-based patient care in a fast-paced environment, collaborate with interdisciplinary teams, and have access to the latest medical technologies.',
-      requirements:['Active RN license in the state of Ohio','BLS and ACLS certifications required','Minimum 2 years of ICU or critical care nursing experience','Proficiency with electronic health record systems (Epic preferred)','Strong clinical assessment and critical thinking skills','CCRN certification preferred but not required'],
-      benefits:['Competitive hourly rates with shift differentials','Sign-on bonus up to $10,000','Tuition reimbursement program ($5,250/year)','Pension plan + 403(b) retirement savings','Comprehensive medical, dental, and vision coverage','Generous PTO accrual from day one','Free parking and employee cafeteria discounts']
-    },
-    { id:4, title:'Product Manager – Growth', company:{name:'FinTech Partners',logo_url:null,headquarters:'Austin, TX',is_verified:true}, location:'Austin, TX', remote:true, job_type:'full_time', salary_min:115000, salary_max:145000, skills_required:['Product Strategy','A/B Testing','SQL'], is_featured:false, views:511, created_at:new Date(Date.now()-1*86400000).toISOString(),
-      description:'FinTech Partners is hiring a Product Manager to lead our Growth squad. You will own the user acquisition and activation funnel, run data-driven experiments, and collaborate with engineering, marketing, and design to deliver features that drive measurable business impact. This is a high-visibility role reporting directly to the VP of Product.',
-      requirements:['4+ years of product management experience, ideally in fintech or SaaS','Demonstrated success driving growth metrics (activation, retention, revenue)','Strong analytical skills with hands-on experience in SQL and experimentation platforms','Excellent stakeholder management and communication skills','Experience leading cross-functional teams in an agile environment','MBA or equivalent experience preferred'],
-      benefits:['Competitive base + performance bonus (up to 20%)','Stock options with early exercise available','Flexible PTO (minimum 15 days encouraged)','$2,500 professional development stipend','Premium health plans including family coverage','Quarterly team offsites','Dog-friendly Austin office with standing desks']
-    },
-    { id:5, title:'DevOps Engineer', company:{name:'CloudNative Corp',logo_url:null,headquarters:'Seattle, WA',is_verified:true}, location:'Remote', remote:true, job_type:'contract', salary_min:95000, salary_max:130000, skills_required:['Kubernetes','Docker','Terraform'], is_featured:false, views:298, created_at:new Date(Date.now()-4*86400000).toISOString(),
-      description:'CloudNative Corp is looking for a DevOps Engineer (contract, 12 months with extension potential) to help us scale our Kubernetes-based infrastructure. You will design CI/CD pipelines, manage infrastructure as code, and ensure 99.99% uptime for our mission-critical services. Fully remote position open to candidates across all US time zones.',
-      requirements:['3+ years of hands-on DevOps / SRE experience','Strong expertise with Kubernetes (CKA certification a plus)','Proficiency with Docker, Terraform, and at least one major cloud provider (AWS/GCP/Azure)','Experience building and maintaining CI/CD pipelines (GitHub Actions, Jenkins, GitLab CI)','Solid Linux systems administration skills','On-call experience and incident management best practices'],
-      benefits:['Competitive contract rate ($75-100/hr depending on experience)','Fully remote with flexible hours','$1,000 home office setup allowance','Access to internal training and certification programs','Conference attendance sponsorship','Option to convert to full-time after contract period','Collaborative, low-meeting culture']
-    },
-    { id:6, title:'UX/UI Designer', company:{name:'DesignCo',logo_url:null,headquarters:'Chicago, IL',is_verified:false}, location:'Chicago, IL', remote:false, job_type:'full_time', salary_min:85000, salary_max:115000, skills_required:['Figma','User Research','Prototyping'], is_featured:false, views:445, created_at:new Date(Date.now()-2*86400000).toISOString(),
-      description:'DesignCo is seeking a talented UX/UI Designer to shape the user experience of our consumer-facing products. You will conduct user research, create wireframes and high-fidelity prototypes, and work hand-in-hand with product managers and engineers to ship beautiful, intuitive interfaces used by hundreds of thousands of people.',
-      requirements:['3+ years of UX/UI design experience with a strong portfolio','Expert proficiency in Figma (components, auto-layout, prototyping)','Experience conducting user research, usability testing, and synthesizing insights','Understanding of accessibility standards (WCAG 2.1) and responsive design','Familiarity with design systems and component libraries','Strong collaboration skills working with engineering teams','Experience with motion design or micro-interactions is a plus'],
-      benefits:['Competitive salary with annual merit increases','Creative Fridays — 20% time for personal design projects','$2,000 annual equipment / software budget','Health, dental, vision + life insurance','4 weeks PTO + company-wide winter break','Beautiful River North office with in-house design library','Sponsored attendance to design conferences (Config, AIGA, etc.)']
-    },
-  ];
+  const STATIC_JOBS = [];
 
   const STATIC_INDUSTRIES = [
     {id:1,name:'Technology',slug:'technology',icon:'💻',count:6820},
@@ -1498,17 +1467,28 @@
   ];
 
   // ── State ────────────────────────────────────────────────────────────────────
-  let allJobs = STATIC_JOBS;
+  let allJobs = [];
   let currentFilter = 'all';
 
   // ── Boot ─────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     initScrollEffects();
     renderIndustries(STATIC_INDUSTRIES);
-    renderJobs(STATIC_JOBS);
+    renderJobsSkeleton();
     renderTestimonials(STATIC_TESTIMONIALS);
     loadFromAPI();
   });
+
+  function renderJobsSkeleton() {
+    const grid = document.getElementById('jobsGrid');
+    grid.innerHTML = Array(6).fill(0).map(() => `
+      <div style="background:var(--white);border-radius:1rem;padding:1.5rem;border:1px solid #e2e8f0">
+        <div style="width:48px;height:48px;border-radius:.75rem;background:#f1f5f9;margin-bottom:1rem"></div>
+        <div style="height:1rem;background:#f1f5f9;border-radius:.5rem;margin-bottom:.5rem;width:70%"></div>
+        <div style="height:.75rem;background:#f1f5f9;border-radius:.5rem;margin-bottom:1.5rem;width:50%"></div>
+        <div style="height:.75rem;background:#f1f5f9;border-radius:.5rem;width:90%"></div>
+      </div>`).join('');
+  }
 
   async function loadFromAPI() {
     try {
@@ -1516,15 +1496,24 @@
         fetch(`${API}/public/stats`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/public/industries`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/public/testimonials`).then(r => r.ok ? r.json() : null),
-        fetch(`${API}/jobs?limit=6`).then(r => r.ok ? r.json() : null),
+        fetch(`${API}/jobs?limit=100`).then(r => r.ok ? r.json() : null),
         fetch(`${API}/public/blog?limit=3`).then(r => r.ok ? r.json() : null),
       ]);
       if (industries.value) renderIndustries(industries.value);
       if (testimonials.value) renderTestimonials(testimonials.value);
-      if (jobs.value?.jobs?.length) { allJobs = jobs.value.jobs; renderJobs(allJobs); }
+      if (jobs.value?.jobs?.length) {
+        allJobs = jobs.value.jobs;
+        renderJobs(allJobs.slice(0, 6));
+      } else {
+        document.getElementById('jobsGrid').innerHTML =
+          '<p style="color:var(--steel);grid-column:1/-1;text-align:center;padding:2rem">Could not load jobs. Please refresh the page.</p>';
+      }
       if (stats.value) updateStats(stats.value);
       if (blog.value?.length) renderHomeBlog(blog.value);
-    } catch { /* use static data */ }
+    } catch {
+      document.getElementById('jobsGrid').innerHTML =
+        '<p style="color:var(--steel);grid-column:1/-1;text-align:center;padding:2rem">Could not load jobs. Please refresh the page.</p>';
+    }
   }
 
   const BLOG_GRADIENTS = [
@@ -1623,7 +1612,10 @@
         </div>
       </div>
     `).join('');
-    count.textContent = `Showing ${jobs.length} of thousands of available positions`;
+    const total = allJobs.length;
+    count.textContent = total > jobs.length
+      ? `Showing ${jobs.length} of ${total} available positions`
+      : `${jobs.length} position${jobs.length !== 1 ? 's' : ''} available`;
   }
 
   function renderTestimonials(list) {
@@ -1647,9 +1639,9 @@
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = type;
-    if (type === 'all') { renderJobs(allJobs); return; }
-    if (type === 'remote') { renderJobs(allJobs.filter(j => j.remote)); return; }
-    renderJobs(allJobs.filter(j => j.job_type === type));
+    if (type === 'all') { renderJobs(allJobs.slice(0, 6)); return; }
+    if (type === 'remote') { renderJobs(allJobs.filter(j => j.remote).slice(0, 6)); return; }
+    renderJobs(allJobs.filter(j => j.job_type === type).slice(0, 6));
   }
 
   function filterByIndustry(slug) {
@@ -1897,15 +1889,32 @@
   let currentJobId = null;
 
   function findJob(id) {
-    return allJobs.find(j => j.id === id);
+    return allJobs.find(j => j.id === id) || null;
   }
 
-  function openJobDetail(id) {
-    const j = findJob(id);
-    if (!j) return;
+  async function openJobDetail(id) {
     currentJobId = id;
+    let j = findJob(id);
 
+    // Show modal immediately with skeleton while fetching if not cached
     const modal = document.getElementById('jobDetailModal');
+    document.getElementById('jobDetailOverlay').classList.add('open');
+
+    if (!j) {
+      modal.innerHTML = `<div style="padding:3rem;text-align:center;color:var(--steel)">Loading…</div>`;
+      try {
+        const r = await fetch(`${API}/jobs/${id}`);
+        if (r.ok) {
+          j = await r.json();
+          allJobs.push(j); // cache it
+        }
+      } catch {}
+        if (!j) {
+        modal.innerHTML = `<div style="padding:3rem;text-align:center;color:var(--steel)">Could not load job details.</div>`;
+        return;
+      }
+    }
+
     modal.innerHTML = `
       <div class="jd-header">
         <div class="jd-header-top">
@@ -1952,19 +1961,19 @@
           <div class="jd-section-title">📋 About This Role</div>
           <p>${j.description || 'No description available.'}</p>
         </div>
-        ${j.requirements?.length ? `
+        ${j.requirements ? `
         <div class="jd-section">
           <div class="jd-section-title">✅ Requirements</div>
-          <ul class="jd-list">
-            ${j.requirements.map(r => `<li>${r}</li>`).join('')}
-          </ul>
+          ${Array.isArray(j.requirements)
+            ? `<ul class="jd-list">${j.requirements.map(r => `<li>${r}</li>`).join('')}</ul>`
+            : `<p style="white-space:pre-line">${j.requirements}</p>`}
         </div>` : ''}
-        ${j.benefits?.length ? `
+        ${j.benefits ? `
         <div class="jd-section">
           <div class="jd-section-title">🎁 Benefits & Perks</div>
-          <ul class="jd-list jd-benefits-list">
-            ${j.benefits.map(b => `<li>${b}</li>`).join('')}
-          </ul>
+          ${Array.isArray(j.benefits)
+            ? `<ul class="jd-list jd-benefits-list">${j.benefits.map(b => `<li>${b}</li>`).join('')}</ul>`
+            : `<p style="white-space:pre-line">${j.benefits}</p>`}
         </div>` : ''}
         <div class="jd-section">
           <div class="jd-section-title">🛠 Skills Required</div>
@@ -1983,7 +1992,6 @@
       </div>
     `;
 
-    document.getElementById('jobDetailOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 
     // Restore saved state if already saved

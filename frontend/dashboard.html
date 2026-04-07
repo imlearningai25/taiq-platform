@@ -1718,6 +1718,11 @@ async function init() {
         openPostJobModal();
         history.replaceState({}, '', 'dashboard.html');
       }
+      // Auto-navigate to Browse Jobs pane via hash
+      if (location.hash === '#jobs') {
+        showPane('jobs');
+        history.replaceState({}, '', 'dashboard.html');
+      }
     }
   } catch {
     applyRoleSections(currentUser.role);

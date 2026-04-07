@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.models.models import Job, Company, Industry
 from app.schemas.schemas import JobOut, JobListOut, SearchQuery
@@ -20,7 +21,12 @@ async def list_jobs(
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(Job).where(Job.is_active == True).order_by(Job.is_featured.desc(), Job.created_at.desc())
+    stmt = (
+        select(Job)
+        .options(selectinload(Job.company))
+        .where(Job.is_active == True)
+        .order_by(Job.is_featured.desc(), Job.created_at.desc())
+    )
 
     if q:
         stmt = stmt.where(or_(Job.title.ilike(f"%{q}%"), Job.description.ilike(f"%{q}%")))
@@ -46,14 +52,21 @@ async def list_jobs(
 
 @router.get("/featured", response_model=list[JobOut])
 async def featured_jobs(db: AsyncSession = Depends(get_db)):
-    stmt = select(Job).where(Job.is_active == True, Job.is_featured == True).limit(6)
+    stmt = (
+        select(Job)
+        .options(selectinload(Job.company))
+        .where(Job.is_active == True, Job.is_featured == True)
+        .order_by(Job.created_at.desc())
+        .limit(6)
+    )
     jobs = (await db.scalars(stmt)).all()
     return [JobOut.model_validate(j) for j in jobs]
 
 
 @router.get("/{job_id}", response_model=JobOut)
 async def get_job(job_id: int, db: AsyncSession = Depends(get_db)):
-    job = await db.get(Job, job_id)
+    stmt = select(Job).options(selectinload(Job.company)).where(Job.id == job_id)
+    job = await db.scalar(stmt)
     if not job or not job.is_active:
         raise HTTPException(status_code=404, detail="Job not found")
     job.views += 1

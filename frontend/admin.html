@@ -248,7 +248,7 @@
       <div class="sidebar-section-title">Content</div>
       <ul class="sidebar-nav">
         <li><a href="index.html#jobs"><span class="nav-icon">💼</span>Job Listings</a></li>
-        <li><a href="#"><span class="nav-icon">🏢</span>Companies</a></li>
+        <li><button onclick="showSection('companies')"><span class="nav-icon">🏢</span>Companies</button></li>
         <li><button onclick="showSection('users')"><span class="nav-icon">👥</span>Users</button></li>
         <li><button onclick="showSection('activities')"><span class="nav-icon">📊</span>All Activities</button></li>
       </ul>
@@ -425,6 +425,41 @@
       </div>
     </div>
 
+    <!-- ── SECTION: Companies ───────────────────────────────────── -->
+    <div id="section-companies" style="display:none">
+      <h1 class="page-title">Companies</h1>
+      <p class="page-subtitle">All registered companies on the platform</p>
+
+      <div class="panel" style="margin-bottom:1.25rem">
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+          <input id="coSearch" type="text" placeholder="Search companies…"
+            style="flex:1;min-width:200px;padding:.55rem .9rem;border:1.5px solid #e2e8f0;border-radius:.5rem;font-size:.9rem"
+            oninput="loadAdminCompanies(1)">
+          <span id="coCount" style="color:var(--steel);font-size:.88rem;white-space:nowrap"></span>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:0;overflow:hidden">
+        <table class="data-table" style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0">
+              <th style="padding:.75rem 1rem;text-align:left;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Company</th>
+              <th style="padding:.75rem 1rem;text-align:left;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">HQ</th>
+              <th style="padding:.75rem 1rem;text-align:left;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Size</th>
+              <th style="padding:.75rem 1rem;text-align:center;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Jobs</th>
+              <th style="padding:.75rem 1rem;text-align:center;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Verified</th>
+              <th style="padding:.75rem 1rem;text-align:left;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Website</th>
+            </tr>
+          </thead>
+          <tbody id="coTableBody">
+            <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="coPagination" style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem"></div>
+    </div>
+
     <!-- ── SECTION: All Activities ──────────────────────────────── -->
     <div id="section-activities" style="display:none">
       <h1 class="page-title">All Activities</h1>
@@ -543,6 +578,7 @@
     if (name === 'overview') loadOverview();
     if (name === 'users') loadAdminUsers(1);
     if (name === 'activities') loadAdminActivities(true);
+    if (name === 'companies') loadAdminCompanies(1);
   }
 
   // ── Load settings ─────────────────────────────────────────────────────────────
@@ -980,6 +1016,85 @@
   }
 
   function loadMoreActivities() { loadAdminActivities(false); }
+
+  // ── Companies ─────────────────────────────────────────────────────────────────
+  let coPage = 1;
+  const CO_LIMIT = 50;
+
+  async function loadAdminCompanies(page = 1) {
+    coPage = page;
+    const q = document.getElementById('coSearch')?.value.trim() || '';
+    const tbody = document.getElementById('coTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>';
+
+    try {
+      const params = new URLSearchParams({ page, limit: CO_LIMIT });
+      if (q) params.set('q', q);
+      const r = await fetch(`${API}/admin/companies?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error();
+      const companies = await r.json();
+
+      if (!companies.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--steel)">No companies found</td></tr>';
+        document.getElementById('coCount').textContent = '';
+        document.getElementById('coPagination').innerHTML = '';
+        return;
+      }
+
+      document.getElementById('coCount').textContent = `${companies.length} companies`;
+
+      tbody.innerHTML = companies.map(c => `
+        <tr style="border-bottom:1px solid #f1f5f9;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+          <td style="padding:.85rem 1rem">
+            <div style="display:flex;align-items:center;gap:.65rem">
+              <div style="width:36px;height:36px;border-radius:.5rem;background:linear-gradient(135deg,#e0f2fe,#bae6fd);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">
+                ${c.logo_url ? `<img src="${escHtml(c.logo_url)}" style="width:32px;height:32px;object-fit:contain;border-radius:.4rem">` : '🏢'}
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.9rem;color:var(--ink)">${escHtml(c.name)}</div>
+                ${c.description ? `<div style="font-size:.78rem;color:var(--steel);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.description)}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td style="padding:.85rem 1rem;font-size:.88rem;color:var(--steel)">${escHtml(c.headquarters || '—')}</td>
+          <td style="padding:.85rem 1rem;font-size:.88rem;color:var(--steel)">${escHtml(c.size || '—')}</td>
+          <td style="padding:.85rem 1rem;text-align:center">
+            <span style="background:#f0fdf4;color:#16a34a;border-radius:999px;padding:.2rem .65rem;font-size:.82rem;font-weight:600">${c.job_count}</span>
+          </td>
+          <td style="padding:.85rem 1rem;text-align:center">
+            ${c.is_verified
+              ? '<span style="background:#f0fdf4;color:#16a34a;border-radius:999px;padding:.2rem .65rem;font-size:.82rem">✓ Verified</span>'
+              : '<span style="background:#fff7ed;color:#c2410c;border-radius:999px;padding:.2rem .65rem;font-size:.82rem">Unverified</span>'}
+          </td>
+          <td style="padding:.85rem 1rem;font-size:.85rem">
+            ${c.website ? `<a href="${escHtml(c.website)}" target="_blank" rel="noopener" style="color:var(--brand);text-decoration:none">${escHtml(c.website.replace(/^https?:\/\//, ''))}</a>` : '<span style="color:var(--steel)">—</span>'}
+          </td>
+        </tr>
+      `).join('');
+
+      // Pagination
+      const pagination = document.getElementById('coPagination');
+      pagination.innerHTML = '';
+      if (page > 1) {
+        const prev = document.createElement('button');
+        prev.textContent = '← Prev';
+        prev.className = 'btn btn-outline btn-sm';
+        prev.onclick = () => loadAdminCompanies(page - 1);
+        pagination.appendChild(prev);
+      }
+      if (companies.length === CO_LIMIT) {
+        const next = document.createElement('button');
+        next.textContent = 'Next →';
+        next.className = 'btn btn-outline btn-sm';
+        next.onclick = () => loadAdminCompanies(page + 1);
+        pagination.appendChild(next);
+      }
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--danger)">Failed to load companies</td></tr>';
+    }
+  }
 
   // ── Boot ──────────────────────────────────────────────────────────────────────
   loadSettings();

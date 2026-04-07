@@ -10,7 +10,7 @@ import logging
 
 from app.core.database import get_db
 from app.models.models import SiteSettings, SiteMode, User, UserRole, ActivityLog, Job, Company, Application
-from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser, JobOut, EmployerApplicationOut
+from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser, JobOut, EmployerApplicationOut, CompanyAdminOut
 from app.api.applications import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -156,6 +156,34 @@ async def get_user_activities(
     )
     logs = (await db.scalars(stmt)).all()
     return [ActivityLogOut.model_validate(l) for l in logs]
+
+
+# ── Admin: all companies ─────────────────────────────────────────────────────
+@router.get("/companies")
+async def admin_all_companies(
+    q: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(
+        Company,
+        func.count(Job.id).label("job_count")
+    ).outerjoin(Job, Job.company_id == Company.id).group_by(Company.id).order_by(Company.name)
+
+    if q:
+        stmt = stmt.where(Company.name.ilike(f"%{q}%"))
+
+    stmt = stmt.offset((page - 1) * limit).limit(limit)
+    rows = (await db.execute(stmt)).all()
+
+    result = []
+    for company, job_count in rows:
+        out = CompanyAdminOut.model_validate(company)
+        out.job_count = job_count
+        result.append(out)
+    return result
 
 
 # ── Admin: all jobs (platform-wide) ──────────────────────────────────────────
