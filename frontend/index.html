@@ -2378,7 +2378,7 @@
                                     color: white;
                                     border: 1px solid rgba(255, 255, 255, 0.2);
                                 "
-                                onclick="openModal('register')"
+                                onclick="handleStartHiring()"
                             >
                                 Post a Job
                             </button>
@@ -2939,7 +2939,7 @@
                             color: white;
                             border: 1px solid rgba(255, 255, 255, 0.25);
                         "
-                        onclick="openModal('register')"
+                        onclick="handleStartHiring()"
                     >
                         Post a Job — Free Trial
                     </button>
@@ -3998,14 +3998,14 @@
             }
 
             function handleStartHiring() {
-                if (
-                    currentUser &&
-                    (currentUser.role === 'employer' ||
-                        currentUser.role === 'admin')
-                ) {
+                if (!currentUser) {
+                    openModal('register');
+                    return;
+                }
+                if (currentUser.role === 'employer' || currentUser.role === 'admin') {
                     window.location.href = 'dashboard.html?postJob=1';
                 } else {
-                    openModal('register');
+                    showToast('An employer account is required to post jobs. Contact support to upgrade your account.', '⚠️');
                 }
             }
 
