@@ -1,0 +1,18 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install cron
+RUN apt-get update && apt-get install -y --no-install-recommends cron \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies (build context is repo root)
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install the crontab
+COPY docker/crontab /etc/cron.d/taiq-seeder
+RUN chmod 0644 /etc/cron.d/taiq-seeder \
+    && crontab /etc/cron.d/taiq-seeder
+
+CMD ["cron", "-f"]

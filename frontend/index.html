@@ -1844,6 +1844,25 @@
                 cursor: not-allowed;
                 transform: none !important;
             }
+            .jd-accent-bar {
+                height: 5px;
+                background: linear-gradient(90deg, var(--brand) 0%, #7c3aed 100%);
+                border-radius: var(--r3) var(--r3) 0 0;
+            }
+            .jd-desc-subheading {
+                font-family: 'Syne', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: var(--brand);
+                margin: 1.1rem 0 0.35rem;
+                padding: 0.35rem 0.75rem;
+                background: rgba(0, 82, 204, 0.05);
+                border-left: 3px solid var(--brand);
+                border-radius: 0 var(--r2) var(--r2) 0;
+                letter-spacing: 0.01em;
+            }
+            .jd-section p + p { margin-top: 0.65rem; }
+            .jd-section .jd-list { margin-top: 0.5rem; }
 
             /* ─── Application Modal ──────────────────────────────────────────────────── */
             .apply-overlay {
@@ -2359,7 +2378,7 @@
                                     color: white;
                                     border: 1px solid rgba(255, 255, 255, 0.2);
                                 "
-                                onclick="openModal('register')"
+                                onclick="handleStartHiring()"
                             >
                                 Post a Job
                             </button>
@@ -2920,7 +2939,7 @@
                             color: white;
                             border: 1px solid rgba(255, 255, 255, 0.25);
                         "
-                        onclick="openModal('register')"
+                        onclick="handleStartHiring()"
                     >
                         Post a Job — Free Trial
                     </button>
@@ -3979,14 +3998,14 @@
             }
 
             function handleStartHiring() {
-                if (
-                    currentUser &&
-                    (currentUser.role === 'employer' ||
-                        currentUser.role === 'admin')
-                ) {
+                if (!currentUser) {
+                    openModal('register');
+                    return;
+                }
+                if (currentUser.role === 'employer' || currentUser.role === 'admin') {
                     window.location.href = 'dashboard.html?postJob=1';
                 } else {
-                    openModal('register');
+                    showToast('An employer account is required to post jobs. Contact support to upgrade your account.', '⚠️');
                 }
             }
 
@@ -4229,6 +4248,52 @@
             // ── Job Detail Modal ──────────────────────────────────────────────────────
             let currentJobId = null;
 
+            function formatDescription(text) {
+                if (!text) return '<p>No description available.</p>';
+                // Normalize mojibake bullet: UTF-8 • (E2 80 A2) decoded as Latin-1 → U+00E2 U+20AC U+00A2
+                const cleaned = text.replace(/â€¢/g, '•');
+                const lines = cleaned.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(Boolean);
+                let html = '';
+                for (const line of lines) {
+                    // • bullet lines (may have multiple glued: "item1• item2")
+                    if (line.includes('•')) {
+                        const items = line.split('•').map(s => s.trim()).filter(Boolean);
+                        html += '<ul class="jd-list">';
+                        for (const item of items) html += `<li>${item}</li>`;
+                        html += '</ul>';
+                    }
+                    // Inline " - Capital" pattern — benefits-style bullet list
+                    else if (/\s-\s[A-Z]/.test(line)) {
+                        const idx = line.search(/\s-\s[A-Z]/);
+                        const header = line.slice(0, idx).trim();
+                        // Only treat as bullets when header is a section label ending with ":"
+                        if (!header.endsWith(':')) {
+                            html += `<p>${line}</p>`;
+                        } else {
+                            html += `<h4 class="jd-desc-subheading">${header.replace(/:$/, '')}</h4>`;
+                            const items = line.slice(idx).split(/\s-\s(?=[A-Z])/).filter(s => s.trim());
+                            html += '<ul class="jd-list">';
+                            for (const raw of items) {
+                                const item = raw.trim().replace(/\s*\.$/, '');
+                                if (!item) continue;
+                                const m = item.match(/^([A-Z][^:]{1,60}):\s+([\s\S]+)/);
+                                html += m ? `<li><strong>${m[1]}:</strong> ${m[2].trim()}</li>` : `<li>${item}</li>`;
+                            }
+                            html += '</ul>';
+                        }
+                    }
+                    // Short capitalized standalone line → sub-heading
+                    else if (line.length < 70 && line.split(' ').length <= 6 && /^[A-Z]/.test(line) && !line.endsWith('.')) {
+                        html += `<h4 class="jd-desc-subheading">${line.replace(/:$/, '')}</h4>`;
+                    }
+                    // Regular paragraph
+                    else {
+                        html += `<p>${line}</p>`;
+                    }
+                }
+                return html;
+            }
+
             function findJob(id) {
                 return allJobs.find((j) => j.id === id) || null;
             }
@@ -4259,6 +4324,7 @@
                 }
 
                 modal.innerHTML = `
+      <div class="jd-accent-bar"></div>
       <div class="jd-header">
         <div class="jd-header-top">
           <div style="display:flex;gap:1rem;align-items:flex-start;flex:1">
@@ -4302,7 +4368,7 @@
       <div class="jd-body">
         <div class="jd-section">
           <div class="jd-section-title">📋 About This Role</div>
-          <p>${j.description || 'No description available.'}</p>
+          ${formatDescription(j.description)}
         </div>
         ${
             j.requirements

@@ -3,9 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.core.database import get_db
-from app.models.models import Job, Company, UserRole, Application, User
-from app.schemas.schemas import JobCreate, JobOut, EmployerApplicationOut
+from app.models.models import Job, Company, UserRole, Application, ApplicationStatus, User
+from app.schemas.schemas import JobCreate, JobOut, EmployerApplicationOut, CompanyOut, CompanyUpdate
 from app.api.applications import get_current_user
+from app.core.activity import track
+from app.core.notify import notify
 from slugify import slugify
 import uuid
 
@@ -25,9 +27,34 @@ async def post_job(
     current_user: User = Depends(require_employer),
     db: AsyncSession = Depends(get_db),
 ):
-    company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
-    if not company:
-        raise HTTPException(status_code=400, detail="Create a company profile first")
+    # Resolve which company to post under
+    if payload.company_id:
+        # Caller explicitly specified a company
+        company = await db.get(Company, payload.company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Company not found")
+        # If unowned, claim it
+        if company.owner_id is None:
+            company.owner_id = current_user.id
+            await db.flush()
+    else:
+        # Use this employer's owned company, auto-creating if needed
+        company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
+        if not company:
+            co_name = (payload.company_name or "").strip() or (current_user.full_name or "My Company")
+            co_slug = slugify(co_name)
+            existing_slug = await db.scalar(select(Company).where(Company.slug == co_slug))
+            if existing_slug:
+                co_slug = f"{co_slug}-{current_user.id}"
+            company = Company(
+                owner_id=current_user.id,
+                name=co_name,
+                slug=co_slug,
+                industry_id=payload.industry_id,
+            )
+            db.add(company)
+            await db.flush()
+            await track(db, current_user, "company_created", f"Company profile auto-created: {co_name}")
 
     slug = f"{slugify(payload.title)}-{uuid.uuid4().hex[:6]}"
     job = Job(
@@ -47,7 +74,55 @@ async def post_job(
     )
     db.add(job)
     await db.flush()
+    await track(db, current_user, "job_posted", f"Posted job: {payload.title}")
     return JobOut.model_validate(job)
+
+
+@router.get("/company")
+async def my_company(
+    current_user: User = Depends(require_employer),
+    db: AsyncSession = Depends(get_db),
+):
+    company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
+    if not company:
+        return {"exists": False}
+    return {
+        "exists": True,
+        "id": company.id,
+        "name": company.name,
+        "description": company.description,
+        "website": company.website,
+        "size": company.size,
+        "headquarters": company.headquarters,
+        "industry_id": company.industry_id,
+        "is_verified": company.is_verified,
+    }
+
+
+@router.put("/company", response_model=CompanyOut)
+async def update_my_company(
+    payload: CompanyUpdate,
+    current_user: User = Depends(require_employer),
+    db: AsyncSession = Depends(get_db),
+):
+    company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
+    if not company:
+        raise HTTPException(status_code=404, detail="No company profile found. Post a job first to auto-create one.")
+    if payload.name is not None:
+        company.name = payload.name
+    if payload.description is not None:
+        company.description = payload.description
+    if payload.website is not None:
+        company.website = payload.website
+    if payload.size is not None:
+        company.size = payload.size
+    if payload.headquarters is not None:
+        company.headquarters = payload.headquarters
+    if payload.industry_id is not None:
+        company.industry_id = payload.industry_id
+    await db.flush()
+    await track(db, current_user, "company_updated", f"Updated company profile: {company.name}")
+    return CompanyOut.model_validate(company)
 
 
 @router.get("", response_model=list[JobOut])
@@ -74,7 +149,8 @@ async def delete_job(
     company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
     if not company or job.company_id != company.id:
         raise HTTPException(status_code=403, detail="Not your job posting")
-    job.is_active = False   # soft delete
+    job.is_active = False
+    await track(db, current_user, "job_deleted", f"Removed job posting: {job.title}")
 
 
 @employer_router.get("/applications", response_model=list[EmployerApplicationOut])
@@ -98,3 +174,57 @@ async def employer_applications(
     )
     apps = (await db.scalars(stmt)).all()
     return [EmployerApplicationOut.model_validate(a) for a in apps]
+
+
+STATUS_LABELS = {
+    "reviewing": "under review",
+    "interview": "moved to interview",
+    "offered": "offered a position",
+    "rejected": "not selected",
+    "applied": "reset to applied",
+}
+
+
+@employer_router.patch("/applications/{app_id}/status")
+async def update_application_status(
+    app_id: int,
+    payload: dict,
+    current_user: User = Depends(require_employer),
+    db: AsyncSession = Depends(get_db),
+):
+    new_status = payload.get("status", "")
+    try:
+        new_status = ApplicationStatus(new_status)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid status '{new_status}'")
+
+    app = await db.scalar(
+        select(Application)
+        .options(
+            selectinload(Application.job).selectinload(Job.company),
+            selectinload(Application.candidate),
+        )
+        .where(Application.id == app_id)
+    )
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    # Verify this employer owns the job
+    company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
+    if not company or app.job.company_id != company.id:
+        raise HTTPException(status_code=403, detail="Not your application")
+
+    app.status = new_status
+    await db.flush()
+    await track(db, current_user, "application_status_updated",
+                f"Updated application #{app_id} to {new_status.value}")
+
+    label = STATUS_LABELS.get(new_status.value, new_status.value)
+    await notify(
+        db,
+        user_id=app.candidate_id,
+        type="status_changed",
+        title=f"Application update: {app.job.title}",
+        message=f"Your application at {app.job.company.name} has been {label}.",
+    )
+    return EmployerApplicationOut.model_validate(app)

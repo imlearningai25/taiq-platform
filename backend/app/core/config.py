@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # Frontend base URL (used in email links)
     FRONTEND_URL: str = "http://localhost:8090"
 
+    # Anthropic API key — used for AI-powered job file parsing
+    ANTHROPIC_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
 

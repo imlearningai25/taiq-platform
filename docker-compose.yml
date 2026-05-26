@@ -55,6 +55,23 @@ services:
         networks:
             - taiq_net
 
+    job-seeder:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile.cron
+        container_name: taiq_job_seeder
+        restart: unless-stopped
+        env_file: .env
+        environment:
+            DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-taiq}:${POSTGRES_PASSWORD:-taiq_secret}@db:5432/${POSTGRES_DB:-taiq_db}
+        volumes:
+            - ./backend:/app
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - taiq_net
+
     frontend:
         build:
             context: ./frontend

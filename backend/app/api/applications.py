@@ -5,7 +5,8 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.security import decode_access_token
 from app.core.activity import track
-from app.models.models import Application, Job, User
+from app.core.notify import notify
+from app.models.models import Application, Job, Company, User
 from app.schemas.schemas import ApplicationCreate, ApplicationOut
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -72,6 +73,19 @@ async def apply_to_job(
 
     ref_note = f" (via {payload.referral_source})" if payload.referral_source else ""
     await track(db, current_user, "job_applied", f"Applied to job: {job.title}{ref_note}")
+
+    # Notify the employer if the job belongs to a company with an owner
+    company = await db.scalar(select(Company).where(Company.id == job.company_id))
+    if company and company.owner_id:
+        candidate_name = current_user.full_name or current_user.email
+        await notify(
+            db,
+            user_id=company.owner_id,
+            type="application_received",
+            title=f"New applicant: {job.title}",
+            message=f"{candidate_name} applied to your '{job.title}' posting.",
+        )
+
     return ApplicationOut.model_validate(loaded_app)
 
 
@@ -96,8 +110,26 @@ async def withdraw_application(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    app = await db.get(Application, app_id)
+    app = await db.scalar(
+        select(Application)
+        .options(selectinload(Application.job).selectinload(Job.company))
+        .where(Application.id == app_id)
+    )
     if not app or app.candidate_id != current_user.id:
         raise HTTPException(status_code=404, detail="Application not found")
+
+    job_title = app.job.title if app.job else "a job"
+    employer_id = app.job.company.owner_id if app.job and app.job.company else None
+
     await db.delete(app)
-    await track(db, current_user, "application_withdrawn", "Withdrew a job application")
+    await track(db, current_user, "application_withdrawn", f"Withdrew application for: {job_title}")
+
+    if employer_id:
+        candidate_name = current_user.full_name or current_user.email
+        await notify(
+            db,
+            user_id=employer_id,
+            type="application_withdrawn",
+            title=f"Application withdrawn: {job_title}",
+            message=f"{candidate_name} withdrew their application for '{job_title}'.",
+        )
