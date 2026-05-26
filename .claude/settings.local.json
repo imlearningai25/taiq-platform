@@ -17,7 +17,10 @@
       "Bash(docker-compose ps *)",
       "Bash(docker-compose build *)",
       "Bash(docker-compose up *)",
-      "Bash(curl -si \"http://localhost:8090/\")"
+      "Bash(curl -si \"http://localhost:8090/\")",
+      "Bash(dir \"c:\\\\Users\\\\newro\\\\Documents\\\\codes\\\\claude\\\\taiq-platform\\\\backend\\\\sample_jobs\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/api/health)",
+      "Bash(xargs grep -l \"notif\")"
     ]
   }
 }

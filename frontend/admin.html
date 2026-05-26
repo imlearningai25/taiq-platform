@@ -450,10 +450,11 @@
               <th style="padding:.75rem 1rem;text-align:center;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Jobs</th>
               <th style="padding:.75rem 1rem;text-align:center;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Verified</th>
               <th style="padding:.75rem 1rem;text-align:left;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Website</th>
+              <th style="padding:.75rem 1rem;text-align:center;font-size:.8rem;color:var(--steel);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Actions</th>
             </tr>
           </thead>
           <tbody id="coTableBody">
-            <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--steel)">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -477,6 +478,42 @@
     </div>
 
   </main>
+</div>
+
+<!-- Company edit modal -->
+<div id="coEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,.5);z-index:500;display:none;align-items:center;justify-content:center" onclick="if(event.target===this)closeEditCompany()">
+  <div style="background:white;border-radius:1rem;padding:2rem;width:min(560px,100% - 2rem);box-shadow:0 20px 60px rgba(10,15,30,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem">Edit Company</div>
+      <button style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--steel)" onclick="closeEditCompany()">✕</button>
+    </div>
+    <div style="display:grid;gap:.9rem">
+      <div><label style="font-size:.82rem;font-weight:600;color:var(--steel);display:block;margin-bottom:.3rem">Company Name</label>
+        <input id="coEditName" class="form-input" style="width:100%;padding:.6rem .9rem;border:1.5px solid #c8d0e4;border-radius:.5rem;font:inherit"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem">
+        <div><label style="font-size:.82rem;font-weight:600;color:var(--steel);display:block;margin-bottom:.3rem">Headquarters</label>
+          <input id="coEditHq" class="form-input" style="width:100%;padding:.6rem .9rem;border:1.5px solid #c8d0e4;border-radius:.5rem;font:inherit"/></div>
+        <div><label style="font-size:.82rem;font-weight:600;color:var(--steel);display:block;margin-bottom:.3rem">Size</label>
+          <select id="coEditSize" style="width:100%;padding:.6rem .9rem;border:1.5px solid #c8d0e4;border-radius:.5rem;font:inherit">
+            <option value="">— Select —</option>
+            <option>1-10</option><option>11-50</option><option>51-200</option>
+            <option>201-500</option><option>501-1000</option><option>1000+</option>
+          </select></div>
+      </div>
+      <div><label style="font-size:.82rem;font-weight:600;color:var(--steel);display:block;margin-bottom:.3rem">Website</label>
+        <input id="coEditWebsite" type="url" style="width:100%;padding:.6rem .9rem;border:1.5px solid #c8d0e4;border-radius:.5rem;font:inherit" placeholder="https://"/></div>
+      <div><label style="font-size:.82rem;font-weight:600;color:var(--steel);display:block;margin-bottom:.3rem">Description</label>
+        <textarea id="coEditDesc" rows="3" style="width:100%;padding:.6rem .9rem;border:1.5px solid #c8d0e4;border-radius:.5rem;font:inherit;resize:vertical"></textarea></div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <input type="checkbox" id="coEditVerified" style="width:16px;height:16px;accent-color:var(--brand)"/>
+        <label for="coEditVerified" style="font-size:.88rem;font-weight:500;cursor:pointer">Mark as Verified</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1.5rem">
+      <button class="btn btn-outline" onclick="closeEditCompany()">Cancel</button>
+      <button class="btn btn-primary" id="coEditSaveBtn" onclick="saveEditCompany()">💾 Save Changes</button>
+    </div>
+  </div>
 </div>
 
 <!-- User drawer -->
@@ -1038,7 +1075,7 @@
       const companies = await r.json();
 
       if (!companies.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--steel)">No companies found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--steel)">No companies found</td></tr>';
         document.getElementById('coCount').textContent = '';
         document.getElementById('coPagination').innerHTML = '';
         return;
@@ -1072,6 +1109,11 @@
           <td style="padding:.85rem 1rem;font-size:.85rem">
             ${c.website ? `<a href="${escHtml(c.website)}" target="_blank" rel="noopener" style="color:var(--brand);text-decoration:none">${escHtml(c.website.replace(/^https?:\/\//, ''))}</a>` : '<span style="color:var(--steel)">—</span>'}
           </td>
+          <td style="padding:.85rem 1rem;text-align:center;white-space:nowrap">
+            <button class="btn btn-sm btn-outline" onclick="openEditCompany(${c.id})" title="Edit" style="margin-right:.3rem">✏️</button>
+            <button class="btn btn-sm ${c.is_verified ? 'btn-outline' : 'btn-success'}" onclick="toggleVerifyCompany(${c.id},${c.is_verified})" title="${c.is_verified ? 'Unverify' : 'Verify'}" style="margin-right:.3rem">${c.is_verified ? '✗' : '✓'}</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.id},'${escHtml(c.name)}')" title="Delete">🗑</button>
+          </td>
         </tr>
       `).join('');
 
@@ -1093,7 +1135,90 @@
         pagination.appendChild(next);
       }
     } catch {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--danger)">Failed to load companies</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--danger)">Failed to load companies</td></tr>';
+    }
+  }
+
+  // ── Company CRUD ──────────────────────────────────────────────────────────────
+  let coEditId = null;
+
+  async function openEditCompany(id) {
+    coEditId = id;
+    try {
+      const r = await fetch(`${API}/companies/${id}`);
+      if (!r.ok) throw new Error();
+      const c = await r.json();
+      document.getElementById('coEditName').value    = c.name || '';
+      document.getElementById('coEditHq').value      = c.headquarters || '';
+      document.getElementById('coEditSize').value    = c.size || '';
+      document.getElementById('coEditWebsite').value = c.website || '';
+      document.getElementById('coEditDesc').value    = c.description || '';
+      document.getElementById('coEditVerified').checked = !!c.is_verified;
+      const ov = document.getElementById('coEditOverlay');
+      ov.style.display = 'flex';
+    } catch {
+      showToast('Could not load company', '❌');
+    }
+  }
+
+  function closeEditCompany() {
+    document.getElementById('coEditOverlay').style.display = 'none';
+    coEditId = null;
+  }
+
+  async function saveEditCompany() {
+    if (!coEditId) return;
+    const btn = document.getElementById('coEditSaveBtn');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    const payload = {
+      name:         document.getElementById('coEditName').value.trim() || null,
+      headquarters: document.getElementById('coEditHq').value.trim() || null,
+      size:         document.getElementById('coEditSize').value || null,
+      website:      document.getElementById('coEditWebsite').value.trim() || null,
+      description:  document.getElementById('coEditDesc').value.trim() || null,
+      is_verified:  document.getElementById('coEditVerified').checked,
+    };
+    try {
+      const r = await fetch(`${API}/admin/companies/${coEditId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || 'Save failed');
+      showToast('Company updated ✓', '✅');
+      closeEditCompany();
+      loadAdminCompanies(coPage);
+    } catch(e) {
+      showToast(e.message || 'Save failed', '❌');
+    } finally {
+      btn.textContent = '💾 Save Changes'; btn.disabled = false;
+    }
+  }
+
+  async function toggleVerifyCompany(id, currentlyVerified) {
+    try {
+      const r = await fetch(`${API}/admin/companies/${id}/verify`, {
+        method: 'PATCH', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      showToast(data.is_verified ? 'Company verified ✓' : 'Company unverified', data.is_verified ? '✅' : '⚠️');
+      loadAdminCompanies(coPage);
+    } catch {
+      showToast('Action failed', '❌');
+    }
+  }
+
+  async function deleteCompany(id, name) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const r = await fetch(`${API}/admin/companies/${id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || 'Delete failed');
+      showToast(`"${name}" deleted`, '🗑️');
+      loadAdminCompanies(coPage);
+    } catch(e) {
+      showToast(e.message || 'Delete failed', '❌');
     }
   }
 

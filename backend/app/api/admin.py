@@ -10,7 +10,7 @@ import logging
 
 from app.core.database import get_db
 from app.models.models import SiteSettings, SiteMode, User, UserRole, ActivityLog, Job, Company, Application
-from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser, JobOut, EmployerApplicationOut, CompanyAdminOut
+from app.schemas.schemas import SiteSettingsOut, SiteSettingsUpdate, UserAdminOut, ActivityLogOut, ActivityLogWithUser, JobOut, EmployerApplicationOut, CompanyAdminOut, CompanyUpdate
 from app.api.applications import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -184,6 +184,63 @@ async def admin_all_companies(
         out.job_count = job_count
         result.append(out)
     return result
+
+
+# ── Admin: edit company ───────────────────────────────────────────────────────
+@router.put("/companies/{company_id}")
+async def admin_update_company(
+    company_id: int,
+    payload: CompanyUpdate,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    company = await db.get(Company, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    if payload.name is not None:
+        company.name = payload.name
+    if payload.description is not None:
+        company.description = payload.description
+    if payload.website is not None:
+        company.website = payload.website
+    if payload.size is not None:
+        company.size = payload.size
+    if payload.headquarters is not None:
+        company.headquarters = payload.headquarters
+    if payload.industry_id is not None:
+        company.industry_id = payload.industry_id
+    if payload.is_verified is not None:
+        company.is_verified = payload.is_verified
+    await db.flush()
+    return CompanyAdminOut.model_validate(company)
+
+
+# ── Admin: verify/unverify company ────────────────────────────────────────────
+@router.patch("/companies/{company_id}/verify")
+async def admin_toggle_verify(
+    company_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    company = await db.get(Company, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    company.is_verified = not company.is_verified
+    await db.flush()
+    return {"id": company.id, "is_verified": company.is_verified}
+
+
+# ── Admin: delete company ─────────────────────────────────────────────────────
+@router.delete("/companies/{company_id}", status_code=204)
+async def admin_delete_company(
+    company_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    company = await db.get(Company, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    await db.delete(company)
 
 
 # ── Admin: all jobs (platform-wide) ──────────────────────────────────────────

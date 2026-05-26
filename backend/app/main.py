@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import auth, jobs, public, applications, companies, employer, profile, admin
+from app.api import auth, jobs, public, applications, companies, employer, profile, admin, parse_job, notifications
+from sqlalchemy.exc import IntegrityError
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -13,8 +14,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+    except IntegrityError:
+        # Another worker already created tables concurrently — safe to ignore
+        pass
     logger.info("Database tables ready")
     yield
     await engine.dispose()
@@ -47,6 +52,8 @@ app.include_router(employer.router,         prefix="/api/v1")
 app.include_router(employer.employer_router, prefix="/api/v1")
 app.include_router(profile.router,      prefix="/api/v1")
 app.include_router(admin.router,        prefix="/api/v1")
+app.include_router(parse_job.router,        prefix="/api/v1")
+app.include_router(notifications.router,    prefix="/api/v1")
 
 
 @app.get("/api/health")

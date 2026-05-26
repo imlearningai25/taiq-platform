@@ -222,7 +222,6 @@ async def get_my_activities(
         select(ActivityLog)
         .where(ActivityLog.user_id == current_user.id)
         .order_by(ActivityLog.created_at.desc())
-        .limit(100)
     )
     logs = (await db.scalars(stmt)).all()
     return [ActivityLogOut.model_validate(l) for l in logs]

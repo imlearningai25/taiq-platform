@@ -75,6 +75,8 @@ class JobCreate(BaseModel):
     salary_max: Decimal | None = None
     skills_required: list[str] = []
     industry_id: int | None = None
+    company_name: str | None = None   # used to auto-create company if none exists
+    company_id: int | None = None     # use a specific existing company
 
 class JobOut(BaseModel):
     id: int
@@ -108,6 +110,15 @@ class CompanyCreate(BaseModel):
     size: str | None = None
     headquarters: str | None = None
     industry_id: int | None = None
+
+class CompanyUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    website: str | None = None
+    size: str | None = None
+    headquarters: str | None = None
+    industry_id: int | None = None
+    is_verified: bool | None = None
 
 class CompanyBrief(BaseModel):
     id: int

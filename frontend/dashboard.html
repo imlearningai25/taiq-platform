@@ -99,6 +99,24 @@
   .status-rejected{background:rgba(239,68,68,.1);color:#991b1b}
   .status-withdrawn{background:rgba(107,120,153,.1);color:var(--steel)}
 
+  /* Clickable app-item */
+  .app-item.clickable{cursor:pointer;transition:background .15s,box-shadow .15s}
+  .app-item.clickable:hover{background:rgba(0,82,204,.04);box-shadow:inset 3px 0 0 var(--brand)}
+
+  /* Job detail drawer */
+  .jd-drawer-overlay{position:fixed;inset:0;background:rgba(10,15,30,.45);z-index:400;display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+  .jd-drawer-overlay.open{opacity:1;pointer-events:all}
+  .jd-drawer{width:min(560px,100%);height:100%;background:var(--white);box-shadow:-8px 0 32px rgba(10,15,30,.15);overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+  .jd-drawer-overlay.open .jd-drawer{transform:translateX(0)}
+  .jd-drawer-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--mist);display:flex;align-items:flex-start;gap:1rem;position:sticky;top:0;background:var(--white);z-index:1}
+  .jd-drawer-logo{width:48px;height:48px;border-radius:10px;background:var(--paper);border:1px solid var(--mist);display:grid;place-items:center;font-size:1.5rem;flex-shrink:0}
+  .jd-drawer-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.3}
+  .jd-drawer-company{font-size:.82rem;color:var(--steel);margin-top:.2rem}
+  .jd-drawer-body{padding:1.25rem 1.5rem;flex:1}
+  .jd-drawer-section{margin-bottom:1.25rem}
+  .jd-drawer-section-title{font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--steel);margin-bottom:.5rem}
+  .jd-drawer-actions{padding:1rem 1.5rem;border-top:1px solid var(--mist);display:flex;gap:.65rem;flex-wrap:wrap;position:sticky;bottom:0;background:var(--white)}
+
   /* Job cards */
   .job-card{background:var(--white);border:1px solid var(--mist);border-radius:var(--r2);padding:1.25rem;transition:all var(--trans)}
   .job-card:hover{box-shadow:var(--shadow-md);border-color:var(--brand)}
@@ -233,6 +251,37 @@
   @media(max-width:900px){.page{grid-template-columns:1fr}.sidebar{position:static}.stats-row{grid-template-columns:1fr 1fr}.content-grid{grid-template-columns:1fr}.jobs-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
   @media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}}
 
+  /* Job file upload zone */
+  .pj-upload-zone{border:2px dashed var(--mist);border-radius:var(--r2);padding:1.1rem 1rem;display:flex;align-items:center;gap:.9rem;cursor:pointer;transition:all .2s;background:var(--paper);margin-bottom:1.25rem;position:relative}
+  .pj-upload-zone:hover,.pj-upload-zone.drag-over{border-color:var(--brand);background:rgba(0,82,204,.04)}
+  .pj-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .pj-upload-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,82,204,.1);display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
+  .pj-upload-text{flex:1}
+  .pj-upload-title{font-size:.88rem;font-weight:600;color:var(--ink);margin-bottom:.15rem}
+  .pj-upload-sub{font-size:.75rem;color:var(--steel)}
+  .pj-upload-badge{display:none;align-items:center;gap:.5rem;padding:.3rem .75rem;background:rgba(0,82,204,.08);border-radius:var(--r1);font-size:.8rem;color:var(--brand);font-weight:500;flex-shrink:0}
+  .pj-upload-badge.visible{display:flex}
+  .pj-parse-status{display:none;align-items:center;gap:.6rem;padding:.65rem .9rem;border-radius:var(--r1);font-size:.82rem;font-weight:500;margin-bottom:1rem}
+  .pj-parse-status.parsing{display:flex;background:rgba(0,82,204,.07);color:var(--brand)}
+  .pj-parse-status.success{display:flex;background:rgba(22,163,74,.08);color:#16a34a}
+  .pj-parse-status.error{display:flex;background:rgba(239,68,68,.07);color:#dc2626}
+  .pj-spinner{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Company combobox */
+  .co-combo{position:relative}
+  .co-combo-input{width:100%;padding:.6rem .9rem;border:1.5px solid var(--mist);border-radius:var(--r1);font:inherit;font-size:.88rem;color:var(--ink);outline:none;transition:border-color var(--trans);background:var(--white)}
+  .co-combo-input:focus{border-color:var(--brand)}
+  .co-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1.5px solid var(--mist);border-radius:var(--r1);box-shadow:0 8px 24px rgba(10,15,30,.12);z-index:200;max-height:220px;overflow-y:auto;display:none}
+  .co-dropdown.open{display:block}
+  .co-option{padding:.6rem .9rem;font-size:.88rem;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:background .15s}
+  .co-option:hover,.co-option.focused{background:rgba(0,82,204,.06);color:var(--brand)}
+  .co-option.new-opt{color:var(--brand);font-weight:600;border-top:1px solid var(--mist)}
+  .co-badge{font-size:.7rem;padding:.1rem .45rem;border-radius:999px;background:#f0fdf4;color:#16a34a;font-weight:600;flex-shrink:0}
+  .co-badge.unverified{background:#fff7ed;color:#c2410c}
+  .co-new-field{margin-top:.6rem;display:none}
+  .co-new-field.visible{display:block}
+
   /* Resume upload widget */
   .resume-upload-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border:1.5px dashed var(--mist);border-radius:var(--r1);background:var(--paper);color:var(--steel);font-size:.85rem;font-weight:500;cursor:pointer;transition:all var(--trans);font-family:inherit;width:100%;justify-content:center}
   .resume-upload-btn:hover{border-color:var(--brand);color:var(--brand);background:rgba(0,82,204,.04)}
@@ -284,9 +333,9 @@
       <li><a onclick="showPane('applications')" id="nav-applications" class="candidate-only"><span class="nav-icon">📋</span>My Applications</a></li>
       <li><a onclick="showPane('saved')" id="nav-saved" class="candidate-only"><span class="nav-icon">❤️</span>Saved Jobs</a></li>
       <li><a onclick="showPane('profile')" id="nav-profile"><span class="nav-icon">👤</span>My Profile</a></li>
-      <li><a onclick="showPane('notifications')" id="nav-notifications"><span class="nav-icon">🔔</span>Notifications</a></li>
+      <li><a onclick="showPane('notifications')" id="nav-notifications"><span class="nav-icon">🔔</span>Notifications<span id="notifBadge" style="display:none;margin-left:auto;background:#ef4444;color:#fff;font-size:.68rem;font-weight:700;border-radius:10px;padding:.1rem .42rem;line-height:1.4"></span></a></li>
+      <li id="nav-company-li" style="display:none"><a onclick="showPane('company')" id="nav-company"><span class="nav-icon">🏢</span>My Company</a></li>
       <li><a onclick="showPane('settings')" id="nav-settings"><span class="nav-icon">⚙️</span>Settings</a></li>
-      <li><a onclick="showPane('activities')" id="nav-activities"><span class="nav-icon">📊</span>Activities</a></li>
       <li id="adminNavItem" style="display:none"><a href="admin.html" style="color:#ef4444"><span class="nav-icon">🔧</span>Admin Panel</a></li>
     </ul>
   </aside>
@@ -502,12 +551,13 @@
 
     <!-- ══ PANE: Notifications ════════════════════════════════════════════ -->
     <div id="pane-notifications" class="pane" style="display:none">
-      <h2 class="pane-title">Notifications</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem">
+        <h2 class="pane-title" style="margin:0">Notifications</h2>
+        <button class="btn btn-ghost" id="markAllReadBtn" onclick="markAllNotificationsRead()" style="display:none;font-size:.82rem">Mark all as read</button>
+      </div>
+      <div id="notifPermBanner" style="display:none;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:.75rem 1rem;font-size:.85rem;color:#92400e;margin-bottom:1rem"></div>
       <div class="card" id="notifList">
-        <div class="empty-state">
-          <div class="empty-state-icon">🔔</div>
-          <p>You're all caught up! No new notifications.</p>
-        </div>
+        <div class="empty-state"><div class="empty-state-icon">🔔</div><p>Loading…</p></div>
       </div>
     </div>
 
@@ -545,6 +595,14 @@
         <p style="font-size:.85rem;color:var(--steel);margin-bottom:1rem">Sign out from all devices by logging out.</p>
         <button class="btn btn-danger" onclick="doLogout()">Sign Out</button>
       </div>
+    <!-- ══ PANE: My Company ══════════════════════════════════════════════════ -->
+    <div id="pane-company" class="pane" style="display:none">
+      <h2 class="pane-title">My Company</h2>
+      <div class="card" id="myCompanyCard">
+        <div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>
+      </div>
+    </div>
+
     <!-- ══ PANE: Activities ══════════════════════════════════════════════════ -->
     <div id="pane-activities" class="pane" style="display:none">
       <h2 class="pane-title">My Activities</h2>
@@ -609,6 +667,39 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
       <div class="modal-title" style="margin-bottom:0">📝 Post a New Job</div>
       <button style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--steel);line-height:1" onclick="closePostJobModal()">✕</button>
+    </div>
+
+    <!-- File upload zone -->
+    <div class="pj-upload-zone" id="pjUploadZone">
+      <input type="file" id="pjFileInput" accept=".csv,.pdf,.docx,.txt" onchange="handlePjFileSelect(event)"/>
+      <div class="pj-upload-icon">📄</div>
+      <div class="pj-upload-text">
+        <div class="pj-upload-title">Auto-fill from file</div>
+        <div class="pj-upload-sub">Drop a CSV, PDF, or DOCX — AI will fill the form for you</div>
+      </div>
+      <div class="pj-upload-badge" id="pjFileBadge">
+        <span id="pjFileName"></span>
+        <span style="cursor:pointer;font-size:1rem;line-height:1" onclick="clearPjFile(event)">✕</span>
+      </div>
+    </div>
+    <div class="pj-parse-status" id="pjParseStatus">
+      <span class="pj-spinner" id="pjSpinner"></span>
+      <span id="pjParseMsg">Parsing…</span>
+    </div>
+
+    <!-- Company selector -->
+    <div class="form-field" id="pjCompanyField" style="margin-bottom:1rem">
+      <label class="form-label">🏢 Company <span style="color:var(--danger)">*</span></label>
+      <div class="co-combo" id="pjCoCombo">
+        <input class="co-combo-input" id="pjCoSearch" placeholder="Search or select your company…"
+          autocomplete="off" oninput="pjCoSearch()" onfocus="pjCoSearch()" onkeydown="pjCoKeydown(event)"/>
+        <div class="co-dropdown" id="pjCoDropdown"></div>
+      </div>
+      <!-- New company name input (shown only when "Create new" is chosen) -->
+      <div class="co-new-field" id="pjCoNewField">
+        <input class="form-input" id="pjCompanyName" placeholder="Enter new company name…" style="margin-top:.5rem"/>
+        <p style="font-size:.75rem;color:var(--steel);margin-top:.35rem">A company profile will be created automatically.</p>
+      </div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
@@ -723,6 +814,8 @@ function showPane(name) {
   if (name === 'profile') loadProfilePane();
   if (name === 'settings') loadSettingsPane();
   if (name === 'activities') loadActivitiesPane();
+  if (name === 'company') loadMyCompanyPane();
+  if (name === 'notifications') loadNotificationsPane();
 }
 
 // ── Populate nav/avatar ───────────────────────────────────────────────────────
@@ -738,6 +831,9 @@ function populateStaticUI(user) {
   document.getElementById('welcomeHeading').textContent = `Welcome, ${firstName}! 👋`;
   document.getElementById('welcomeSub').textContent = user.role === 'admin' ? 'Platform-wide overview — all jobs, users and applications.' : user.role === 'employer' ? 'Manage your postings and review candidate applications.' : "Here's your career activity at a glance.";
   if (user.role === 'admin') { const a = document.getElementById('adminNavItem'); if(a) a.style.display=''; }
+  if (user.role === 'employer' || user.role === 'admin') {
+    const li = document.getElementById('nav-company-li'); if(li) li.style.display='';
+  }
   // Welcome banner actions — employer/admin get Post Job CTA
   if (user.role === 'employer' || user.role === 'admin') {
     document.getElementById('welcomeBannerActions').innerHTML = `
@@ -929,6 +1025,75 @@ async function loadRecommendedJobs() {
 
 // ── Post Job Modal ────────────────────────────────────────────────────────────
 let pjSkills = [];
+let pjSelectedCompanyId = null;   // null = create new
+let pjCoFocusIndex = -1;
+let pjCoOptions = [];             // [{id, name, is_verified}]
+let employerCompanyData = null;   // cached company info
+
+// Company combobox
+async function pjCoSearch() {
+  const q = document.getElementById('pjCoSearch').value.trim();
+  const dd = document.getElementById('pjCoDropdown');
+  try {
+    const r = await fetch(`${API}/companies?q=${encodeURIComponent(q)}&limit=20`);
+    pjCoOptions = r.ok ? await r.json() : [];
+  } catch { pjCoOptions = []; }
+  renderPjCoDropdown(q);
+  dd.classList.add('open');
+}
+
+function renderPjCoDropdown(q) {
+  const dd = document.getElementById('pjCoDropdown');
+  const items = pjCoOptions.map((c, i) => `
+    <div class="co-option" data-idx="${i}" onmousedown="selectPjCompany(${i})">
+      <span>🏢</span>
+      <span style="flex:1">${escHtml(c.name)}</span>
+      <span class="co-badge ${c.is_verified ? '' : 'unverified'}">${c.is_verified ? '✓ Verified' : 'Unverified'}</span>
+    </div>`).join('');
+  const createLabel = q ? `➕ Create "${escHtml(q)}"` : '➕ Create new company…';
+  dd.innerHTML = items + `<div class="co-option new-opt" onmousedown="selectPjNewCompany('${escHtml(q)}')"><span>${createLabel}</span></div>`;
+  pjCoFocusIndex = -1;
+}
+
+function selectPjCompany(idx) {
+  const c = pjCoOptions[idx];
+  pjSelectedCompanyId = c.id;
+  document.getElementById('pjCoSearch').value = c.name;
+  document.getElementById('pjCoDropdown').classList.remove('open');
+  document.getElementById('pjCoNewField').classList.remove('visible');
+  document.getElementById('pjCompanyName').value = '';
+}
+
+function selectPjNewCompany(prefill) {
+  pjSelectedCompanyId = null;
+  document.getElementById('pjCoDropdown').classList.remove('open');
+  document.getElementById('pjCoNewField').classList.add('visible');
+  const nameEl = document.getElementById('pjCompanyName');
+  if (prefill) nameEl.value = prefill;
+  nameEl.focus();
+}
+
+function pjCoKeydown(e) {
+  const dd = document.getElementById('pjCoDropdown');
+  const opts = dd.querySelectorAll('.co-option');
+  if (!dd.classList.contains('open')) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); pjCoFocusIndex = Math.min(pjCoFocusIndex + 1, opts.length - 1); opts.forEach((o,i)=>o.classList.toggle('focused',i===pjCoFocusIndex)); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); pjCoFocusIndex = Math.max(pjCoFocusIndex - 1, 0); opts.forEach((o,i)=>o.classList.toggle('focused',i===pjCoFocusIndex)); }
+  else if (e.key === 'Enter' && pjCoFocusIndex >= 0) { e.preventDefault(); opts[pjCoFocusIndex].dispatchEvent(new Event('mousedown')); }
+  else if (e.key === 'Escape') dd.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('pjCoCombo')?.contains(e.target))
+    document.getElementById('pjCoDropdown')?.classList.remove('open');
+});
+
+function resetPjCompanyCombo(companyData) {
+  pjSelectedCompanyId = companyData?.id || null;
+  document.getElementById('pjCoSearch').value = companyData?.name || '';
+  document.getElementById('pjCoNewField').classList.remove('visible');
+  document.getElementById('pjCompanyName').value = '';
+}
 
 async function openPostJobModal() {
   // Reset form
@@ -940,6 +1105,17 @@ async function openPostJobModal() {
   document.getElementById('pjIndustry').value = '';
   pjSkills = [];
   renderPjSkills();
+  clearPjFile();
+
+  // Load employer's existing company once
+  if (employerCompanyData === undefined || employerCompanyData === null) {
+    try {
+      const r = await fetch(`${API}/employer/jobs/company`, { headers: authHeaders() });
+      const data = r.ok ? await r.json() : {};
+      employerCompanyData = data.exists ? data : null;
+    } catch { employerCompanyData = null; }
+  }
+  resetPjCompanyCombo(employerCompanyData);
 
   // Load industries if not already loaded
   const sel = document.getElementById('pjIndustry');
@@ -995,12 +1171,111 @@ function handlePjSkillKey(e) {
   }
 }
 
+// ── Job file parser ───────────────────────────────────────────────────────────
+function setPjStatus(state, msg) {
+  const el = document.getElementById('pjParseStatus');
+  const spinner = document.getElementById('pjSpinner');
+  el.className = 'pj-parse-status';
+  if (!state) return;
+  el.classList.add(state);
+  document.getElementById('pjParseMsg').textContent = msg;
+  spinner.style.display = state === 'parsing' ? '' : 'none';
+}
+
+function clearPjFile(e) {
+  e && e.stopPropagation();
+  document.getElementById('pjFileInput').value = '';
+  document.getElementById('pjFileBadge').classList.remove('visible');
+  document.getElementById('pjFileName').textContent = '';
+  setPjStatus(null, '');
+}
+
+// Drag-and-drop
+const pjZone = document.getElementById('pjUploadZone');
+pjZone.addEventListener('dragover', e => { e.preventDefault(); pjZone.classList.add('drag-over'); });
+pjZone.addEventListener('dragleave', () => pjZone.classList.remove('drag-over'));
+pjZone.addEventListener('drop', e => {
+  e.preventDefault();
+  pjZone.classList.remove('drag-over');
+  const f = e.dataTransfer?.files?.[0];
+  if (f) processPjFile(f);
+});
+
+async function handlePjFileSelect(event) {
+  const f = event.target.files?.[0];
+  if (f) await processPjFile(f);
+}
+
+async function processPjFile(file) {
+  const badge = document.getElementById('pjFileBadge');
+  document.getElementById('pjFileName').textContent = file.name;
+  badge.classList.add('visible');
+  setPjStatus('parsing', 'Reading file and extracting job data…');
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const r = await fetch(`${API}/employer/parse-job-file`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: form,
+    });
+
+    const data = await r.json();
+    if (!r.ok) {
+      setPjStatus('error', data.detail || 'Parsing failed.');
+      return;
+    }
+
+    // Fill form fields
+    if (data.title)       document.getElementById('pjTitle').value       = data.title;
+    if (data.location)    document.getElementById('pjLocation').value    = data.location;
+    if (data.description) document.getElementById('pjDescription').value = data.description;
+    if (data.requirements)document.getElementById('pjRequirements').value= data.requirements;
+    if (data.benefits)    document.getElementById('pjBenefits').value    = data.benefits;
+    if (data.salary_min)  document.getElementById('pjSalMin').value      = data.salary_min;
+    if (data.salary_max)  document.getElementById('pjSalMax').value      = data.salary_max;
+    if (typeof data.remote === 'boolean') document.getElementById('pjRemote').checked = data.remote;
+    if (data.job_type)    document.getElementById('pjJobType').value     = data.job_type;
+
+    // Match industry by name
+    if (data.industry) {
+      const sel = document.getElementById('pjIndustry');
+      const opt = Array.from(sel.options).find(o => o.textContent.toLowerCase().includes(data.industry.toLowerCase()));
+      if (opt) sel.value = opt.value;
+    }
+
+    // Fill skills
+    if (Array.isArray(data.skills) && data.skills.length) {
+      pjSkills = data.skills.slice(0, 15);
+      renderPjSkills();
+    }
+
+    const filled = [data.title, data.location, data.description].filter(Boolean).length;
+    setPjStatus('success', `Form filled from file — ${filled > 0 ? 'review and edit as needed' : 'some fields may need manual entry'} ✓`);
+  } catch {
+    setPjStatus('error', 'Network error while parsing file.');
+  }
+}
+
 async function submitPostJob() {
   const title       = document.getElementById('pjTitle').value.trim();
   const location    = document.getElementById('pjLocation').value.trim();
   const description = document.getElementById('pjDescription').value.trim();
   if (!title || !location || !description) {
     showToast('Please fill in Title, Location and Description', '⚠️'); return;
+  }
+
+  // Validate company selection
+  const coSearch    = document.getElementById('pjCoSearch').value.trim();
+  const companyName = document.getElementById('pjCompanyName').value.trim();
+  const newFieldVis = document.getElementById('pjCoNewField').classList.contains('visible');
+  if (!pjSelectedCompanyId && !companyName && !employerCompanyData) {
+    showToast('Please select or create a company', '⚠️'); return;
+  }
+  if (newFieldVis && !companyName) {
+    showToast('Please enter a company name', '⚠️'); return;
   }
 
   // Add any skill still typed but not confirmed
@@ -1022,6 +1297,8 @@ async function submitPostJob() {
     salary_max:   parseFloat(document.getElementById('pjSalMax').value) || null,
     skills_required: pjSkills,
     industry_id:  parseInt(document.getElementById('pjIndustry').value) || null,
+    company_id:   pjSelectedCompanyId || null,
+    company_name: (!pjSelectedCompanyId && companyName) ? companyName : null,
   };
 
   try {
@@ -1035,6 +1312,7 @@ async function submitPostJob() {
       throw new Error(err.detail || `Error ${r.status}`);
     }
     closePostJobModal();
+    employerCompanyData = null; // force re-fetch so My Company pane stays fresh
     showToast(`"${title}" posted successfully! 🎉`, '✅');
     // Refresh job postings list
     await loadDashboardEmployer(null);
@@ -1058,7 +1336,7 @@ async function loadDashboardEmployer(company) {
       document.getElementById('statJobs').textContent = jobs.filter(j=>j.is_active!==false).length;
       const el = document.getElementById('myJobsList');
       el.innerHTML = jobs.length ? `<div class="app-list">${jobs.slice(0,4).map(j=>`
-        <div class="app-item">
+        <div class="app-item clickable" onclick="openJobDrawer(${j.id})">
           <div class="app-logo">💼</div>
           <div class="app-info"><div class="app-title">${j.title}</div><div class="app-company">${j.location} · ${j.views} views</div></div>
           <span class="app-status status-applied">${j.job_type.replace('_',' ')}</span>
@@ -1074,11 +1352,13 @@ async function loadDashboardEmployer(company) {
       document.getElementById('statEmpInterviews').textContent = apps.filter(a=>a.status==='interview').length;
       document.getElementById('statOffers').textContent = apps.filter(a=>a.status==='offered').length;
       const el = document.getElementById('empAppList');
-      el.innerHTML = apps.length ? `<div class="app-list">${apps.slice(0,4).map(a=>`
-        <div class="app-item">
+      el.innerHTML = apps.length ? `<div class="app-list">${apps.slice(0,8).map(a=>`
+        <div class="app-item" style="flex-wrap:wrap;gap:.5rem">
           <div class="app-logo">👤</div>
-          <div class="app-info"><div class="app-title">${a.candidate?.full_name||a.candidate?.email||'Candidate'}</div><div class="app-company">${a.job?.title||''}</div></div>
-          ${statusBadge(a.status)}
+          <div class="app-info" style="flex:1;min-width:120px"><div class="app-title">${a.candidate?.full_name||a.candidate?.email||'Candidate'}</div><div class="app-company">${a.job?.title||''}</div></div>
+          <select onchange="updateAppStatus(${a.id},this.value,this)" style="border:1px solid var(--mist);border-radius:6px;padding:.25rem .5rem;font-size:.78rem;color:var(--ink);background:var(--white);cursor:pointer">
+            ${['applied','reviewing','interview','offered','rejected'].map(s=>`<option value="${s}"${a.status===s?' selected':''}>${STATUS_LABEL[s]||s}</option>`).join('')}
+          </select>
         </div>`).join('')}</div>`
       : `<div class="empty-state"><div class="empty-state-icon">📭</div><p>No applications yet.</p></div>`;
     }
@@ -1659,7 +1939,7 @@ async function loadDashboardAdmin() {
       const el = document.getElementById('myJobsList');
       el.innerHTML = jobs.length
         ? `<div class="app-list">${jobs.map(j => `
-            <div class="app-item">
+            <div class="app-item clickable" onclick="openJobDrawer(${j.id})">
               <div class="app-logo">💼</div>
               <div class="app-info">
                 <div class="app-title">${j.title}</div>
@@ -1733,13 +2013,105 @@ async function init() {
   }
 }
 
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── My Company pane ───────────────────────────────────────────────────────────
+async function loadMyCompanyPane() {
+  const card = document.getElementById('myCompanyCard');
+  card.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>';
+  try {
+    const r = await fetch(`${API}/employer/jobs/company`, { headers: authHeaders() });
+    const data = r.ok ? await r.json() : {};
+    if (!data.exists) {
+      card.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏢</div>
+          <p>No company profile yet. Post a job and your company will be created automatically.</p>
+          <button class="btn btn-primary" style="margin-top:1rem" onclick="openPostJobModal()">Post Your First Job</button>
+        </div>`;
+      return;
+    }
+    employerCompanyData = data;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+        <div style="width:56px;height:56px;border-radius:1rem;background:linear-gradient(135deg,#e0f2fe,#bae6fd);display:grid;place-items:center;font-size:1.8rem;flex-shrink:0">🏢</div>
+        <div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--ink)">${escHtml(data.name)}</div>
+          <div style="margin-top:.25rem">${data.is_verified
+            ? '<span style="background:#f0fdf4;color:#16a34a;border-radius:999px;padding:.2rem .75rem;font-size:.78rem;font-weight:600">✓ Verified</span>'
+            : '<span style="background:#fff7ed;color:#c2410c;border-radius:999px;padding:.2rem .75rem;font-size:.78rem;font-weight:600">⏳ Pending Verification</span>'}</div>
+        </div>
+      </div>
+      <form id="myCompanyForm" onsubmit="saveMyCompany(event,${data.id})">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-field" style="grid-column:1/-1">
+            <label class="form-label">Company Name</label>
+            <input class="form-input" name="name" value="${escHtml(data.name)}"/>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Headquarters</label>
+            <input class="form-input" name="headquarters" value="${escHtml(data.headquarters||'')}"/>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Company Size</label>
+            <select class="form-input" name="size">
+              ${['1-10','11-50','51-200','201-500','501-1000','1000+'].map(s=>`<option value="${s}" ${data.size===s?'selected':''}>${s} employees</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-field" style="grid-column:1/-1">
+            <label class="form-label">Website</label>
+            <input class="form-input" name="website" type="url" placeholder="https://example.com" value="${escHtml(data.website||'')}"/>
+          </div>
+          <div class="form-field" style="grid-column:1/-1">
+            <label class="form-label">Description</label>
+            <textarea class="form-input" name="description" rows="4" style="resize:vertical">${escHtml(data.description||'')}</textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:1rem">
+          <button type="submit" class="btn btn-primary" id="saveCompanyBtn">💾 Save Changes</button>
+        </div>
+      </form>`;
+  } catch {
+    card.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Could not load company profile.</p></div>';
+  }
+}
+
+async function saveMyCompany(e, companyId) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('saveCompanyBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  const payload = {
+    name:         form.name.value.trim() || null,
+    headquarters: form.headquarters.value.trim() || null,
+    size:         form.size.value || null,
+    website:      form.website.value.trim() || null,
+    description:  form.description.value.trim() || null,
+  };
+  try {
+    const r = await fetch(`${API}/companies/${companyId}`, {
+      method: 'PUT', headers: authHeaders(), body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || 'Save failed');
+    const updated = await r.json();
+    employerCompanyData = { ...employerCompanyData, ...updated };
+    showToast('Company profile saved ✓', '✅');
+  } catch(err) {
+    showToast(err.message || 'Could not save', '❌');
+  } finally {
+    btn.textContent = '💾 Save Changes'; btn.disabled = false;
+  }
+}
+
 // ── Activities pane ───────────────────────────────────────────────────────────
 const ACTION_ICONS_MAP = {
   registered:'🎉', email_verified:'✅', login:'🔐',
   profile_basic_updated:'👤', profile_professional_updated:'📝',
   password_changed:'🔒', job_applied:'📋', application_withdrawn:'↩️',
-  job_saved:'❤️', job_unsaved:'💔', company_created:'🏢',
-  job_posted:'💼', job_deleted:'🗑️',
+  job_saved:'❤️', job_unsaved:'💔', resume_uploaded:'📄', resume_deleted:'🗑️',
+  company_created:'🏢', job_posted:'💼', job_deleted:'🗑️',
 };
 
 function fmtDateTime(iso) {
@@ -1772,7 +2144,266 @@ async function loadActivitiesPane() {
   }
 }
 
-init();
+// ── Notifications ─────────────────────────────────────────────────────────────
+const NOTIF_ICONS = { application_received:'📨', status_changed:'📋', application_withdrawn:'↩️' };
+
+// null = first run (seed IDs without firing browser alerts)
+let _seenNotifIds = null;
+
+function fmtTimeAgo(iso) {
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)   return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+async function initNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    const result = await Notification.requestPermission();
+    console.log('[Notif] Permission result:', result);
+  } else {
+    console.log('[Notif] Permission already:', Notification.permission);
+  }
+}
+
+function fireBrowserNotif(title, body) {
+  console.log('[Notif] Firing browser notification:', title, body);
+  if (!('Notification' in window)) { console.warn('[Notif] API not available'); return; }
+  if (Notification.permission !== 'granted') { console.warn('[Notif] Permission not granted:', Notification.permission); return; }
+  try {
+    const n = new Notification(title, { body, icon: '/favicon.ico' });
+    n.onclick = () => { window.focus(); showPane('notifications'); n.close(); };
+    setTimeout(() => n.close(), 6000);
+  } catch(e) { console.error('[Notif] Error:', e); }
+}
+
+async function pollNotifBadge() {
+  try {
+    const r = await fetch(`${API}/me/notifications`, { headers: authHeaders() });
+    if (!r.ok) return;
+    const notifs = await r.json();
+    const unread  = notifs.filter(n => !n.is_read);
+
+    if (_seenNotifIds === null) {
+      // First poll — seed known IDs, no browser alerts
+      _seenNotifIds = new Set(notifs.map(n => n.id));
+    } else {
+      // Find notifications that arrived since last poll
+      const fresh = unread.filter(n => !_seenNotifIds.has(n.id));
+      notifs.forEach(n => _seenNotifIds.add(n.id));
+
+      if (fresh.length) {
+        // Fire one browser notification per new item
+        fresh.forEach(n => fireBrowserNotif(n.title, n.message));
+
+        // If the pane is open, refresh it live
+        const pane = document.getElementById('pane-notifications');
+        if (pane && pane.style.display !== 'none') loadNotificationsPane();
+      }
+    }
+
+    updateNotifBadgeCount(unread.length);
+  } catch {}
+}
+
+async function loadNotificationsPane() {
+  const el = document.getElementById('notifList');
+  // Show permission warning banner if blocked
+  const banner = document.getElementById('notifPermBanner');
+  if (banner) {
+    const perm = 'Notification' in window ? Notification.permission : 'unavailable';
+    banner.style.display = perm === 'granted' ? 'none' : '';
+    banner.textContent = perm === 'denied'
+      ? '⚠️ Browser notifications are blocked. Enable them in your browser settings to receive alerts.'
+      : perm === 'default'
+      ? '🔔 Click "Allow" when your browser asks to enable push notifications.'
+      : '⚠️ Your browser does not support notifications.';
+  }
+  el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--steel)">Loading…</div>';
+  try {
+    const r = await fetch(`${API}/me/notifications`, { headers: authHeaders() });
+    if (!r.ok) throw new Error();
+    const notifs = await r.json();
+    const unread = notifs.filter(n => !n.is_read);
+    // Merge into seen set so poll doesn't re-fire for these
+    if (_seenNotifIds) notifs.forEach(n => _seenNotifIds.add(n.id));
+    document.getElementById('markAllReadBtn').style.display = unread.length ? '' : 'none';
+    if (!notifs.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔔</div><p>You\'re all caught up!</p></div>';
+      updateNotifBadgeCount(0);
+      return;
+    }
+    el.innerHTML = `<div class="activity-list">${notifs.map(n => `
+      <div class="activity-item${n.is_read ? '' : ' notif-unread'}" id="notif-${n.id}" onclick="markNotifRead(${n.id})" style="cursor:pointer${n.is_read ? '' : ';background:rgba(0,82,204,.04);border-left:3px solid var(--brand)'}">
+        <div class="activity-icon-wrap">${NOTIF_ICONS[n.type] || '🔔'}</div>
+        <div class="activity-body" style="flex:1">
+          <div class="activity-desc" style="font-weight:${n.is_read ? '400' : '600'}">${n.title}</div>
+          <div class="activity-time">${n.message}</div>
+          <div class="activity-time" style="margin-top:.15rem">${fmtTimeAgo(n.created_at)}</div>
+        </div>
+        ${n.is_read ? '' : '<div style="width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0;margin-top:.3rem"></div>'}
+      </div>`).join('')}</div>`;
+    updateNotifBadgeCount(unread.length);
+  } catch {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Could not load notifications.</p></div>';
+  }
+}
+
+async function markNotifRead(id) {
+  const item = document.getElementById(`notif-${id}`);
+  if (!item || !item.classList.contains('notif-unread')) return;
+  try {
+    await fetch(`${API}/me/notifications/${id}/read`, { method: 'PATCH', headers: authHeaders() });
+    item.classList.remove('notif-unread');
+    item.style.background = '';
+    item.style.borderLeft = '';
+    item.querySelector('.activity-desc').style.fontWeight = '400';
+    const dot = item.querySelector('div[style*="border-radius:50%"]');
+    if (dot) dot.remove();
+    const remaining = document.querySelectorAll('.notif-unread').length;
+    if (!remaining) document.getElementById('markAllReadBtn').style.display = 'none';
+    updateNotifBadgeCount(remaining);
+  } catch {}
+}
+
+async function markAllNotificationsRead() {
+  try {
+    await fetch(`${API}/me/notifications/read-all`, { method: 'PATCH', headers: authHeaders() });
+    await loadNotificationsPane();
+    updateNotifBadgeCount(0);
+  } catch {}
+}
+
+function updateNotifBadgeCount(count) {
+  const badge = document.getElementById('notifBadge');
+  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = ''; }
+  else badge.style.display = 'none';
+}
+
+// ── Application status update (employer) ─────────────────────────────────────
+async function updateAppStatus(appId, newStatus, selectEl) {
+  const prev = [...selectEl.options].find(o => o.defaultSelected)?.value || selectEl.options[0].value;
+  try {
+    const r = await fetch(`${API}/employer/applications/${appId}/status`, {
+      method: 'PATCH',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (!r.ok) throw new Error();
+    // Update the default so next change detects correctly
+    [...selectEl.options].forEach(o => o.defaultSelected = o.value === newStatus);
+    showToast(`Status updated to "${STATUS_LABEL[newStatus] || newStatus}"`, '✅');
+  } catch {
+    selectEl.value = prev;
+    showToast('Failed to update status.', '⚠️');
+  }
+}
+
+// ── Job detail drawer ─────────────────────────────────────────────────────────
+let _jdCurrentId = null;
+
+async function openJobDrawer(jobId) {
+  _jdCurrentId = jobId;
+  const overlay = document.getElementById('jdDrawerOverlay');
+  document.getElementById('jdDrawerTitle').textContent   = 'Loading…';
+  document.getElementById('jdDrawerCompany').textContent = '';
+  document.getElementById('jdDrawerBody').innerHTML      = '<div style="padding:2rem;text-align:center;color:var(--steel)">Loading…</div>';
+  document.getElementById('jdDrawerActions').innerHTML   = '';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const r = await fetch(`${API}/jobs/${jobId}`);
+    if (!r.ok) throw new Error('not found');
+    const j = await r.json();
+
+    document.getElementById('jdDrawerTitle').textContent   = j.title;
+    document.getElementById('jdDrawerCompany').textContent = [j.company?.name, j.location, j.remote ? 'Remote' : null].filter(Boolean).join(' · ');
+
+    const sal = fmtSalary(j.salary_min, j.salary_max);
+    const chips = [
+      j.job_type ? `<span class="app-status status-applied">${j.job_type.replace('_',' ')}</span>` : '',
+      sal ? `<span class="app-status" style="background:var(--paper);color:var(--ink);border:1px solid var(--mist)">${sal}</span>` : '',
+      j.is_active === false ? `<span class="app-status status-rejected">Inactive</span>` : `<span class="app-status status-interview">Active</span>`,
+    ].join('');
+
+    const section = (title, body) => body ? `
+      <div class="jd-drawer-section">
+        <div class="jd-drawer-section-title">${title}</div>
+        <div style="font-size:.88rem;color:var(--ink);white-space:pre-wrap;line-height:1.6">${escHtml(body)}</div>
+      </div>` : '';
+
+    const skillTags = (j.skills_required||[]).length
+      ? `<div class="jd-drawer-section"><div class="jd-drawer-section-title">Skills</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">${(j.skills_required||[]).map(s=>`<span style="background:var(--paper);border:1px solid var(--mist);border-radius:20px;padding:.2rem .65rem;font-size:.78rem;color:var(--ink)">${escHtml(s)}</span>`).join('')}</div></div>`
+      : '';
+
+    document.getElementById('jdDrawerBody').innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem">${chips}</div>
+      ${section('Description', j.description)}
+      ${section('Requirements', j.requirements)}
+      ${section('Benefits', j.benefits)}
+      ${skillTags}`;
+
+    // Action buttons based on role
+    const isEmp   = currentUser?.role === 'employer';
+    const isAdmin = currentUser?.role === 'admin';
+    let actions = '';
+    if (isEmp || isAdmin) {
+      actions += `<button class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger)" onclick="deleteJobFromDrawer(${j.id},'${escHtml(j.title)}')">🗑 Delete</button>`;
+    }
+    actions += `<button class="btn btn-ghost" onclick="closeJobDrawer()">Close</button>`;
+    document.getElementById('jdDrawerActions').innerHTML = actions;
+  } catch {
+    document.getElementById('jdDrawerBody').innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>Could not load job details.</p></div>';
+    document.getElementById('jdDrawerActions').innerHTML = `<button class="btn btn-ghost" onclick="closeJobDrawer()">Close</button>`;
+  }
+}
+
+function closeJobDrawer() {
+  document.getElementById('jdDrawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _jdCurrentId = null;
+}
+
+async function deleteJobFromDrawer(jobId, title) {
+  if (!confirm(`Delete job "${title}"? This cannot be undone.`)) return;
+  const endpoint = currentUser?.role === 'admin' ? `${API}/employer/jobs/${jobId}` : `${API}/employer/jobs/${jobId}`;
+  try {
+    const r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders() });
+    if (!r.ok && r.status !== 204) throw new Error();
+    closeJobDrawer();
+    showToast('Job removed.', '🗑');
+    if (currentUser?.role === 'admin') loadAdminDashboard();
+    else loadDashboardEmployer(null);
+  } catch {
+    showToast('Failed to delete job.', '⚠️');
+  }
+}
+
+init().then(async () => {
+  await initNotifPermission();   // ask browser for notification permission
+  await pollNotifBadge();        // first poll seeds known IDs (no browser alert)
+  setInterval(pollNotifBadge, 20_000);  // check every 20 seconds
+});
 </script>
+
+<!-- Job detail drawer -->
+<div class="jd-drawer-overlay" id="jdDrawerOverlay" onclick="if(event.target===this)closeJobDrawer()">
+  <div class="jd-drawer">
+    <div class="jd-drawer-head">
+      <div class="jd-drawer-logo">💼</div>
+      <div style="flex:1;min-width:0">
+        <div class="jd-drawer-title" id="jdDrawerTitle"></div>
+        <div class="jd-drawer-company" id="jdDrawerCompany"></div>
+      </div>
+      <button style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--steel);padding:.25rem" onclick="closeJobDrawer()">✕</button>
+    </div>
+    <div class="jd-drawer-body" id="jdDrawerBody"></div>
+    <div class="jd-drawer-actions" id="jdDrawerActions"></div>
+  </div>
+</div>
+
 </body>
 </html>
