@@ -21,10 +21,14 @@ async def get_current_user(
     payload = decode_access_token(credentials.credentials)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    user = await db.get(User, int(payload["sub"]))
-    if not user or not user.is_active:
+    result = await db.scalar(
+        select(User)
+        .options(selectinload(User.profile))
+        .where(User.id == int(payload["sub"]))
+    )
+    if not result or not result.is_active:
         raise HTTPException(status_code=401, detail="User not found")
-    return user
+    return result
 
 
 @router.post("", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED)
