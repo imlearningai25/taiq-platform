@@ -20,7 +20,11 @@
       "Bash(curl -si \"http://localhost:8090/\")",
       "Bash(dir \"c:\\\\Users\\\\newro\\\\Documents\\\\codes\\\\claude\\\\taiq-platform\\\\backend\\\\sample_jobs\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/api/health)",
-      "Bash(xargs grep -l \"notif\")"
+      "Bash(xargs grep -l \"notif\")",
+      "Bash(curl -s -X POST http://localhost:8090/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")",
+      "Bash(docker network *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST http://localhost:8090/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/api/v1/auth/login -X POST -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")"
     ]
   }
 }
