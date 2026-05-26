@@ -24,7 +24,12 @@
       "Bash(curl -s -X POST http://localhost:8090/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")",
       "Bash(docker network *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST http://localhost:8090/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/api/v1/auth/login -X POST -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/api/v1/auth/login -X POST -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@taiq.us\\\\\",\\\\\"password\\\\\":\\\\\"Admin@1234!\\\\\"}\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(netstat -tlnp)",
+      "Bash(docker inspect *)",
+      "Bash(xargs -I{} docker network inspect {} --format 'Network: {{.Name}} Subnet: {{range .IPAM.Config}}{{.Subnet}}{{end}}')",
+      "Bash(awk '{print $1}')"
     ]
   }
 }

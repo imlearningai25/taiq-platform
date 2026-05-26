@@ -144,8 +144,11 @@ taiq/
 │           ├── jobs.py         # Job search & detail
 │           ├── applications.py # Apply, track, withdraw
 │           ├── companies.py    # Company profiles
-│           ├── employer.py     # Post & manage jobs
-│           ├── profile.py      # Candidate profile
+│           ├── employer.py     # Post & manage jobs, employer applications
+│           ├── parse_job.py    # AI-powered job file parser (CSV/PDF/DOCX)
+│           ├── profile.py      # Candidate profile, saved jobs, resume upload
+│           ├── notifications.py# In-app notifications
+│           ├── admin.py        # Admin panel: users, sites settings, audit log
 │           └── public.py       # Stats, industries, blog
 └── frontend/
     ├── Dockerfile              # Nginx static server
@@ -195,12 +198,60 @@ make clean         # Remove everything (containers + images + volumes)
 | GET | `/api/v1/applications/my` | My applications |
 | DELETE | `/api/v1/applications/{id}` | Withdraw |
 
+### Profile / Me (requires auth)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/me` | Get own profile + company |
+| PATCH | `/api/v1/me` | Update name / phone |
+| PUT | `/api/v1/me/profile` | Update candidate professional profile |
+| POST | `/api/v1/me/change-password` | Change password |
+| POST | `/api/v1/me/resume` | Upload resume (PDF/DOC/DOCX, max 10 MB) |
+| DELETE | `/api/v1/me/resume` | Delete uploaded resume |
+| GET | `/api/v1/me/saved` | List saved jobs |
+| POST | `/api/v1/me/saved/{job_id}` | Save a job |
+| DELETE | `/api/v1/me/saved/{job_id}` | Unsave a job |
+| GET | `/api/v1/me/activities` | Own activity log |
+| GET | `/api/v1/me/notifications` | List notifications (last 50) |
+| PATCH | `/api/v1/me/notifications/{id}/read` | Mark one notification read |
+| PATCH | `/api/v1/me/notifications/read-all` | Mark all notifications read |
+
 ### Employer (requires employer role)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/employer/jobs` | Post a job |
 | GET | `/api/v1/employer/jobs` | My job postings |
-| DELETE | `/api/v1/employer/jobs/{id}` | Remove posting |
+| DELETE | `/api/v1/employer/jobs/{id}` | Deactivate posting |
+| GET | `/api/v1/employer/jobs/company` | Get own company profile |
+| PUT | `/api/v1/employer/jobs/company` | Update own company profile |
+| GET | `/api/v1/employer/applications` | Applications to my jobs |
+| PATCH | `/api/v1/employer/applications/{id}/status` | Update application status |
+| POST | `/api/v1/employer/parse-job-file` | AI-parse CSV/PDF/DOCX into job fields |
+
+### Companies
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/companies` | List / search companies |
+| POST | `/api/v1/companies` | Create company profile |
+| GET | `/api/v1/companies/{id}` | Company detail |
+| PUT | `/api/v1/companies/{id}` | Update company (owner or admin) |
+
+### Admin (requires admin role)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/admin/site-settings` | Read site mode + construction content |
+| PUT | `/api/v1/admin/site-settings` | Update site mode / construction content |
+| GET | `/api/v1/admin/overview` | Platform stats (users, jobs, applications) |
+| GET | `/api/v1/admin/users` | List users (filterable by role / search) |
+| GET | `/api/v1/admin/users/count` | Total + verified user counts |
+| PATCH | `/api/v1/admin/users/{id}/toggle-verify` | Toggle email-verified flag |
+| GET | `/api/v1/admin/users/{id}/activities` | Activity log for a user |
+| GET | `/api/v1/admin/jobs` | All jobs platform-wide |
+| GET | `/api/v1/admin/applications` | All applications platform-wide |
+| GET | `/api/v1/admin/companies` | All companies (with job counts) |
+| PUT | `/api/v1/admin/companies/{id}` | Edit any company |
+| PATCH | `/api/v1/admin/companies/{id}/verify` | Toggle company verified badge |
+| DELETE | `/api/v1/admin/companies/{id}` | Delete company |
+| GET | `/api/v1/admin/activities` | Platform-wide audit log |
 
 ### Public
 | Method | Endpoint | Description |

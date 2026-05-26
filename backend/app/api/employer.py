@@ -75,7 +75,11 @@ async def post_job(
     db.add(job)
     await db.flush()
     await track(db, current_user, "job_posted", f"Posted job: {payload.title}")
-    return JobOut.model_validate(job)
+
+    loaded_job = await db.scalar(
+        select(Job).options(selectinload(Job.company)).where(Job.id == job.id)
+    )
+    return JobOut.model_validate(loaded_job)
 
 
 @router.get("/company")
@@ -133,7 +137,12 @@ async def my_jobs(
     company = await db.scalar(select(Company).where(Company.owner_id == current_user.id))
     if not company:
         return []
-    jobs = (await db.scalars(select(Job).where(Job.company_id == company.id).order_by(Job.created_at.desc()))).all()
+    jobs = (await db.scalars(
+        select(Job)
+        .options(selectinload(Job.company))
+        .where(Job.company_id == company.id)
+        .order_by(Job.created_at.desc())
+    )).all()
     return [JobOut.model_validate(j) for j in jobs]
 
 
